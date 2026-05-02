@@ -1,0 +1,5 @@
+- Find then fix problem where Rain Meadow switches to challenge mode in arena if the tab name has a ' in it.
+- Check how Configurable<T>s can have information. See if the UI can use configurable information rather than duplicating the descriptions.
+- Update options design after making story and arena game modes.
+- Reconsider the logic for saving lobby and client settings. Maybe use auto properties in the game mode and update at fixed points?
+- Ensure everything is being cleaned up correctly. (Especially UI)

@@ -1,0 +1,60 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <ModName>HideAndSeek</ModName>
+        <ModAuthor>OneLetterShor</ModAuthor>
+        <RootNamespace>$(ModAuthor).$(ModName)</RootNamespace>
+        <AssemblyName>$(RootNamespace)</AssemblyName>
+        <SolutionDir_>$(MSBuildThisFileDirectory)../../</SolutionDir_>
+        <TargetFramework>net48</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <GenerateNullableAttributes>true</GenerateNullableAttributes>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        
+        <DefineConstants>$(DefineConstants);<!--SHOULD_EXPLICITLY_LOG_ASSERTION_FAILURES--></DefineConstants>
+        
+        <PolySharpIncludeGeneratedTypes>
+            System.Diagnostics.CodeAnalysis.AllowNullAttribute;
+            System.Diagnostics.CodeAnalysis.DisallowNullAttribute;
+            System.Diagnostics.CodeAnalysis.MaybeNullAttribute; 
+            System.Diagnostics.CodeAnalysis.NotNullAttribute;
+            System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute;
+            System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
+            System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute;
+            System.Diagnostics.CodeAnalysis.MemberNotNullAttribute;
+            System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute;
+            System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute;
+            System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute;
+            System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
+        </PolySharpIncludeGeneratedTypes>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <Reference Include="Microsoft.CSharp" />
+        <Reference Include="System" />
+        <Reference Include="System.Core" />
+        <Reference Include="System.Data" />
+        <Reference Include="System.Data.DataSetExtensions" />
+        <Reference Include="System.Xml" />
+        <Reference Include="System.Xml.Linq" />
+    </ItemGroup>
+    <ItemGroup>
+        <Reference Include="$(SolutionDir_)lib/*.dll" Private="False" />
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Update="Arena/HideAndSeekMode.UI.cs">
+            <DependentUpon>HideAndSeekMode.cs</DependentUpon>
+        </Compile>
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="PolySharp" Version="1.15.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
+    
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Copy SourceFiles="$(TargetDir)$(TargetName).dll;$(TargetDir)$(TargetName).pdb"
+              DestinationFolder="$(SolutionDir_)dist/plugins" />
+    </Target>
+</Project>

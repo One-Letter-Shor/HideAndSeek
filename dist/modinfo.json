@@ -1,0 +1,15 @@
+{
+    "id": "OneLetterShor.HideAndSeek",
+    "name": "Hide N Seek",
+    "version": "0.0.0",
+    "hide_version": false,
+    "target_game_version": "v1.11.8",
+    "authors": "OneLetterShor",
+    "description": "",
+    "youtube_trailer_id": "",
+    "requirements": [ "henpemaz_rainmeadow" ],
+    "requirements_names": [ "Rain Meadow" ],
+    "tags": [ "Base", "Downpour", "Watcher" ],
+    "priorities": [],
+    "checksum_override_version": false
+}
