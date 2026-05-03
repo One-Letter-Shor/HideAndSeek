@@ -27,11 +27,11 @@ public static class RainMeadowHooks
         );
         
         _ = new Hook(
-            typeof(Lobby).GetMethod(
-                "ActivateImpl",
+            typeof(ArenaOnlineGameMode).GetMethod(
+                nameof(ArenaOnlineGameMode.ResourceAvailable),
                 BindingFlags.NonPublic | BindingFlags.Instance
             ),
-            On_RainMeadow_Lobby_ActivateImpl
+            On_RainMeadow_ArenaCompetitiveGameMode_ResourceAvailable
         );
     }
     
@@ -45,13 +45,19 @@ public static class RainMeadowHooks
         HideAndSeekMode.RegisterNewInstance(self);
     }
     
-    private static void On_RainMeadow_Lobby_ActivateImpl(Action<Lobby> orig, Lobby self)
+    private static void On_RainMeadow_ArenaCompetitiveGameMode_ResourceAvailable(
+        Action<ArenaOnlineGameMode, OnlineResource> orig,
+        ArenaOnlineGameMode self,
+        OnlineResource onlineResource)
     {
-        orig(self);
-        HideAndSeekLobbyData.RegisterNewInstance(self);
+        AssertIs(onlineResource, out Lobby lobby);
+        orig(self, onlineResource);
+        HideAndSeekLobbyData.RegisterNewInstance(lobby);
     }
     
-    private static void On_RainMeadow_ArenaOnlineGameMode_AddClientData(Action<ArenaOnlineGameMode> orig, ArenaOnlineGameMode self)
+    private static void On_RainMeadow_ArenaOnlineGameMode_AddClientData(
+        Action<ArenaOnlineGameMode> orig,
+        ArenaOnlineGameMode self)
     {
         orig(self);
         HideAndSeekClientData.RegisterNewInstance(self);
