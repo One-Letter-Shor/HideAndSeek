@@ -29,7 +29,7 @@ public static class RainMeadowHooks
         _ = new Hook(
             typeof(ArenaOnlineGameMode).GetMethod(
                 nameof(ArenaOnlineGameMode.ResourceAvailable),
-                BindingFlags.NonPublic | BindingFlags.Instance
+                BindingFlags.Public | BindingFlags.Instance
             ),
             On_RainMeadow_ArenaCompetitiveGameMode_ResourceAvailable
         );

@@ -12,7 +12,7 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
     {
         Logger.Mark();
         Assert(SettingsTab is null);
-        AssertIs(OnlineManager.lobby?.gameMode, out ArenaOnlineGameMode arenaOnline);
+        AssertIs(OnlineManager.lobby!.gameMode, out ArenaOnlineGameMode arenaOnline);
         
         base.OnUIEnabled(menu);
         SettingsTab = new HideAndSeekSettingsTab(
@@ -28,7 +28,7 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
     public override void OnUIDisabled(ArenaOnlineLobbyMenu menu)
     {
         Logger.Mark();
-        Assert(OnlineManager.lobby?.gameMode is ArenaOnlineGameMode);
+        Assert(OnlineManager.lobby!.gameMode is ArenaOnlineGameMode);
         
         if (SettingsTab is null) return;
         

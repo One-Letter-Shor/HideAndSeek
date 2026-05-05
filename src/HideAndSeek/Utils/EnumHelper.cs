@@ -10,8 +10,7 @@ internal static class EnumHelper
     /// bit set, otherwise <see langword="false"/>.
     /// </returns>
     /// <exception cref="OverflowException">
-    /// Propagated by <see langword="Convert.ToUInt64"/> if
-    /// <paramref name="enumValue"/>'s underlying value is negative.
+    /// Thrown if <paramref name="enumValue"/>'s underlying value is negative.
     /// </exception>
     internal static bool HasExactlyOneFlag(Enum enumValue)
     {
@@ -31,8 +30,7 @@ internal static class EnumHelper
     /// bits set, otherwise <see langword="false"/>.
     /// </returns>
     /// <exception cref="OverflowException">
-    /// Propagated by <see langword="Convert.ToUInt64"/> if
-    /// <paramref name="enumValue"/>'s underlying value is negative.
+    /// Thrown if <paramref name="enumValue"/>'s underlying value is negative.
     /// </exception>
     internal static bool HasExactlyOneOrZeroFlags(Enum enumValue)
     {

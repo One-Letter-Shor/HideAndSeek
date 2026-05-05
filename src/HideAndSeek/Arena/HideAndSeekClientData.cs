@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using RainMeadow;
 
 namespace OneLetterShor.HideAndSeek.Arena;
@@ -36,6 +37,31 @@ internal sealed class HideAndSeekClientData : OnlineEntity.EntityData
                             .GetData<HideAndSeekClientData>();
     }
     
+    /// <summary>
+    /// Attempts to get the <see cref="HideAndSeekClientData"/> instance that
+    /// correlates to the <see cref="OnlineManager.mePlayer"/>.
+    /// </summary>
+    /// <returns><see langword="true"/> if the data is found, otherwise <see langword="false"/>.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if there is no <see cref="Lobby"/>.</exception>
+    /// <remarks>
+    /// Fails gracefully on both <see cref="Lobby.clientSettings"/> and
+    /// <see cref="ClientSettings.TryGetData"/>. (returns <see langword="false"/>)
+    /// </remarks>
+    public static bool TryGetMyData([NotNullWhen(true)] out HideAndSeekClientData? data)
+    {
+        if (OnlineManager.lobby is null) throw new InvalidOperationException("There is no lobby.");
+        
+        data = null;
+        
+        if (
+            !OnlineManager.lobby.clientSettings.TryGetValue(OnlineManager.mePlayer, out ClientSettings clientSettings)
+            || !clientSettings.TryGetData(out HideAndSeekClientData _data)
+        ) return false;
+        
+        data = _data;
+        return true;
+    }
+    
     
     public override EntityDataState MakeState(OnlineEntity entity, OnlineResource inResource)
     {
@@ -55,7 +81,6 @@ internal sealed class HideAndSeekClientData : OnlineEntity.EntityData
         
         internal State(HideAndSeekClientData data)
         {
-            if (Input.GetKey(KeyCode.G)) Logger.Debug($"from data: {data.IsWillingToSeek}");
             IsWillingToSeek = data.IsWillingToSeek;
         }
         
@@ -63,7 +88,6 @@ internal sealed class HideAndSeekClientData : OnlineEntity.EntityData
         {
             AssertIs(entityData, out HideAndSeekClientData data);
             
-            if (Input.GetKey(KeyCode.G)) Logger.Debug($"[{onlineEntity.owner}] value: {data.IsWillingToSeek}         ({onlineEntity})");
             data.IsWillingToSeek = IsWillingToSeek;
         }
         

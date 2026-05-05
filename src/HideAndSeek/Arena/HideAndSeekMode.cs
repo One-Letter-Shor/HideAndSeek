@@ -4,12 +4,17 @@ using RainMeadow;
 
 namespace OneLetterShor.HideAndSeek.Arena;
 
+/// <remarks>
+/// Settings are automatically saved unless
+/// <see cref="CanApplySettings"/> is <see langword="false"/>.
+/// </remarks>
 public sealed partial class HideAndSeekMode : ExternalArenaGameMode
 {
     public static ArenaSetup.GameTypeID Id { get; } = new(Plugin.Name);
     
+    public bool CanApplySettings { get; set; } = true;
     public int               HideDurationSeconds      { get; set => ApplySetting(value, out field, Plugin.Options.CfgHideDurationSeconds);    } = Plugin.Options.HideDurationSeconds;
-    public int               SeekDurationSeconds      { get; set => ApplySetting(value, out field, Plugin.Options.CfgRoundDurationSeconds);   } = Plugin.Options.RoundDurationSeconds;
+    public int               SeekDurationSeconds      { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekDurationSeconds);    } = Plugin.Options.SeekDurationSeconds;
     public int               SeekerCount              { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerCount);            } = Plugin.Options.SeekerCount;
     public SeekerSelection   EnabledSeekerSelection   { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledSeekerSelection); } = Plugin.Options.EnabledSeekerSelection;
     public TaggingMethods    EnabledTaggingMethods    { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledTaggingMethods);  } = Plugin.Options.EnabledTaggingMethods;
@@ -75,14 +80,23 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         LogGameInfo(arena, arenaOnline);
     }
     
+    /// <summary>
+    /// Clamps value based on the <see cref="Configurable{T}"/>
+    /// and writes to it if currently the host.
+    /// </summary>
+    /// <remarks>
+    /// If <see cref="CanApplySettings"/> is <see langword="false"/>,
+    /// writing to the <see cref="Configurable{T}"/> is disabled.
+    /// </remarks>
     private void ApplySetting<T>(T value, out T field, Configurable<T> configurable)
     {
         Assert(OnlineManager.lobby is not null);
         
         value = configurable.ClampValue(value);
         
-        if (OnlineManager.lobby.isOwner)
+        if (CanApplySettings && OnlineManager.lobby.isOwner)
             configurable.Value = value;
+        
         
         field = value;
     }

@@ -73,11 +73,11 @@ public sealed class Options : OptionInterface
         get => CfgHideDurationSeconds.Value;
         set => CfgHideDurationSeconds.Value = value;
     }
-    /// <inheritdoc cref="CfgRoundDurationSeconds"/>
-    public int RoundDurationSeconds
+    /// <inheritdoc cref="CfgSeekDurationSeconds"/>
+    public int SeekDurationSeconds
     {
-        get => CfgRoundDurationSeconds.Value;
-        set => CfgRoundDurationSeconds.Value = value;
+        get => CfgSeekDurationSeconds.Value;
+        set => CfgSeekDurationSeconds.Value = value;
     }
     /// <inheritdoc cref="CfgSeekerCount"/>
     public int SeekerCount
@@ -118,7 +118,7 @@ public sealed class Options : OptionInterface
     public Configurable<int> CfgHideDurationSeconds { get; }
     
     // TODO: Add documentation.
-    public Configurable<int> CfgRoundDurationSeconds { get; }
+    public Configurable<int> CfgSeekDurationSeconds { get; }
     
     // TODO: Add documentation.
     public Configurable<int> CfgSeekerCount { get; }
@@ -163,7 +163,7 @@ public sealed class Options : OptionInterface
         CfgIsWillingToSeek = BindCfg(nameof(IsWillingToSeek), true);
         
         CfgHideDurationSeconds = BindCfg(nameof(HideDurationSeconds), 60);
-        CfgRoundDurationSeconds = BindCfg(nameof(RoundDurationSeconds), 60 * 8);
+        CfgSeekDurationSeconds = BindCfg(nameof(SeekDurationSeconds), 60 * 8);
         CfgSeekerCount = BindCfg(nameof(SeekerCount), 1, new ConfigAcceptableRange<int>(1, 99));
         CfgEnabledSeekerSelection = BindCfg(nameof(EnabledSeekerSelection), SeekerSelection.Random);
         CfgEnabledTaggingMethods = BindCfg(nameof(EnabledTaggingMethods), TaggingMethods.Ascension, new ConfigAcceptableRange<TaggingMethods>(TaggingMethods.None + 1, TaggingMethods.All));

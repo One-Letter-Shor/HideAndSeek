@@ -30,7 +30,7 @@ internal sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         public int HideDurationSeconds;
         
         [OnlineField(group = _settings)]
-        public int RoundDurationSeconds;
+        public int SeekDurationSeconds;
         
         [OnlineField(group = _settings)]
         public int SeekerCount;
@@ -46,7 +46,7 @@ internal sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         
         
         /// <remarks>Rain Meadow requires a ctor with no params.</remarks>
-        public State() { Logger.Mark(); }
+        public State() { }
         
         internal State(Lobby lobby)
         {
@@ -55,7 +55,7 @@ internal sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
             if (!HideAndSeekMode.IsHideAndSeekMode(arenaOnline, out HideAndSeekMode? hideAndSeek)) return;
             
             HideDurationSeconds    = hideAndSeek.HideDurationSeconds;
-            RoundDurationSeconds   = hideAndSeek.SeekDurationSeconds;
+            SeekDurationSeconds   = hideAndSeek.SeekDurationSeconds;
             SeekerCount            = hideAndSeek.SeekerCount;
             EnabledSeekerSelection = (byte)hideAndSeek.EnabledSeekerSelection;
             EnabledTaggingMethods  = (byte)hideAndSeek.EnabledTaggingMethods;
@@ -64,14 +64,13 @@ internal sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         
         public override void ReadTo(OnlineResource.ResourceData data, OnlineResource onlineResource)
         {
-            Logger.Mark();
             AssertIs(onlineResource, out Lobby lobby);
             AssertIs(lobby.gameMode, out ArenaOnlineGameMode arenaOnline);
             
             if (!HideAndSeekMode.IsHideAndSeekMode(arenaOnline, out HideAndSeekMode? hideAndSeek)) return;
             
             hideAndSeek.HideDurationSeconds    = HideDurationSeconds;
-            hideAndSeek.SeekDurationSeconds   = RoundDurationSeconds;
+            hideAndSeek.SeekDurationSeconds   = SeekDurationSeconds;
             hideAndSeek.SeekerCount            = SeekerCount;
             hideAndSeek.EnabledSeekerSelection = (SeekerSelection)EnabledSeekerSelection;
             hideAndSeek.EnabledTaggingMethods  = (TaggingMethods)EnabledTaggingMethods;

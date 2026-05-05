@@ -9,9 +9,8 @@ internal static class ConfigurableHelper
     /// <see cref="ConfigurableInfo"/> of the cloned <see cref="Configurable{T}"/>.
     /// </summary>
     /// <exception cref="InvalidOperationException">
-    /// Propagated by <see cref="ValueConverter.ConvertToValue{T}"/>
-    /// if a valid <see cref="ValueConverter.Converter"/> could not
-    /// be found for <typeparamref name="T"/>.
+    /// Thrown if a valid <see cref="ValueConverter.Converter"/>
+    /// could not be found for <typeparamref name="T"/>.
     /// </exception>
     internal static Configurable<T> Clone<T>(Configurable<T> configurable)
     {

@@ -279,9 +279,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         
         base.Update();
         
-        // The value is not updated when held.
-        // If the update loop always assigned the value, then no user input would go through.(unless they clicked for exactly one tick)
-        if (!SeekerCountUpdown.held) 
+        if (!SeekerCountUpdown.held)
             SeekerCountUpdown.SetValueInt(HideAndSeekMode.SeekerCount);
         SeekerSelectionSelector.value = HideAndSeekMode.EnabledSeekerSelection.ToString();
         TagResultSelector.value = HideAndSeekMode.EnabledTagResult.ToString();
@@ -297,7 +295,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
     
     public override void RemoveSprites()
     {
-        Assert(OnlineManager.lobby?.gameMode is ArenaOnlineGameMode);
+        Assert(OnlineManager.lobby!.gameMode is ArenaOnlineGameMode);
         base.RemoveSprites();
     }
 }
