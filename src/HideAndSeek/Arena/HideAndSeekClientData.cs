@@ -84,9 +84,9 @@ internal sealed class HideAndSeekClientData : OnlineEntity.EntityData
             IsWillingToSeek = data.IsWillingToSeek;
         }
         
-        public override void ReadTo(OnlineEntity.EntityData entityData, OnlineEntity onlineEntity)
+        public override void ReadTo(OnlineEntity.EntityData data_, OnlineEntity onlineEntity)
         {
-            AssertIs(entityData, out HideAndSeekClientData data);
+            AssertIs(data_, out HideAndSeekClientData data);
             
             data.IsWillingToSeek = IsWillingToSeek;
         }

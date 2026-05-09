@@ -7,7 +7,6 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
 {
     public HideAndSeekSettingsTab? SettingsTab { get; private set; }
     
-    /// <summary>Fully initializes all UI elements.</summary>
     public override void OnUIEnabled(ArenaOnlineLobbyMenu menu)
     {
         Logger.Mark();
@@ -24,7 +23,6 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
         menu.arenaMainLobbyPage.tabContainer.AddTab(SettingsTab, Plugin.Name);
     }
     
-    /// <summary>Fully removes all UI.</summary>
     public override void OnUIDisabled(ArenaOnlineLobbyMenu menu)
     {
         Logger.Mark();
@@ -39,9 +37,5 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
         base.OnUIDisabled(menu);
     }
     
-    /// <remarks>
-    /// Calls <see cref="OnUIDisabled"/> because it fully handles UI removal.
-    /// <see cref="ExternalArenaGameMode.OnUIShutDown"/> only performs a partial removal.
-    /// </remarks>
     public override void OnUIShutDown(ArenaOnlineLobbyMenu menu) => OnUIDisabled(menu);
 }
