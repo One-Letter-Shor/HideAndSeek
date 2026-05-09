@@ -1,13 +1,13 @@
-using System.Diagnostics.CodeAnalysis;
 using RainMeadow;
 
 namespace OneLetterShor.HideAndSeek.Arena;
 
-internal sealed class HideAndSeekClientData : OnlineEntity.EntityData
+/// <remarks>
+/// Settings are automatically saved unless
+/// <see cref="CanApplySettings"/> is <see langword="false"/>.
+/// </remarks>
+public sealed class HideAndSeekClientData : OnlineEntity.EntityData
 {
-    public bool IsWillingToSeek { get; set; }
-    
-    
     /// <summary>Registers client data via <see cref="ClientSettings.AddData"/>.</summary>
     /// <exception cref="InvalidOperationException">Thrown if already registered.</exception>
     internal static void RegisterNewInstance(ArenaOnlineGameMode arenaOnline)
@@ -18,50 +18,29 @@ internal sealed class HideAndSeekClientData : OnlineEntity.EntityData
         arenaOnline.clientSettings.AddData(new HideAndSeekClientData());
     }
     
-    /// <summary>
-    /// Gets the <see cref="HideAndSeekClientData"/> instance that
-    /// correlates to the <see cref="OnlineManager.mePlayer"/>.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when:
-    /// <br/>- There is no <see cref="Lobby"/>.
-    /// <br/>- The <see cref="ClientSettings"/> could not be found.
-    /// </exception>
-    public static HideAndSeekClientData GetMyData()
-    {
-        if (OnlineManager.lobby is null) throw new InvalidOperationException("There is no lobby.");
-        if (!OnlineManager.lobby.clientSettings.ContainsKey(OnlineManager.mePlayer)) throw new InvalidOperationException($"Could not find client settings. [ {string.Join(", ",OnlineManager.lobby.clientSettings)} ]");
-        
-        return OnlineManager.lobby
-                            .clientSettings[OnlineManager.mePlayer]
-                            .GetData<HideAndSeekClientData>();
-    }
+    public bool CanApplySettings { get; set; } = true;
+    public bool IsWillingToSeek { get; set => ApplySetting(value, out field, Plugin.Options.CfgIsWillingToSeek); } = Plugin.Options.IsWillingToSeek;
     
     /// <summary>
-    /// Attempts to get the <see cref="HideAndSeekClientData"/> instance that
-    /// correlates to the <see cref="OnlineManager.mePlayer"/>.
+    /// Clamps value based on the <see cref="Configurable{T}"/>
+    /// and writes to it if currently the host.
     /// </summary>
-    /// <returns><see langword="true"/> if the data is found, otherwise <see langword="false"/>.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if there is no <see cref="Lobby"/>.</exception>
     /// <remarks>
-    /// Fails gracefully on both <see cref="Lobby.clientSettings"/> and
-    /// <see cref="ClientSettings.TryGetData"/>. (returns <see langword="false"/>)
+    /// If <see cref="CanApplySettings"/> is <see langword="false"/>,
+    /// writing to the <see cref="Configurable{T}"/> is disabled.
     /// </remarks>
-    public static bool TryGetMyData([NotNullWhen(true)] out HideAndSeekClientData? data)
+    private void ApplySetting<T>(T value, out T field, Configurable<T> configurable)
     {
-        if (OnlineManager.lobby is null) throw new InvalidOperationException("There is no lobby.");
+        Assert(OnlineManager.lobby is not null);
         
-        data = null;
+        value = configurable.ClampValue(value);
         
-        if (
-            !OnlineManager.lobby.clientSettings.TryGetValue(OnlineManager.mePlayer, out ClientSettings clientSettings)
-            || !clientSettings.TryGetData(out HideAndSeekClientData _data)
-        ) return false;
+        // TODO: Only save if the client data is for me player. 
+        if (CanApplySettings)
+            configurable.Value = value;
         
-        data = _data;
-        return true;
+        field = value;
     }
-    
     
     public override EntityDataState MakeState(OnlineEntity entity, OnlineResource inResource)
     {

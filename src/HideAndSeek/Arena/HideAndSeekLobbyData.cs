@@ -2,7 +2,11 @@ using RainMeadow;
 
 namespace OneLetterShor.HideAndSeek.Arena;
 
-internal sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
+/// <remarks>
+/// Settings are automatically saved unless
+/// <see cref="CanApplySettings"/> is <see langword="false"/>.
+/// </remarks>
+public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
 {
     /// <summary>Registers lobby data via <see cref="Lobby.AddData"/>.</summary>
     /// <exception cref="InvalidOperationException">Thrown if already registered.</exception>
@@ -14,12 +18,39 @@ internal sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         lobby.AddData(new HideAndSeekLobbyData());
     }
     
+    public bool CanApplySettings { get; set; } = true;
+    public int               HideDurationSeconds      { get; set => ApplySetting(value, out field, Plugin.Options.CfgHideDurationSeconds);    } = Plugin.Options.HideDurationSeconds;
+    public int               SeekDurationSeconds      { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekDurationSeconds);    } = Plugin.Options.SeekDurationSeconds;
+    public int               SeekerCount              { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerCount);            } = Plugin.Options.SeekerCount;
+    public SeekerSelection   EnabledSeekerSelection   { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledSeekerSelection); } = Plugin.Options.EnabledSeekerSelection;
+    public TaggingMethods    EnabledTaggingMethods    { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledTaggingMethods);  } = Plugin.Options.EnabledTaggingMethods;
+    public TagResult         EnabledTagResult         { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledTagResult);       } = Plugin.Options.EnabledTagResult;
+    
+    /// <summary>
+    /// Clamps value based on the <see cref="Configurable{T}"/>
+    /// and writes to it if currently the host.
+    /// </summary>
+    /// <remarks>
+    /// If <see cref="CanApplySettings"/> is <see langword="false"/>,
+    /// writing to the <see cref="Configurable{T}"/> is disabled.
+    /// </remarks>
+    private void ApplySetting<T>(T value, out T field, Configurable<T> configurable)
+    {
+        Assert(OnlineManager.lobby is not null);
+        
+        value = configurable.ClampValue(value);
+        
+        if (CanApplySettings && OnlineManager.lobby.isOwner)
+            configurable.Value = value;
+        
+        field = value;
+    }
     
     public override ResourceDataState MakeState(OnlineResource resource)
     {
         AssertIs(resource, out Lobby lobby);
         
-        return new State(lobby);
+        return new State(this, lobby);
     }
     
     internal sealed class State : ResourceDataState
@@ -48,33 +79,34 @@ internal sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         /// <remarks>Rain Meadow requires a ctor with no params.</remarks>
         public State() { }
         
-        internal State(Lobby lobby)
+        internal State(HideAndSeekLobbyData data, Lobby lobby)
         {
             AssertIs(lobby.gameMode, out ArenaOnlineGameMode arenaOnline);
             
-            if (!HideAndSeekMode.IsHideAndSeekMode(arenaOnline, out HideAndSeekMode? hideAndSeek)) return;
+            if (!HideAndSeekMode.IsHideAndSeekMode(arenaOnline, out _)) return;
             
-            HideDurationSeconds    = hideAndSeek.HideDurationSeconds;
-            SeekDurationSeconds   = hideAndSeek.SeekDurationSeconds;
-            SeekerCount            = hideAndSeek.SeekerCount;
-            EnabledSeekerSelection = (byte)hideAndSeek.EnabledSeekerSelection;
-            EnabledTaggingMethods  = (byte)hideAndSeek.EnabledTaggingMethods;
-            EnabledTagResult       = (byte)hideAndSeek.EnabledTagResult;
+            HideDurationSeconds    = data.HideDurationSeconds;
+            SeekDurationSeconds    = data.SeekDurationSeconds;
+            SeekerCount            = data.SeekerCount;
+            EnabledSeekerSelection = (byte)data.EnabledSeekerSelection;
+            EnabledTaggingMethods  = (byte)data.EnabledTaggingMethods;
+            EnabledTagResult       = (byte)data.EnabledTagResult;
         }
         
-        public override void ReadTo(OnlineResource.ResourceData data, OnlineResource onlineResource)
+        public override void ReadTo(OnlineResource.ResourceData data_, OnlineResource onlineResource)
         {
+            AssertIs(data_, out HideAndSeekLobbyData data);
             AssertIs(onlineResource, out Lobby lobby);
             AssertIs(lobby.gameMode, out ArenaOnlineGameMode arenaOnline);
             
-            if (!HideAndSeekMode.IsHideAndSeekMode(arenaOnline, out HideAndSeekMode? hideAndSeek)) return;
+            if (!HideAndSeekMode.IsHideAndSeekMode(arenaOnline, out _)) return;
             
-            hideAndSeek.HideDurationSeconds    = HideDurationSeconds;
-            hideAndSeek.SeekDurationSeconds   = SeekDurationSeconds;
-            hideAndSeek.SeekerCount            = SeekerCount;
-            hideAndSeek.EnabledSeekerSelection = (SeekerSelection)EnabledSeekerSelection;
-            hideAndSeek.EnabledTaggingMethods  = (TaggingMethods)EnabledTaggingMethods;
-            hideAndSeek.EnabledTagResult       = (TagResult)EnabledTagResult;
+            data.HideDurationSeconds    = HideDurationSeconds;
+            data.SeekDurationSeconds    = SeekDurationSeconds;
+            data.SeekerCount            = SeekerCount;
+            data.EnabledSeekerSelection = (SeekerSelection)EnabledSeekerSelection;
+            data.EnabledTaggingMethods  = (TaggingMethods)EnabledTaggingMethods;
+            data.EnabledTagResult       = (TagResult)EnabledTagResult;
         }
         
         public override Type GetDataType() => typeof(HideAndSeekLobbyData);

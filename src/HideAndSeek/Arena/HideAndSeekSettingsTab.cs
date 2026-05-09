@@ -73,9 +73,8 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         
         WillingToSeekCheckBox.OnValueChanged += (_, _, _) =>
         {
-            bool value = WillingToSeekCheckBox.GetValueBool();
-            Plugin.Options.IsWillingToSeek = value;
-            HideAndSeekClientData.GetMyData().IsWillingToSeek = value;
+            HideAndSeek.MyClientData.IsWillingToSeek = WillingToSeekCheckBox.GetValueBool();
+            Assert(HideAndSeek.MyClientData.IsWillingToSeek == Plugin.Options.IsWillingToSeek);
         };
         
         
@@ -97,7 +96,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         SeekerCountUpdown.OnValueChanged += (_, _, _) =>
         {
             Assert(SeekerCountUpdown.accept == OpTextBox.Accept.Int);
-            HideAndSeek.SeekerCount = SeekerCountUpdown.GetValueInt();
+            HideAndSeek.LobbyData.SeekerCount = SeekerCountUpdown.GetValueInt();
         };
         
         
@@ -119,7 +118,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         SeekerSelectionSelector.OnValueChanged += (_, valueAsString, _) =>
         {
             Assert(Enum.TryParse(valueAsString, out SeekerSelection value));
-            HideAndSeek.EnabledSeekerSelection = value;
+            HideAndSeek.LobbyData.EnabledSeekerSelection = value;
         };
         
         
@@ -153,7 +152,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
                 {
                     bool value = checkBox.GetValueBool();
                     
-                    TaggingMethods currentValue = HideAndSeek.EnabledTaggingMethods;
+                    TaggingMethods currentValue = HideAndSeek.LobbyData.EnabledTaggingMethods;
                     TaggingMethods newValue = value
                         ? currentValue | taggingMethod 
                         : currentValue & ~taggingMethod;
@@ -165,7 +164,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
                         return;
                     }
                     
-                    HideAndSeek.EnabledTaggingMethods = newValue;
+                    HideAndSeek.LobbyData.EnabledTaggingMethods = newValue;
                 };
                 
                 ProperlyAlignedMenuLabel label = new(
@@ -201,7 +200,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         TagResultSelector.OnValueChanged += (_, valueAsString, _) =>
         {
             Assert(Enum.TryParse(valueAsString, out TagResult value));
-            HideAndSeek.EnabledTagResult = value;
+            HideAndSeek.LobbyData.EnabledTagResult = value;
         };
         
         
@@ -280,16 +279,16 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         base.Update();
         
         if (!SeekerCountUpdown.held)
-            SeekerCountUpdown.SetValueInt(HideAndSeek.SeekerCount);
-        SeekerSelectionSelector.value = HideAndSeek.EnabledSeekerSelection.ToString();
-        TagResultSelector.value = HideAndSeek.EnabledTagResult.ToString();
+            SeekerCountUpdown.SetValueInt(HideAndSeek.LobbyData.SeekerCount);
+        SeekerSelectionSelector.value = HideAndSeek.LobbyData.EnabledSeekerSelection.ToString();
+        TagResultSelector.value = HideAndSeek.LobbyData.EnabledTagResult.ToString();
         
         foreach (var kvp in UIByTaggingMethod)
         {
             TaggingMethods taggingMethod = kvp.Key;
             (_, OpCheckBox? opCheckBox) = kvp.Value;
             
-            opCheckBox.SetValueBool(HideAndSeek.EnabledTaggingMethods.HasFlag(taggingMethod));
+            opCheckBox.SetValueBool(HideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(taggingMethod));
         }
     }
     

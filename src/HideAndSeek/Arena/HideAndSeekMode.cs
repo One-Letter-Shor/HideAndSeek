@@ -4,21 +4,14 @@ using RainMeadow;
 
 namespace OneLetterShor.HideAndSeek.Arena;
 
-/// <remarks>
-/// Settings are automatically saved unless
-/// <see cref="CanApplySettings"/> is <see langword="false"/>.
-/// </remarks>
 public sealed partial class HideAndSeekMode : ExternalArenaGameMode
 {
     public static ArenaSetup.GameTypeID Id { get; } = new(Plugin.Name);
     
-    public bool CanApplySettings { get; set; } = true;
-    public int               HideDurationSeconds      { get; set => ApplySetting(value, out field, Plugin.Options.CfgHideDurationSeconds);    } = Plugin.Options.HideDurationSeconds;
-    public int               SeekDurationSeconds      { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekDurationSeconds);    } = Plugin.Options.SeekDurationSeconds;
-    public int               SeekerCount              { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerCount);            } = Plugin.Options.SeekerCount;
-    public SeekerSelection   EnabledSeekerSelection   { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledSeekerSelection); } = Plugin.Options.EnabledSeekerSelection;
-    public TaggingMethods    EnabledTaggingMethods    { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledTaggingMethods);  } = Plugin.Options.EnabledTaggingMethods;
-    public TagResult         EnabledTagResult         { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledTagResult);       } = Plugin.Options.EnabledTagResult;
+    public HideAndSeekLobbyData LobbyData { get; } = OnlineManager.lobby.GetData<HideAndSeekLobbyData>();
+    public HideAndSeekClientData MyClientData { get; } = OnlineManager.lobby
+                                                                      .clientSettings[OnlineManager.mePlayer]
+                                                                      .GetData<HideAndSeekClientData>();
     
     public override int TimerDuration
     {
@@ -55,12 +48,11 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         return false;
     }
     
-    
     public override bool SpawnBatflies(FliesWorldAI fliesWorldAI, int spawnRoom) => false;
     
     public override string TimerText() => "Quickly, hide!";
     
-    public override int SetTimer(ArenaOnlineGameMode arenaOnline) => arenaOnline.setupTime = HideDurationSeconds;
+    public override int SetTimer(ArenaOnlineGameMode arenaOnline) => arenaOnline.setupTime = LobbyData.HideDurationSeconds;
     
     public override bool IsExitsOpen(
         ArenaOnlineGameMode arenaOnline,
@@ -79,27 +71,6 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         base.ArenaSessionCtor(arenaOnline, orig, arena, game);
         
         LogGameInfo(arena, arenaOnline);
-    }
-    
-    /// <summary>
-    /// Clamps value based on the <see cref="Configurable{T}"/>
-    /// and writes to it if currently the host.
-    /// </summary>
-    /// <remarks>
-    /// If <see cref="CanApplySettings"/> is <see langword="false"/>,
-    /// writing to the <see cref="Configurable{T}"/> is disabled.
-    /// </remarks>
-    private void ApplySetting<T>(T value, out T field, Configurable<T> configurable)
-    {
-        Assert(OnlineManager.lobby is not null);
-        
-        value = configurable.ClampValue(value);
-        
-        if (CanApplySettings && OnlineManager.lobby.isOwner)
-            configurable.Value = value;
-        
-        
-        field = value;
     }
     
     private void LogGameInfo(ArenaGameSession arena, ArenaOnlineGameMode arenaOnline) // temp
