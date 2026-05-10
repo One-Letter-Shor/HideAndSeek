@@ -27,13 +27,10 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
     public TagResult         EnabledTagResult         { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledTagResult);       } = Plugin.Options.EnabledTagResult;
     
     /// <summary>
-    /// Clamps value based on the <see cref="Configurable{T}"/>
-    /// and writes to it if currently the host.
+    /// Clamps the value based on <paramref name="configurable"/>
+    /// and writes to it if both the me player is the host and
+    /// <see cref="CanApplySettings"/> is <see langword="true"/>.
     /// </summary>
-    /// <remarks>
-    /// If <see cref="CanApplySettings"/> is <see langword="false"/>,
-    /// writing to the <see cref="Configurable{T}"/> is disabled.
-    /// </remarks>
     private void ApplySetting<T>(T value, out T field, Configurable<T> configurable)
     {
         Assert(OnlineManager.lobby is not null);
