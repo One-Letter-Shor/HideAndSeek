@@ -31,7 +31,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         arenaOnline.AddExternalGameModes(Id, new HideAndSeekMode());
     }
     
-    /// <exception cref="InvalidOperationException">Thrown if the game mode is registered.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the game mode is not registered.</exception>
     public static bool IsHideAndSeekMode(ArenaOnlineGameMode arenaOnline, [NotNullWhen(true)] out HideAndSeekMode? hideAndSeek)
     {
         string modeName = Id.value;
