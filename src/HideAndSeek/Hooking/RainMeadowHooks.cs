@@ -20,18 +20,18 @@ public static class RainMeadowHooks
         
         _ = new Hook(
             typeof(ArenaOnlineGameMode).GetMethod(
-                nameof(ArenaOnlineGameMode.AddClientData),
+                nameof(ArenaOnlineGameMode.ResourceAvailable),
                 BindingFlags.Public | BindingFlags.Instance
             ),
-            On_RainMeadow_ArenaOnlineGameMode_AddClientData
+            On_RainMeadow_ArenaOnlineGameMode_ResourceAvailable
         );
         
         _ = new Hook(
             typeof(ArenaOnlineGameMode).GetMethod(
-                nameof(ArenaOnlineGameMode.ResourceAvailable),
+                nameof(ArenaOnlineGameMode.AddClientData),
                 BindingFlags.Public | BindingFlags.Instance
             ),
-            On_RainMeadow_ArenaCompetitiveGameMode_ResourceAvailable
+            On_RainMeadow_ArenaOnlineGameMode_AddClientData
         );
     }
     
@@ -45,7 +45,7 @@ public static class RainMeadowHooks
         HideAndSeekMode.RegisterNewInstance(self);
     }
     
-    private static void On_RainMeadow_ArenaCompetitiveGameMode_ResourceAvailable(
+    private static void On_RainMeadow_ArenaOnlineGameMode_ResourceAvailable(
         Action<ArenaOnlineGameMode, OnlineResource> orig,
         ArenaOnlineGameMode self,
         OnlineResource onlineResource)
