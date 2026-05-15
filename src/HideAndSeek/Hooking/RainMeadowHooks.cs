@@ -50,9 +50,10 @@ public static class RainMeadowHooks
         ArenaOnlineGameMode self,
         OnlineResource onlineResource)
     {
-        AssertIs(onlineResource, out Lobby lobby);
         orig(self, onlineResource);
-        HideAndSeekLobbyData.RegisterNewInstance(lobby);
+        
+        if (onlineResource is Lobby lobby)
+            HideAndSeekLobbyData.RegisterNewInstance(lobby);
     }
     
     private static void On_RainMeadow_ArenaOnlineGameMode_AddClientData(
