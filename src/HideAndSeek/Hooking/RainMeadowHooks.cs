@@ -50,9 +50,11 @@ public static class RainMeadowHooks
         ArenaOnlineGameMode self,
         OnlineResource onlineResource)
     {
+        Logger.Mark(onlineResource);
+        
         orig(self, onlineResource);
         
-        if (onlineResource is Lobby lobby)
+        if (onlineResource is Lobby lobby && lobby.isOwner)
             HideAndSeekLobbyData.RegisterNewInstance(lobby);
     }
     

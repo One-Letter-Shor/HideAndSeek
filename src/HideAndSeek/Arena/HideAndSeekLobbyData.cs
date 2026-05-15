@@ -12,6 +12,8 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
     /// <exception cref="InvalidOperationException">Thrown if already registered.</exception>
     internal static void RegisterNewInstance(Lobby lobby)
     {
+        Logger.Debug($"Registering lobby data for {lobby}.");
+        
         if (lobby.TryGetData<HideAndSeekLobbyData>(out _))
             throw new InvalidOperationException("Lobby data is already registered.");
         

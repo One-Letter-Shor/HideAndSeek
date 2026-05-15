@@ -8,11 +8,13 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
 {
     public static ArenaSetup.GameTypeID Id { get; } = new(Plugin.Name);
     
-    public HideAndSeekLobbyData LobbyData { get; } = OnlineManager.lobby.GetData<HideAndSeekLobbyData>();
-    public HideAndSeekClientData MyClientData { get; } = OnlineManager.lobby
-                                                                      .clientSettings[OnlineManager.mePlayer]
-                                                                      .GetData<HideAndSeekClientData>();
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered yet.</exception>
+    public HideAndSeekLobbyData LobbyData => OnlineManager.lobby.GetData<HideAndSeekLobbyData>();
     
+    /// <exception cref="KeyNotFoundException">Thrown if the client data is not registered yet.</exception>
+    public HideAndSeekClientData MyClientData => OnlineManager.lobby
+                                                              .clientSettings[OnlineManager.mePlayer]
+                                                              .GetData<HideAndSeekClientData>();
     public override int TimerDuration
     {
         get => throw new InvalidOperationException("This should not be used.");
@@ -47,6 +49,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         
         return false;
     }
+    
     
     public override bool SpawnBatflies(FliesWorldAI fliesWorldAI, int spawnRoom) => false;
     

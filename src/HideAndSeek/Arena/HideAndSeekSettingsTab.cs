@@ -208,13 +208,13 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         UIfocusable[] taggingMethodUIFocusables = UIByTaggingMethod.Select(tuple => tuple.Value.Item2).ToArray<UIfocusable>();
         
         // Add new UIFocusables here
-        // LobbyUIFocusables = [ SeekerCountUpdown, SeekerSelectionSelector, ..taggingMethodUIFocusables, TagResultSelector ];
-        // ClientUIFocusables = [ WillingToSeekCheckBox ];
-        // DisabledUIFocusables = [];
-        
-        LobbyUIFocusables = [];
+        LobbyUIFocusables = [ SeekerCountUpdown, SeekerSelectionSelector, ..taggingMethodUIFocusables, TagResultSelector ];
         ClientUIFocusables = [ WillingToSeekCheckBox ];
-        DisabledUIFocusables = [ SeekerCountUpdown, SeekerSelectionSelector, ..taggingMethodUIFocusables, TagResultSelector ];
+        DisabledUIFocusables = [];
+        
+        // LobbyUIFocusables = [];
+        // ClientUIFocusables = [ WillingToSeekCheckBox ];
+        // DisabledUIFocusables = [ SeekerCountUpdown, SeekerSelectionSelector, ..taggingMethodUIFocusables, TagResultSelector ];
         
         AllUIFocusables =
         [
