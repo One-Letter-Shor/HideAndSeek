@@ -8,6 +8,8 @@ namespace OneLetterShor.HideAndSeek.Arena;
 /// </remarks>
 public sealed class HideAndSeekClientData : OnlineEntity.EntityData
 {
+    public static bool CanApplySettings { get; set; } = true;
+    
     /// <summary>Registers client data via <see cref="ClientSettings.AddData"/>.</summary>
     /// <exception cref="InvalidOperationException">Thrown if already registered.</exception>
     internal static void RegisterNewInstance(ArenaOnlineGameMode arenaOnline)
@@ -18,7 +20,6 @@ public sealed class HideAndSeekClientData : OnlineEntity.EntityData
         arenaOnline.clientSettings.AddData(new HideAndSeekClientData());
     }
     
-    public bool CanApplySettings { get; set; } = true;
     public bool IsWillingToSeek { get; set => ApplySetting(value, out field, Plugin.Options.CfgIsWillingToSeek); } = Plugin.Options.IsWillingToSeek;
     
     /// <summary>
