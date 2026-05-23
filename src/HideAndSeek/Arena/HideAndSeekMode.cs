@@ -9,10 +9,10 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     public static ArenaSetup.GameTypeID Id { get; } = new(Plugin.Name);
     
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered yet.</exception>
-    public HideAndSeekLobbyData LobbyData => OnlineManager.lobby.GetData<HideAndSeekLobbyData>();
+    public HideAndSeekLobbyData LobbyData => OnlineManager.lobby!.GetData<HideAndSeekLobbyData>();
     
     /// <exception cref="KeyNotFoundException">Thrown if the client data is not registered yet.</exception>
-    public HideAndSeekClientData MyClientData => OnlineManager.lobby
+    public HideAndSeekClientData MyClientData => OnlineManager.lobby!
                                                               .clientSettings[OnlineManager.mePlayer]
                                                               .GetData<HideAndSeekClientData>();
     public override int TimerDuration

@@ -20,7 +20,7 @@ public sealed class Options : OptionInterface
     /// Configurables are initialized in the constructor.
     /// </remarks>
     // TODO: Consider making this a dictionary. Matches DataByTaggingMethod.
-    public (LogLevel, Color, Configurable<bool>)[] LogLevelData { get; } =
+    public (LogLevel logLevel, Color color, Configurable<bool> configurable)[] LogLevelData { get; } =
     [
         (LogLevel.Debug,   new Color(0.14f, 0.48f, 0.70f), null!),
         (LogLevel.Info,    new Color(0.14f, 0.66f, 0.37f), null!),
@@ -149,7 +149,7 @@ public sealed class Options : OptionInterface
             Assert(EnumHelper.HasExactlyOneFlag(logLevel));
             Configurable<bool> configurable = BindCfg(logLevel.ToString(), true);
             
-            LogLevelData[i].Item3 = configurable;
+            LogLevelData[i].configurable = configurable;
         }
         
         CfgEnabledLogLevels = BindCfg(nameof(EnabledLogLevels), LogLevel.All);
@@ -367,11 +367,12 @@ public sealed class Options : OptionInterface
         string text,
         ConfigurableInfo? configInfo = null)
     {
-        if (   gridCoord.x < 0
+        if (
+               gridCoord.x < 0
             || gridCoord.x > _devToggleUIData.GetLength(0)
             || gridCoord.y < 0
-            || gridCoord.y > _devToggleUIData.GetLength(1))
-            throw new ArgumentOutOfRangeException(nameof(gridCoord), gridCoord, "Coordinate is out of bounds.");
+            || gridCoord.y > _devToggleUIData.GetLength(1)
+        ) throw new ArgumentOutOfRangeException(nameof(gridCoord), gridCoord, $"Coordinates '{gridCoord}' is out of bounds.");
         
         Configurable<bool> configurable = BindCfg(key, defaultValue, configInfo);
         _devToggleUIData[gridCoord.x, gridCoord.y] = (configurable, text);

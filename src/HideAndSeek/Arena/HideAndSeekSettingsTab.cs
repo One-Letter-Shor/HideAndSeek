@@ -17,13 +17,13 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
     private HideAndSeekMode HideAndSeek { get; }
     
     public ProperlyAlignedMenuLabel WillingToSeekLabel { get; }
-    public OpCheckBox               WillingToSeekCheckBox { get; }
+    public OpCheckBox               IsWillingToSeekCheckBox { get; }
     public ProperlyAlignedMenuLabel SeekerCountLabel { get; }
     public OpUpdown                 SeekerCountUpdown { get; }
     public ProperlyAlignedMenuLabel SeekerSelectionLabel { get; }
     public OpResourceSelector       SeekerSelectionSelector { get; }
     public ProperlyAlignedMenuLabel TaggingMethodsLabel { get; }
-    public Dictionary<TaggingMethods, (ProperlyAlignedMenuLabel, OpCheckBox)> UIByTaggingMethod { get; } = [];
+    public Dictionary<TaggingMethods, (ProperlyAlignedMenuLabel label, OpCheckBox checkBox)> UIByTaggingMethod { get; } = [];
     public ProperlyAlignedMenuLabel TagResultLabel { get; }
     public OpResourceSelector       TagResultSelector { get; }
     
@@ -66,14 +66,14 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
             false
         );
         
-        WillingToSeekCheckBox = new OpCheckBox(
+        IsWillingToSeekCheckBox = new OpCheckBox(
             ConfigurableHelper.Clone(Plugin.Options.CfgIsWillingToSeek),
             new Vector2(WillingToSeekLabel.pos.x + labelSize.x, WillingToSeekLabel.pos.y + labelAlignmentYFix)
         );
         
-        WillingToSeekCheckBox.OnValueChanged += (_, _, _) =>
+        IsWillingToSeekCheckBox.OnValueChanged += (_, _, _) =>
         {
-            HideAndSeek.MyClientData.IsWillingToSeek = WillingToSeekCheckBox.GetValueBool();
+            HideAndSeek.MyClientData.IsWillingToSeek = IsWillingToSeekCheckBox.GetValueBool();
             Assert(HideAndSeek.MyClientData.IsWillingToSeek == Plugin.Options.IsWillingToSeek);
         };
         
@@ -150,6 +150,8 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
                 
                 checkBox.OnValueChanged += (_, _, _) =>
                 {
+                    if (!OnlineManager.lobby!.isOwner) return;
+                    
                     bool value = checkBox.GetValueBool();
                     
                     TaggingMethods currentValue = HideAndSeek.LobbyData.EnabledTaggingMethods;
@@ -204,16 +206,16 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         };
         
         
-        MenuObject[] taggingMethodMenuObjects = UIByTaggingMethod.Select(tuple => tuple.Value.Item1).ToArray<MenuObject>();
-        UIfocusable[] taggingMethodUIFocusables = UIByTaggingMethod.Select(tuple => tuple.Value.Item2).ToArray<UIfocusable>();
+        MenuObject[] taggingMethodMenuObjects = UIByTaggingMethod.Select(tuple => tuple.Value.label).ToArray<MenuObject>();
+        UIfocusable[] taggingMethodUIFocusables = UIByTaggingMethod.Select(tuple => tuple.Value.checkBox).ToArray<UIfocusable>();
         
         // Add new UIFocusables here
         LobbyUIFocusables = [ SeekerCountUpdown, SeekerSelectionSelector, ..taggingMethodUIFocusables, TagResultSelector ];
-        ClientUIFocusables = [ WillingToSeekCheckBox ];
+        ClientUIFocusables = [ IsWillingToSeekCheckBox ];
         DisabledUIFocusables = [];
         
         // LobbyUIFocusables = [];
-        // ClientUIFocusables = [ WillingToSeekCheckBox ];
+        // ClientUIFocusables = [ IsWillingToSeekCheckBox ];
         // DisabledUIFocusables = [ SeekerCountUpdown, SeekerSelectionSelector, ..taggingMethodUIFocusables, TagResultSelector ];
         
         AllUIFocusables =
