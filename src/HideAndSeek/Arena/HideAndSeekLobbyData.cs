@@ -1,4 +1,5 @@
 using RainMeadow;
+using RainMeadow.Generics;
 
 namespace OneLetterShor.HideAndSeek.Arena;
 
@@ -28,6 +29,18 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
     public SeekerSelection   EnabledSeekerSelection   { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledSeekerSelection); } = Plugin.Options.EnabledSeekerSelection;
     public TaggingMethods    EnabledTaggingMethods    { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledTaggingMethods);  } = Plugin.Options.EnabledTaggingMethods;
     public TagResult         EnabledTagResult         { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledTagResult);       } = Plugin.Options.EnabledTagResult;
+    
+    public List<OnlinePlayer> Seekers
+    {
+        get;
+        set
+        {
+            if (value.SequenceEqual(field))
+                Logger.Info($"Seekers: [ {string.Join(", ", value)} ]");
+            
+            field = value;
+        }
+    } = [];
     
     /// <summary>
     /// Clamps the value based on <paramref name="configurable"/>
@@ -75,6 +88,8 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         [OnlineField(group = _settings)]
         public byte EnabledTagResult;
         
+        [OnlineField]
+        public DynamicOrderedUshorts Seekers = new([]);
         
         /// <remarks>Rain Meadow requires a ctor with no params.</remarks>
         public State() { }
@@ -91,8 +106,11 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
             EnabledSeekerSelection = (byte)data.EnabledSeekerSelection;
             EnabledTaggingMethods  = (byte)data.EnabledTaggingMethods;
             EnabledTagResult       = (byte)data.EnabledTagResult;
+            
+            Seekers = new DynamicOrderedUshorts(data.Seekers.Select(seeker => seeker.inLobbyId).ToList());
         }
         
+        // TODO: Handle enum casts gracefully.
         public override void ReadTo(OnlineResource.ResourceData data_, OnlineResource onlineResource)
         {
             AssertIs(data_, out HideAndSeekLobbyData data);
@@ -107,6 +125,34 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
             data.EnabledSeekerSelection = (SeekerSelection)EnabledSeekerSelection;
             data.EnabledTaggingMethods  = (TaggingMethods)EnabledTaggingMethods;
             data.EnabledTagResult       = (TagResult)EnabledTagResult;
+            
+            data.Seekers = GetSeekers();
+            
+            return;
+            
+            List<OnlinePlayer> GetSeekers()
+            {
+                List<(ushort id, OnlinePlayer oPlayer)> seekerResults = Seekers.list
+                                                                               .Select(id => (id, ArenaHelpers.FindOnlinePlayerByLobbyId(id)))
+                                                                               .ToList();
+                
+                List<OnlinePlayer> seekers = seekerResults
+                                             .Where(result => result.oPlayer is not null)
+                                             .Select(result => result.oPlayer)
+                                             .ToList();
+                
+                if (seekers.Count != seekerResults.Count)
+                {
+                    Logger.Info(
+                        $"""
+                        Found {seekers.Count}/{seekerResults.Count} seekers.
+                        - seeker results: [ {string.Join(", ", seekerResults.Select(result => $"({result.id}, {result.oPlayer?.ToString() ?? "null"})"))} ]
+                        """
+                    );
+                }
+                
+                return seekers;
+            }
         }
         
         public override Type GetDataType() => typeof(HideAndSeekLobbyData);

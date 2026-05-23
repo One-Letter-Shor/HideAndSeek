@@ -1,6 +1,7 @@
 using MonoMod.RuntimeDetour;
 using OneLetterShor.HideAndSeek.Arena;
 using RainMeadow;
+using RainMeadow.UI;
 
 namespace OneLetterShor.HideAndSeek.Hooking;
 
@@ -33,6 +34,14 @@ public static class RainMeadowHooks
             ),
             On_RainMeadow_ArenaOnlineGameMode_AddClientData
         );
+        
+        _ = new Hook(
+            typeof(ArenaOnlineLobbyMenu).GetMethod(
+                nameof(ArenaOnlineLobbyMenu.StartGame),
+                BindingFlags.Public | BindingFlags.Instance
+            ),
+            On_RainMeadow_ArenaOnlineLobbyMenu_StartGame
+        );
     }
     
     
@@ -50,8 +59,6 @@ public static class RainMeadowHooks
         ArenaOnlineGameMode self,
         OnlineResource onlineResource)
     {
-        Logger.Mark(onlineResource);
-        
         orig(self, onlineResource);
         
         if (onlineResource is Lobby lobby && lobby.isOwner)
@@ -65,4 +72,21 @@ public static class RainMeadowHooks
         orig(self);
         HideAndSeekClientData.RegisterNewInstance(self);
     }
+    
+    /// <exception cref="NullReferenceException">Thrown if there is no <see cref="Lobby"/>.</exception>
+    private static void On_RainMeadow_ArenaOnlineLobbyMenu_StartGame(
+        Action<ArenaOnlineLobbyMenu> orig,
+        ArenaOnlineLobbyMenu self)
+    {
+        AssertIs(OnlineManager.lobby!.gameMode, out ArenaOnlineGameMode arenaOnline);
+        
+        if (HideAndSeekMode.IsHideAndSeekMode(arenaOnline, out HideAndSeekMode? hideAndSeek))
+        {
+            if (OnlineManager.lobby.isOwner && arenaOnline.lobbyCountDown > 0)
+                hideAndSeek.ChooseRandomSeekers();
+        }
+        
+        orig(self);
+    }
+
 }

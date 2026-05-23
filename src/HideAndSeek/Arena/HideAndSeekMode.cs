@@ -50,6 +50,39 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         return false;
     }
     
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if <see cref="SeekerSelection"/> is not <see cref="SeekerSelection.Random"/>.
+    /// </exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered yet.</exception>
+    public void ChooseRandomSeekers()
+    {
+        if (LobbyData.EnabledSeekerSelection != SeekerSelection.Random)
+            throw new InvalidOperationException($"{nameof(SeekerSelection)} '{LobbyData.EnabledSeekerSelection}' must be {nameof(SeekerSelection.Random)} to choose random seekers.");
+        
+        List<OnlinePlayer> readyPlayers = OnlineManager.players.Where(IsReady).ToList();
+        readyPlayers.Shuffle();
+        
+        int seekerCount = Mathf.Min(LobbyData.SeekerCount, readyPlayers.Count);
+        LobbyData.Seekers = readyPlayers
+                                .Take(seekerCount)
+                                .ToList();
+        
+        Logger.Info($"Seekers: [ {string.Join(", ", LobbyData.Seekers)} ]");
+        
+        return;
+        
+        bool IsReady(OnlinePlayer oPlayer)
+        {
+            if (!OnlineManager.lobby!.clientSettings.TryGetValue(oPlayer, out ClientSettings clientSettings)
+                || !clientSettings.TryGetData(out ArenaClientSettings data))
+            {
+                Logger.Debug($"Could not find client data for {oPlayer}.");
+                return false;
+            }
+            
+            return data.ready;
+        }
+    }
     
     public override bool SpawnBatflies(FliesWorldAI fliesWorldAI, int spawnRoom) => false;
     
