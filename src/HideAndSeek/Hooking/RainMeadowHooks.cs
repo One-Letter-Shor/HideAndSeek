@@ -62,7 +62,7 @@ public static class RainMeadowHooks
         orig(self, onlineResource);
         
         if (onlineResource is Lobby lobby && lobby.isOwner)
-            HideAndSeekLobbyData.RegisterNewInstance(lobby);
+            lobby.AddData(new HideAndSeekLobbyData());
     }
     
     private static void On_RainMeadow_ArenaOnlineGameMode_AddClientData(
@@ -70,7 +70,7 @@ public static class RainMeadowHooks
         ArenaOnlineGameMode self)
     {
         orig(self);
-        HideAndSeekClientData.RegisterNewInstance(self);
+        self.clientSettings.AddData(new HideAndSeekClientData { IsMine = true });
     }
     
     /// <exception cref="NullReferenceException">Thrown if there is no <see cref="Lobby"/>.</exception>

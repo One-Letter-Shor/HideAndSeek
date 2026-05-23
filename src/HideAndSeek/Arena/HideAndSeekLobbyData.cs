@@ -11,18 +11,6 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
 {
     public static bool CanApplySettings { get; set; } = true;
     
-    /// <summary>Registers lobby data via <see cref="Lobby.AddData"/>.</summary>
-    /// <exception cref="InvalidOperationException">Thrown if already registered.</exception>
-    internal static void RegisterNewInstance(Lobby lobby)
-    {
-        Logger.Debug($"Registering lobby data for {lobby}.");
-        
-        if (lobby.TryGetData<HideAndSeekLobbyData>(out _))
-            throw new InvalidOperationException("Lobby data is already registered.");
-        
-        lobby.AddData(new HideAndSeekLobbyData());
-    }
-    
     public int               HideDurationSeconds      { get; set => ApplySetting(value, out field, Plugin.Options.CfgHideDurationSeconds);    } = Plugin.Options.HideDurationSeconds;
     public int               SeekDurationSeconds      { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekDurationSeconds);    } = Plugin.Options.SeekDurationSeconds;
     public int               SeekerCount              { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerCount);            } = Plugin.Options.SeekerCount;

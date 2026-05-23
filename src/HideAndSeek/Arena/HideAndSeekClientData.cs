@@ -10,16 +10,8 @@ public sealed class HideAndSeekClientData : OnlineEntity.EntityData
 {
     public static bool CanApplySettings { get; set; } = true;
     
-    /// <summary>Registers client data via <see cref="ClientSettings.AddData"/>.</summary>
-    /// <exception cref="InvalidOperationException">Thrown if already registered.</exception>
-    internal static void RegisterNewInstance(ArenaOnlineGameMode arenaOnline)
-    {
-        if (arenaOnline.clientSettings.TryGetData(typeof(HideAndSeekClientData), out _))
-            throw new InvalidOperationException("Client data is already registered.");
-        
-        arenaOnline.clientSettings.AddData(new HideAndSeekClientData());
-    }
-    
+    /// <remarks>Init-only setter.</remarks>
+    public bool IsMine { get; internal set; } = false;
     public bool IsWillingToSeek { get; set => ApplySetting(value, out field, Plugin.Options.CfgIsWillingToSeek); } = Plugin.Options.IsWillingToSeek;
     
     /// <summary>
@@ -28,13 +20,12 @@ public sealed class HideAndSeekClientData : OnlineEntity.EntityData
     /// <see cref="CanApplySettings"/> is <see langword="true"/>.
     /// </summary>
     private void ApplySetting<T>(T value, out T field, Configurable<T> configurable)
-    {
+    {   
         Assert(OnlineManager.lobby is not null);
         
         value = configurable.ClampValue(value);
         
-        // TODO: Only save if the client data is for me player. 
-        if (CanApplySettings)
+        if (CanApplySettings && IsMine)
             configurable.Value = value;
         
         field = value;
@@ -64,6 +55,7 @@ public sealed class HideAndSeekClientData : OnlineEntity.EntityData
         public override void ReadTo(OnlineEntity.EntityData data_, OnlineEntity onlineEntity)
         {
             AssertIs(data_, out HideAndSeekClientData data);
+            Assert(onlineEntity.isMine == data.IsMine);
             
             data.IsWillingToSeek = IsWillingToSeek;
         }
