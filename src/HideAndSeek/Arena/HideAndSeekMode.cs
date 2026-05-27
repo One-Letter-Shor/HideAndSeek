@@ -22,17 +22,6 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     }
     public override ArenaSetup.GameTypeID GetGameModeId => Id;
     
-    
-    /// <summary>Registers game mode via <see cref="ArenaOnlineGameMode.AddExternalGameModes"/>.</summary>
-    /// <exception cref="InvalidOperationException">Thrown if already registered.</exception>
-    internal static void RegisterNewInstance(ArenaOnlineGameMode arenaOnline)
-    {
-        if (arenaOnline.registeredGameModes.TryGetValue(Id.value, out _))
-            throw new InvalidOperationException($"Game mode is already registered. registered: [ {string.Join(", ", arenaOnline.registeredGameModes.Keys)} ]");
-        
-        arenaOnline.AddExternalGameModes(Id, new HideAndSeekMode());
-    }
-    
     /// <exception cref="InvalidOperationException">Thrown if the game mode is not registered.</exception>
     public static bool IsHideAndSeekMode(ArenaOnlineGameMode arenaOnline, [NotNullWhen(true)] out HideAndSeekMode? hideAndSeek)
     {

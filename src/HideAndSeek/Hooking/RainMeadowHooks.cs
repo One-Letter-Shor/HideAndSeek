@@ -51,7 +51,7 @@ public static class RainMeadowHooks
         Lobby lobby)
     {
         orig(self, lobby);
-        HideAndSeekMode.RegisterNewInstance(self);
+        self.AddExternalGameModes(HideAndSeekMode.Id, new HideAndSeekMode());
     }
     
     private static void On_RainMeadow_ArenaOnlineGameMode_ResourceAvailable(
