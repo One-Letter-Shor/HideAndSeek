@@ -24,6 +24,7 @@ public static class RainWorldHooks
         );
     }
     
+    // Tag players when ascended.
     private static void IL_Player_ClassMechanicsSaint(ILContext il)
     {
         /*
@@ -173,6 +174,7 @@ public static class RainWorldHooks
         orig(self, timeStacker);
     }
     
+    // Tag players when hit by a rock
     private static bool On_Rock_HitSomething(
         On.Rock.orig_HitSomething orig,
         Rock self,
@@ -202,6 +204,7 @@ public static class RainWorldHooks
         return hasHit;
     }
     
+    // Tag players when colliding.
     private static void On_Player_Collide(
         On.Player.orig_Collide orig,
         Player self,

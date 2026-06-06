@@ -72,6 +72,7 @@ public static class RainMeadowHooks
         );
     }
     
+    // Game mode
     private static void On_RainMeadow_ArenaOnlineGameMode_ctor(
         Action<ArenaOnlineGameMode, Lobby> orig,
         ArenaOnlineGameMode self,
@@ -81,6 +82,7 @@ public static class RainMeadowHooks
         self.AddExternalGameModes(HideAndSeekMode.Id, new HideAndSeekMode());
     }
     
+    // Lobby data
     private static void On_RainMeadow_ArenaOnlineGameMode_ResourceAvailable(
         Action<ArenaOnlineGameMode, OnlineResource> orig,
         ArenaOnlineGameMode self,
@@ -92,6 +94,7 @@ public static class RainMeadowHooks
             lobby.AddData(new HideAndSeekLobbyData());
     }
     
+    // Client data
     private static void On_RainMeadow_ArenaOnlineGameMode_AddClientData(
         Action<ArenaOnlineGameMode> orig,
         ArenaOnlineGameMode self)
@@ -100,6 +103,7 @@ public static class RainMeadowHooks
         self.clientSettings.AddData(new HideAndSeekClientData { IsMine = true });
     }
     
+    // Choose random seekers when the start button is pressed.
     private static void On_RainMeadow_ArenaOnlineLobbyMenu_StartGame(
         Action<ArenaOnlineLobbyMenu> orig,
         ArenaOnlineLobbyMenu self)
@@ -115,6 +119,7 @@ public static class RainMeadowHooks
         orig(self);
     }
     
+    // // Add seeker to seeker friendly fire protection.
     // private static void IL_GameplayExtensions_FriendlyFireSafetyCandidate(ILContext il)
     // {
     //     /*
@@ -211,6 +216,7 @@ public static class RainMeadowHooks
     //     }
     // }
     
+    // Prevent seekers from seeing name tags.
     private static void IL_RainMeadow_OnlineHUD_Draw(ILContext il)
     {
         /*
@@ -268,7 +274,7 @@ public static class RainMeadowHooks
     }
     
     // Rain Meadow's hook protects players from dangerous weapons when piggybacking and in team mode.
-    // This overrides their hook to protect all players when the weapon is dangerous, and it is Hide and Seek mode. 
+    // This overrides their hook when the mode is Hide and Seek to protect players from 'dangerous' weapons.
     private static bool On_RainMeadow_RainMeadow_Weapon_HitThisObject(
         Func<RainMeadow.RainMeadow, On.Weapon.orig_HitThisObject, Weapon, PhysicalObject, bool> orig,
         RainMeadow.RainMeadow self,
@@ -278,16 +284,10 @@ public static class RainMeadowHooks
     {
         if (HideAndSeekMode.IsHideAndSeekMode(out _) &&
             physicalObject is Player &&
-            WeaponIsDangerous(weapon)
+            (weapon is Spear || ModManager.DLCShared && weapon is LillyPuck)
         )
             return false;
         
         return orig(self, hitThisObjectOrig, weapon, physicalObject);
-        
-        static bool WeaponIsDangerous(Weapon weapon) // Rain Meadow's method for this is private for whatever reason.
-        {
-            return weapon is Spear ||
-                   ModManager.DLCShared && weapon is LillyPuck;
-        }
     }
 }
