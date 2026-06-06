@@ -1,3 +1,4 @@
+using OneLetterShor.HideAndSeek.Utils;
 using RainMeadow;
 using RainMeadow.UI;
 
@@ -5,7 +6,46 @@ namespace OneLetterShor.HideAndSeek.Arena;
 
 public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
 {
+    public const string
+        SeekerAtlasElementName = "HunterA",
+        HiderAtlasElementName = "SaintA";
+    public static Color SeekerColor { get; } = new(0.80f, 0.10f, 0.10f);
+    public static Color HiderColor { get; }  = new(0.10f, 0.60f, 0.10f);
+    
     public HideAndSeekSettingsTab? SettingsTab { get; private set; }
+    
+    public override string AddIcon(
+        ArenaOnlineGameMode arenaOnline,
+        OnlinePlayerDisplay display,
+        PlayerSpecificOnlineHud onlineHud,
+        SlugcatCustomization customization,
+        OnlinePlayer oPlayer)
+    {
+        if (customization.globalMute)
+            return base.AddIcon(arenaOnline, display, onlineHud, customization, oPlayer);
+        
+        return oPlayer.IsSeeker
+            ? SeekerAtlasElementName
+            : HiderAtlasElementName;
+    }
+    
+    public override Color IconColor(
+        ArenaOnlineGameMode arena,
+        OnlinePlayerDisplay display,
+        PlayerSpecificOnlineHud onlineHud,
+        SlugcatCustomization customization,
+        OnlinePlayer oPlayer)
+    {
+        Color color = oPlayer.IsSeeker
+            ? SeekerColor
+            : HiderColor;
+        
+        // Note: On the first IconColor call, the UI elements are not initialized.
+        display.arrowSprite?.color = color;
+        display.username?.color = color;
+        
+        return color;
+    }
     
     public override void OnUIEnabled(ArenaOnlineLobbyMenu menu)
     {
