@@ -27,7 +27,7 @@ public static class RainWorldHooks
     private static void IL_Player_ClassMechanicsSaint(ILContext il)
     {
         /*
-         (last updated: 6/2/26)
+         (last updated: 6/6/26)
          
          
          Current code:
@@ -59,20 +59,18 @@ public static class RainWorldHooks
                      if (!(physicalObject as Creature).dead)
                          flag2 = true;
                      
-                     if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) ||
+                     if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
                          otherPO is Player otherPlayer)
                      {
                          OnlineCreature saintOCreature = saintPlayer.abstractCreature.GetOnlineCreature()!;
                          OnlineCreature otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature()!;
                          
-                         if (saintOCreature.isMine &&
+                         if (hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
+                             saintOCreature.isMine &&
                              saintOCreature.owner.IsSeeker &&
-                             !otherOCreature.owner.IsSeeker)
-                         {
+                             !otherOCreature.owner.IsSeeker
+                         )
                              hideAndSeek.MakeSeeker(otherOCreature.owner);
-                         }
-                         
-                         return true;
                      }
                      else
                          (physicalObject as Creature).Die();
@@ -81,17 +79,17 @@ public static class RainWorldHooks
          
          example of the instructions (simplified)
          
-         physObj                      // Emitted from Hide N Seek
-         self                         // Emitted from Hide N Seek
-         <Func(self, physObj, bool)>  // Emitted from Hide N Seek
-         brtrue skip <-               // Emitted from Hide N Seek
+         physObj                      // Emitted from Hide and Seek
+         self                         // Emitted from Hide and Seek
+         <Func(self, physObj, bool)>  // Emitted from Hide and Seek
+         brtrue skip <-               // Emitted from Hide and Seek
          physObj
          isinst Creature
          self                         // Emitted from Rain Meadow
          physObj                      // Emitted from Rain Meadow
          <Action(self, physObj)>      // Emitted from Rain Meadow
          Die()
-         skip:                        // Emitted from Hide N Seek
+         skip:                        // Emitted from Hide and Seek
         */
         
         // TODO: Disable flinging and sound when the hit player is not a hider and when the ascender is not a seeker.
@@ -100,7 +98,7 @@ public static class RainWorldHooks
             ILCursor cursor = new(il);
             ILLabel skip = cursor.DefineLabel();
             
-            const int locIndex18 = 18; // No source code name provided, physical object that is used to kill if ascended.
+            const int locIndex18 = 18; // No source code name provided. physical object that is used to kill if ascended.
             
             cursor.GotoNext(
                 MoveType.After,
@@ -120,6 +118,7 @@ public static class RainWorldHooks
                 i => i.MatchLdloc(locIndex18)
             );
             
+            
             // Skip Rain World and Rain Meadow code if the game mode is Hide N Seek.
             // Determine if the ascension should tag someone.
             
@@ -128,23 +127,25 @@ public static class RainWorldHooks
             cursor.EmitDelegate(
                 (Player saintPlayer, PhysicalObject otherPO) =>
                 {
-                    if (!HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) ||
-                        otherPO is not Player otherPlayer
-                    )
-                        return false;
-                    
-                    OnlineCreature saintOCreature = saintPlayer.abstractCreature.GetOnlineCreature()!;
-                    OnlineCreature otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature()!;
-                    
-                    if (saintOCreature.isMine &&
-                        saintOCreature.owner.IsSeeker &&
-                        !otherOCreature.owner.IsSeeker)
+                    if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
+                        otherPO is Player otherPlayer)
                     {
-                        Logger.Debug($"{saintOCreature.owner} hit {otherOCreature.owner} with ascension!");
-                        hideAndSeek.MakeSeeker(otherOCreature.owner);
+                        OnlineCreature saintOCreature = saintPlayer.abstractCreature.GetOnlineCreature()!;
+                        OnlineCreature otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature()!;
+                        
+                        if (hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
+                            saintOCreature.isMine &&
+                            saintOCreature.owner.IsSeeker &&
+                            !otherOCreature.owner.IsSeeker)
+                        {
+                            Logger.Debug($"{saintOCreature.owner} hit {otherOCreature.owner} with ascension!");
+                            hideAndSeek.MakeSeeker(otherOCreature.owner);
+                        }
+                        
+                        return true;
                     }
                     
-                    return true;
+                    return false;
                 }
             );
             
@@ -182,6 +183,7 @@ public static class RainWorldHooks
         
         if (hasHit &&
             HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
+            hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Rock) &&
             self.thrownBy is Player throwerPlayer &&
             result.obj is Player hitPlayer)
         {
@@ -210,6 +212,7 @@ public static class RainWorldHooks
         // TODO: Handle devtool teleporting and stuff.
         
         if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
+            hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
             otherObject is Player otherPlayer)
         {
             OnlineCreature oCreature = self.abstractCreature.GetOnlineCreature()!;             // TODO: Possible NRE?
