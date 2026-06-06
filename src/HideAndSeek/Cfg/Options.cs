@@ -162,7 +162,7 @@ public sealed class Options : OptionInterface
         
         CfgIsWillingToSeek = BindCfg(nameof(IsWillingToSeek), true);
         
-        CfgHideDurationSeconds = BindCfg(nameof(HideDurationSeconds), 60);
+        CfgHideDurationSeconds = BindCfg(nameof(HideDurationSeconds), 10);
         CfgSeekDurationSeconds = BindCfg(nameof(SeekDurationSeconds), 60 * 8);
         CfgSeekerCount = BindCfg(nameof(SeekerCount), 1, new ConfigAcceptableRange<int>(1, 99));
         CfgEnabledSeekerSelection = BindCfg(nameof(EnabledSeekerSelection), SeekerSelection.Random);

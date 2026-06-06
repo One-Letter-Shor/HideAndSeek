@@ -11,6 +11,7 @@ public static class RainWorldHooks
 {
     internal static void Apply()
     {
+        On.RainWorldGame.GrafUpdate += On_RainWorldGame_GrafUpdate;
         On.Player.Collide += On_Player_Collide;
         On.Rock.HitSomething += On_Rock_HitSomething;
         
@@ -153,6 +154,22 @@ public static class RainWorldHooks
         {
             Logger.Fatal(exception);
         }
+    }
+    
+    private static void On_RainWorldGame_GrafUpdate(
+        On.RainWorldGame.orig_GrafUpdate orig,
+        RainWorldGame self,
+        float timeStacker)
+    {
+        if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
+        {
+            if (Input.GetKeyDown(KeyCode.PageDown))
+                hideAndSeek.MakeSeeker(OnlineManager.mePlayer!);
+            if (Input.GetKeyDown(KeyCode.End))
+                hideAndSeek.RemoveSeeker(OnlineManager.mePlayer!);
+        }
+        
+        orig(self, timeStacker);
     }
     
     private static bool On_Rock_HitSomething(

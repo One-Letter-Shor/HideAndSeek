@@ -62,8 +62,6 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
                                 .Take(seekerCount)
                                 .ToList();
         
-        Logger.Info($"Seekers: [ {string.Join(", ", LobbyData.Seekers)} ]");
-        
         return;
         
         bool IsReady(OnlinePlayer oPlayer)
@@ -120,8 +118,6 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered yet.</exception>
     public void MakeSeeker(OnlinePlayer oPlayer)
     {
-        Logger.Info($"Making {oPlayer} a seeker!");
-        
         if (OnlineManager.lobby!.isOwner)
             MakeSeekerRpc(null, oPlayer);
         else
@@ -131,7 +127,6 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered yet.</exception>
     public void RemoveSeeker(OnlinePlayer oPlayer)
     {
-        Logger.Info($"Removing {oPlayer} from seekers!");
         if (OnlineManager.lobby!.isOwner)
             RemoveSeekerRpc(null, oPlayer);
         else
@@ -165,7 +160,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
             return;
         }
         
-        Logger.Info($"Making {oPlayer.id.name} a seeker. From: {rpcEvent?.from.id.name ?? "(self)"}");
+        Logger.Debug($"Making {oPlayer.id.name} a seeker. From: {rpcEvent?.from.id.name ?? "(self)"}");
         hideAndSeek.LobbyData.Seekers.Add(oPlayer);
     }
     
@@ -196,7 +191,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
             return;
         }
         
-        Logger.Info($"Removing {oPlayer.id.name} from seekers. From: {rpcEvent?.from.id.name ?? "(self)"}");
+        Logger.Debug($"Removing {oPlayer.id.name} from seekers. From: {rpcEvent?.from.id.name ?? "(self)"}");
         hideAndSeek.LobbyData.Seekers.Remove(oPlayer);
     }
 }

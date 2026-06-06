@@ -23,7 +23,7 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         get;
         set
         {
-            if (value.SequenceEqual(field))
+            if (!value.SequenceEqual(field))
                 Logger.Info($"Seekers: [ {string.Join(", ", value)} ]");
             
             field = value;
@@ -98,7 +98,6 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
             Seekers = new DynamicOrderedUshorts(data.Seekers.Select(seeker => seeker.inLobbyId).ToList());
         }
         
-        // TODO: Handle enum casts gracefully.
         public override void ReadTo(OnlineResource.ResourceData data_, OnlineResource onlineResource)
         {
             AssertIs(data_, out HideAndSeekLobbyData data);

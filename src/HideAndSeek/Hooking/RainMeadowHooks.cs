@@ -46,6 +46,15 @@ public static class RainMeadowHooks
             ),
             On_RainMeadow_ArenaOnlineLobbyMenu_StartGame
         );
+        
+        // _ = new ILHook( // TODO: Is this hook needed?
+        //     typeof(GameplayExtensions).GetMethod(
+        //         nameof(GameplayExtensions.FriendlyFireSafetyCandidate),
+        //         BindingFlags.Public | BindingFlags.Static
+        //     ),
+        //     IL_GameplayExtensions_FriendlyFireSafetyCandidate
+        // );
+        
         _ = new ILHook(
             typeof(OnlineHUD).GetMethod(
                 nameof(OnlineHUD.Draw),
@@ -91,7 +100,6 @@ public static class RainMeadowHooks
         self.clientSettings.AddData(new HideAndSeekClientData { IsMine = true });
     }
     
-    /// <exception cref="NullReferenceException">Thrown if there is no <see cref="Lobby"/>.</exception>
     private static void On_RainMeadow_ArenaOnlineLobbyMenu_StartGame(
         Action<ArenaOnlineLobbyMenu> orig,
         ArenaOnlineLobbyMenu self)
@@ -106,6 +114,103 @@ public static class RainMeadowHooks
         
         orig(self);
     }
+    
+    // private static void IL_GameplayExtensions_FriendlyFireSafetyCandidate(ILContext il)
+    // {
+    //     /*
+    //      (OnlineUIComponents/GameplayOverrides.cs:22 - last updated: 6/1/26)
+    //      
+    //      
+    //      Current code:
+    //      ...
+    //      if (RainMeadow.isArenaMode(out var arena))
+    //      {
+    //          if (
+    //              creature.room.game.IsArenaSession
+    //              && creature
+    //                  .room
+    //                  .game
+    //                  .GetArenaGameSession
+    //                  .arenaSitting
+    //                  .gameTypeSetup
+    //                  .spearsHitPlayers == false)
+    //      ...
+    //      
+    //      Desired code:
+    //      ...
+    //      if (RainMeadow.isArenaMode(out var arena))
+    //      {
+    //          if (HideAndSeekMode.IsHideAndSeekMode(out _))
+    //          {
+    //              if (friend is null) return true;
+    //              
+    //              OnlineCreature selfOCreature = self.abstractCreature.GetOnlineCreature()!;
+    //              OnlineCreature friendOCreature = friend?.abstractCreature.GetOnlineCreature()!;
+    //              
+    //              return selfOCreature.owner.IsSeeker && friendOCreature.owner.IsSeeker;
+    //          }
+    //          
+    //          if (
+    //              creature.room.game.IsArenaSession
+    //              && creature
+    //                  .room
+    //                  .game
+    //                  .GetArenaGameSession
+    //                  .arenaSitting
+    //                  .gameTypeSetup
+    //                  .spearsHitPlayers == false)
+    //      ...
+    //     */
+    //     
+    //     try
+    //     {
+    //         
+    //         ILCursor cursor = new(il);
+    //         ILLabel skip = il.DefineLabel();
+    //         
+    //         const int 
+    //             selfArgIndex = 0,
+    //             friendArgIndex = 1;
+    //         
+    //         const int
+    //             locIndex6 = 6; // Compiler generated, used to store and load the value from isArenaMode().
+    //         
+    //         cursor.GotoNext(
+    //             MoveType.After,
+    //             i => i.MatchCall<RainMeadow.RainMeadow>(nameof(RainMeadow.RainMeadow.isArenaMode)),
+    //             i => i.MatchStloc(locIndex6),
+    //             i => i.MatchLdloc(locIndex6),
+    //             i => i.MatchBrfalse(out _)
+    //         );
+    //         
+    //         // TODO: Maybe just always return true when it's Hide And Seek mode.
+    //         
+    //         cursor.EmitDelegate(() => HideAndSeekMode.IsHideAndSeekMode(out _));
+    //         cursor.Emit(OpCodes.Brfalse, skip);
+    //         
+    //         cursor.Emit(OpCodes.Ldarg, friendArgIndex);
+    //         cursor.Emit(OpCodes.Ldarg, selfArgIndex);
+    //         cursor.EmitDelegate(
+    //             (Creature self, Creature? friend) =>
+    //             {
+    //                 if (friend is null) return true;
+    //                 
+    //                 OnlineCreature selfOCreature = self.abstractCreature.GetOnlineCreature()!;
+    //                 OnlineCreature friendOCreature = friend.abstractCreature.GetOnlineCreature()!;
+    //                 
+    //                 return selfOCreature.owner.IsSeeker && friendOCreature.owner.IsSeeker;
+    //             }
+    //         );
+    //         
+    //         cursor.Emit(OpCodes.Ret);
+    //         cursor.MarkLabel(skip);
+    //     }
+    //     catch (Exception exception)
+    //     {
+    //         Logger.Fatal(exception);
+    //     }
+    // }
+    
     private static void IL_RainMeadow_OnlineHUD_Draw(ILContext il)
     {
         /*
