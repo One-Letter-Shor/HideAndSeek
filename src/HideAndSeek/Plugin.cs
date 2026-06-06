@@ -31,6 +31,7 @@ public sealed class Plugin : BaseUnityPlugin
     
     public void ApplyHooksAndEvents()
     {
+        RainWorldHooks.Apply();
         RainMeadowHooks.Apply();
     }
     
