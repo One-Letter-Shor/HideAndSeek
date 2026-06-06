@@ -9,6 +9,35 @@ public static class RainWorldHooks
     internal static void Apply()
     {
         On.Player.Collide += On_Player_Collide;
+        On.Rock.HitSomething += On_Rock_HitSomething;
+    }
+    
+    private static bool On_Rock_HitSomething(
+        On.Rock.orig_HitSomething orig,
+        Rock self,
+        SharedPhysics.CollisionResult result,
+        bool eu)
+    {
+        bool hasHit = orig(self, result, eu);
+        
+        if (hasHit &&
+            HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
+            self.thrownBy is Player throwerPlayer &&
+            result.obj is Player hitPlayer)
+        {
+            OnlineCreature throwerOCreature = throwerPlayer.abstractCreature.GetOnlineCreature()!; // TODO: Possible NRE?
+            OnlineCreature hitOCreature = hitPlayer.abstractCreature.GetOnlineCreature()!;         // TODO: Possible NRE?
+            
+            if (throwerOCreature.isMine &&
+                throwerOCreature.owner.IsSeeker &&
+                !hitOCreature.owner.IsSeeker)
+            {
+                Logger.Debug($"{throwerOCreature.owner} hit {hitOCreature.owner} with a rock!");
+                hideAndSeek.MakeSeeker(hitOCreature.owner);
+            }
+        }
+        
+        return hasHit;
     }
     
     private static void On_Player_Collide(
