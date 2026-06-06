@@ -53,6 +53,14 @@ public static class RainMeadowHooks
             ),
             IL_RainMeadow_OnlineHUD_Draw
         );
+        
+        _ = new Hook(
+            typeof(RainMeadow.RainMeadow).GetMethod(
+                "Weapon_HitThisObject",
+                BindingFlags.NonPublic | BindingFlags.Instance
+            ),
+            On_RainMeadow_RainMeadow_Weapon_HitThisObject
+        );
     }
     
     private static void On_RainMeadow_ArenaOnlineGameMode_ctor(
@@ -151,6 +159,30 @@ public static class RainMeadowHooks
         catch (Exception exception)
         {
             Logger.Fatal(exception);
+        }
+    }
+    
+    // Rain Meadow's hook protects players from dangerous weapons when piggybacking and in team mode.
+    // This overrides their hook to protect all players when the weapon is dangerous, and it is Hide and Seek mode. 
+    private static bool On_RainMeadow_RainMeadow_Weapon_HitThisObject(
+        Func<RainMeadow.RainMeadow, On.Weapon.orig_HitThisObject, Weapon, PhysicalObject, bool> orig,
+        RainMeadow.RainMeadow self,
+        On.Weapon.orig_HitThisObject hitThisObjectOrig,
+        Weapon weapon,
+        PhysicalObject physicalObject)
+    {
+        if (HideAndSeekMode.IsHideAndSeekMode(out _) &&
+            physicalObject is Player &&
+            WeaponIsDangerous(weapon)
+        )
+            return false;
+        
+        return orig(self, hitThisObjectOrig, weapon, physicalObject);
+        
+        static bool WeaponIsDangerous(Weapon weapon) // Rain Meadow's method for this is private for whatever reason.
+        {
+            return weapon is Spear ||
+                   ModManager.DLCShared && weapon is LillyPuck;
         }
     }
 }
