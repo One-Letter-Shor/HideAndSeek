@@ -274,20 +274,32 @@ public static class RainMeadowHooks
     }
     
     // Rain Meadow's hook protects players from dangerous weapons when piggybacking and in team mode.
-    // This overrides their hook when the mode is Hide and Seek to protect players from 'dangerous' weapons.
+    // This overrides their hook when the mode is Hide and Seek to protect players from weapons.
     private static bool On_RainMeadow_RainMeadow_Weapon_HitThisObject(
         Func<RainMeadow.RainMeadow, On.Weapon.orig_HitThisObject, Weapon, PhysicalObject, bool> orig,
         RainMeadow.RainMeadow self,
         On.Weapon.orig_HitThisObject hitThisObjectOrig,
         Weapon weapon,
-        PhysicalObject physicalObject)
+        PhysicalObject hitPO)
     {
         if (HideAndSeekMode.IsHideAndSeekMode(out _) &&
-            physicalObject is Player &&
-            (weapon is Spear || ModManager.DLCShared && weapon is LillyPuck)
-        )
-            return false;
+            weapon.thrownBy is Player throwerPlayer &&
+            hitPO is Player hitPlayer)
+        {
+            // Some weapons should non-conditionally phase.
+            if (weapon is Spear ||
+                ModManager.DLCShared && weapon is LillyPuck
+            )
+                return false;
+            
+            // Others should only phase if on different 'teams'.
+            OnlineCreature throwerOCreature = throwerPlayer.abstractCreature.GetOnlineCreature()!;
+            OnlineCreature hitOCreature = hitPlayer.abstractCreature.GetOnlineCreature()!;
+            
+            if (throwerOCreature.owner.IsSeeker == hitOCreature.owner.IsSeeker)
+                return false;
+        }
         
-        return orig(self, hitThisObjectOrig, weapon, physicalObject);
+        return orig(self, hitThisObjectOrig, weapon, hitPO);
     }
 }
