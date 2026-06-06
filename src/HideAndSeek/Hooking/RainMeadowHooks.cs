@@ -80,7 +80,7 @@ public static class RainMeadowHooks
     {
         AssertIs(OnlineManager.lobby!.gameMode, out ArenaOnlineGameMode arenaOnline);
         
-        if (HideAndSeekMode.IsHideAndSeekMode(arenaOnline, out HideAndSeekMode? hideAndSeek))
+        if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
         {
             if (OnlineManager.lobby.isOwner && arenaOnline.lobbyCountDown > 0)
                 hideAndSeek.ChooseRandomSeekers();

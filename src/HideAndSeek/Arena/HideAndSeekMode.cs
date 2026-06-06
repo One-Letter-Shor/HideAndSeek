@@ -23,10 +23,15 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     public override ArenaSetup.GameTypeID GetGameModeId => Id;
     
     /// <exception cref="InvalidOperationException">Thrown if the game mode is not registered.</exception>
-    public static bool IsHideAndSeekMode(ArenaOnlineGameMode arenaOnline, [NotNullWhen(true)] out HideAndSeekMode? hideAndSeek)
+    public static bool IsHideAndSeekMode([NotNullWhen(true)] out HideAndSeekMode? hideAndSeek)
     {
+        hideAndSeek = null;
+        
+        if (OnlineManager.lobby?.gameMode is not ArenaOnlineGameMode arenaOnline)
+            return false;
+        
         string modeName = Id.value;
-        if (!arenaOnline.registeredGameModes.TryGetValue(modeName, out ExternalArenaGameMode registeredMode)) 
+        if (!arenaOnline.registeredGameModes.TryGetValue(modeName, out ExternalArenaGameMode registeredMode))
             throw new InvalidOperationException($"Could not find game mode. registered: [ {string.Join(", ", arenaOnline.registeredGameModes.Keys)} ]");
         
         hideAndSeek = null;

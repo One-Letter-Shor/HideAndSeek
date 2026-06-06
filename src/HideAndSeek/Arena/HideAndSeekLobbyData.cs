@@ -84,9 +84,9 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         
         internal State(HideAndSeekLobbyData data, Lobby lobby)
         {
-            AssertIs(lobby.gameMode, out ArenaOnlineGameMode arenaOnline);
+            Assert(lobby.gameMode is ArenaOnlineGameMode);
             
-            if (!HideAndSeekMode.IsHideAndSeekMode(arenaOnline, out _)) return;
+            if (!HideAndSeekMode.IsHideAndSeekMode(out _)) return;
             
             HideDurationSeconds    = data.HideDurationSeconds;
             SeekDurationSeconds    = data.SeekDurationSeconds;
@@ -102,10 +102,9 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         public override void ReadTo(OnlineResource.ResourceData data_, OnlineResource onlineResource)
         {
             AssertIs(data_, out HideAndSeekLobbyData data);
-            AssertIs(onlineResource, out Lobby lobby);
-            AssertIs(lobby.gameMode, out ArenaOnlineGameMode arenaOnline);
+            Assert(onlineResource is Lobby);
             
-            if (!HideAndSeekMode.IsHideAndSeekMode(arenaOnline, out _)) return;
+            if (!HideAndSeekMode.IsHideAndSeekMode(out _)) return;
             
             data.HideDurationSeconds    = HideDurationSeconds;
             data.SeekDurationSeconds    = SeekDurationSeconds;
