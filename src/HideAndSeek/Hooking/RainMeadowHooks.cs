@@ -1,5 +1,9 @@
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
+using MoreSlugcats;
 using OneLetterShor.HideAndSeek.Arena;
+using OneLetterShor.HideAndSeek.Utils;
 using RainMeadow;
 using RainMeadow.UI;
 
@@ -42,8 +46,14 @@ public static class RainMeadowHooks
             ),
             On_RainMeadow_ArenaOnlineLobbyMenu_StartGame
         );
+        _ = new ILHook(
+            typeof(OnlineHUD).GetMethod(
+                nameof(OnlineHUD.Draw),
+                BindingFlags.Public | BindingFlags.Instance
+            ),
+            IL_RainMeadow_OnlineHUD_Draw
+        );
     }
-    
     
     private static void On_RainMeadow_ArenaOnlineGameMode_ctor(
         Action<ArenaOnlineGameMode, Lobby> orig,
@@ -88,5 +98,59 @@ public static class RainMeadowHooks
         
         orig(self);
     }
-
+    private static void IL_RainMeadow_OnlineHUD_Draw(ILContext il)
+    {
+        /*
+         (OnlineUIComponents/OnlineHud.cs:28 - last updated: 6/4/26)
+         
+         Current code: 
+         ...
+         if (!RainMeadow.rainMeadowOptions.FriendViewClickToActivate.Value)
+             RainMeadow.rainMeadowOptions.ShowFriends.Value = Input.GetKey(RainMeadow.rainMeadowOptions.FriendsListKey.Value);
+         else if (Input.GetKeyDown(RainMeadow.rainMeadowOptions.FriendsListKey.Value))
+             RainMeadow.rainMeadowOptions.ShowFriends.Value ^= true;
+         ...
+         
+         Desired code:
+         ...
+         if (!HideAndSeekMode.IsHideAndSeekMode(out _) || OnlineManager.mePlayer.CanEnableNametags)
+         {
+             if (!RainMeadow.rainMeadowOptions.FriendViewClickToActivate.Value)
+                 RainMeadow.rainMeadowOptions.ShowFriends.Value = Input.GetKey(RainMeadow.rainMeadowOptions.FriendsListKey.Value);
+             else if (Input.GetKeyDown(RainMeadow.rainMeadowOptions.FriendsListKey.Value))
+                 RainMeadow.rainMeadowOptions.ShowFriends.Value ^= true;
+         }
+         ...
+        */
+        
+        try
+        {
+            ILCursor cursor = new(il);
+            ILLabel skip = cursor.DefineLabel();
+            
+            // Emit Hide and Seek's check.
+            cursor.EmitDelegate(
+                () => !HideAndSeekMode.IsHideAndSeekMode(out _) ||
+                      OnlineManager.mePlayer.CanEnableNametags
+            );
+            cursor.Emit(OpCodes.Brfalse, skip);
+            
+            // Go past the if body, then past the else if body.
+            cursor.GotoNext(
+                MoveType.After,
+                i => i.MatchCallvirt(typeof(Configurable<bool>).GetProperty(nameof(Configurable<>.Value))!.GetSetMethod())
+            );
+            cursor.GotoNext(
+                MoveType.After,
+                i => i.MatchCallvirt(typeof(Configurable<bool>).GetProperty(nameof(Configurable<>.Value))!.GetSetMethod()),
+                i => i.MatchNop()
+            );
+            
+            cursor.MarkLabel(skip);
+        }
+        catch (Exception exception)
+        {
+            Logger.Fatal(exception);
+        }
+    }
 }
