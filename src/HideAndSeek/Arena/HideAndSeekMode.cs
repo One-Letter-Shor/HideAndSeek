@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using On.ArenaBehaviors;
+using OneLetterShor.HideAndSeek.Utils;
 using RainMeadow;
 
 namespace OneLetterShor.HideAndSeek.Arena;
@@ -114,5 +115,88 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
             - [online]   equal to online sitting: -  -  -  -  -  {arenaOnline.playersEqualToOnlineSitting}
             """
         );
+    }
+    
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered yet.</exception>
+    public void MakeSeeker(OnlinePlayer oPlayer)
+    {
+        Logger.Info($"Making {oPlayer} a seeker!");
+        
+        if (OnlineManager.lobby!.isOwner)
+            MakeSeekerRpc(null, oPlayer);
+        else
+            OnlineManager.lobby.owner.InvokeRPC(MakeSeekerRpc, oPlayer);
+    }
+    
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered yet.</exception>
+    public void RemoveSeeker(OnlinePlayer oPlayer)
+    {
+        Logger.Info($"Removing {oPlayer} from seekers!");
+        if (OnlineManager.lobby!.isOwner)
+            RemoveSeekerRpc(null, oPlayer);
+        else
+            OnlineManager.lobby.owner.InvokeRPC(RemoveSeekerRpc, oPlayer);
+    }
+    
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered yet.</exception>
+    [RPCMethod]
+    private static void MakeSeekerRpc(RPCEvent? rpcEvent, OnlinePlayer oPlayer)
+    {
+        Assert(rpcEvent?.from.isMe != true);
+        
+        if (!OnlineManager.lobby!.isOwner)
+        {
+            Logger.Warning($"Received {nameof(MakeSeekerRpc)} when not the host.");
+            return;
+        }
+        if (OnlineManager.lobby.gameMode is not ArenaOnlineGameMode arenaOnline)
+        {
+            Logger.Warning($"Received {nameof(MakeSeekerRpc)} when the online game mode ({OnlineManager.lobby!.gameMode}) is not Arena Online.");
+            return;
+        }
+        if (!IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
+        {
+            Logger.Warning($"Received {nameof(MakeSeekerRpc)} when the game mode ({arenaOnline.currentGameMode}) is not Hide and Seek.");
+            return;
+        }
+        if (oPlayer.IsSeeker)
+        {
+            Logger.Debug($"Received {nameof(MakeSeekerRpc)} when {oPlayer.id.name} is already a seeker.");
+            return;
+        }
+        
+        Logger.Info($"Making {oPlayer.id.name} a seeker. From: {rpcEvent?.from.id.name ?? "(self)"}");
+        hideAndSeek.LobbyData.Seekers.Add(oPlayer);
+    }
+    
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered yet.</exception>
+    [RPCMethod]
+    private static void RemoveSeekerRpc(RPCEvent? rpcEvent, OnlinePlayer oPlayer)
+    {
+        Assert(rpcEvent?.from.isMe != true);
+        
+        if (!OnlineManager.lobby!.isOwner)
+        {
+            Logger.Warning($"Received {nameof(RemoveSeekerRpc)} when not the host.");
+            return;
+        }
+        if (OnlineManager.lobby.gameMode is not ArenaOnlineGameMode arenaOnline)
+        {
+            Logger.Warning($"Received {nameof(RemoveSeekerRpc)} when the online game mode ({OnlineManager.lobby!.gameMode}) is not Arena Online.");
+            return;
+        }
+        if (!IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
+        {
+            Logger.Warning($"Received {nameof(RemoveSeekerRpc)} when the game mode ({arenaOnline.currentGameMode}) is not Hide and Seek.");
+            return;
+        }
+        if (!oPlayer.IsSeeker)
+        {
+            Logger.Debug($"Received {nameof(RemoveSeekerRpc)} when {oPlayer.id.name} is already a Hider.");
+            return;
+        }
+        
+        Logger.Info($"Removing {oPlayer.id.name} from seekers. From: {rpcEvent?.from.id.name ?? "(self)"}");
+        hideAndSeek.LobbyData.Seekers.Remove(oPlayer);
     }
 }
