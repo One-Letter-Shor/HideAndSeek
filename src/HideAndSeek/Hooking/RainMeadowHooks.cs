@@ -56,11 +56,11 @@ public static class RainMeadowHooks
         // );
         
         _ = new ILHook(
-            typeof(OnlineHUD).GetMethod(
-                nameof(OnlineHUD.Draw),
+            typeof(OnlinePlayerDisplay).GetMethod(
+                nameof(OnlinePlayerDisplay.Update),
                 BindingFlags.Public | BindingFlags.Instance
             ),
-            IL_RainMeadow_OnlineHUD_Draw
+            IL_RainMeadow_OnlinePlayerDisplay_Update
         );
         
         _ = new Hook(
@@ -216,28 +216,61 @@ public static class RainMeadowHooks
     //     }
     // }
     
-    // Prevent seekers from seeing name tags.
-    private static void IL_RainMeadow_OnlineHUD_Draw(ILContext il)
+    // Prevent seekers from seeing hider nametags.
+    private static void IL_RainMeadow_OnlinePlayerDisplay_Update(ILContext il)
     {
         /*
-         (OnlineUIComponents/OnlineHud.cs:28 - last updated: 6/4/26)
+         (OnlineUIComponents/OnlinePlayerDisplay.cs:180 - last updated: 6/7/26)
          
-         Current code: 
+         current code:
          ...
-         if (!RainMeadow.rainMeadowOptions.FriendViewClickToActivate.Value)
-             RainMeadow.rainMeadowOptions.ShowFriends.Value = Input.GetKey(RainMeadow.rainMeadowOptions.FriendsListKey.Value);
-         else if (Input.GetKeyDown(RainMeadow.rainMeadowOptions.FriendsListKey.Value))
-             RainMeadow.rainMeadowOptions.ShowFriends.Value ^= true;
-         ...
-         
-         Desired code:
-         ...
-         if (!HideAndSeekMode.IsHideAndSeekMode(out _) || OnlineManager.mePlayer.CanEnableNametags)
+         bool show = RainMeadow.rainMeadowOptions.ShowFriends.Value || (owner.clientSettings.isMine && onlineTimeSinceSpawn < 120);
+         if (RainMeadow.isArenaMode(out var a) && owner.RealizedPlayer?.isCamo == true)
          {
-             if (!RainMeadow.rainMeadowOptions.FriendViewClickToActivate.Value)
-                 RainMeadow.rainMeadowOptions.ShowFriends.Value = Input.GetKey(RainMeadow.rainMeadowOptions.FriendsListKey.Value);
-             else if (Input.GetKeyDown(RainMeadow.rainMeadowOptions.FriendsListKey.Value))
-                 RainMeadow.rainMeadowOptions.ShowFriends.Value ^= true;
+             bool isTeammate = TeamBattleMode.isTeamBattleMode(a, out _) && ArenaHelpers.CheckSameTeam(OnlineManager.mePlayer, player);
+
+             if (!player.isMe && !isTeammate)
+             {
+                 show = false;
+                 pos.x = -1000;
+                 this.alpha = 0f;
+             }
+         }
+         
+         if (show || this.alpha > 0 || flashIcons)
+         {
+             ...
+         }
+         ...
+         
+         desired code:
+         ...
+         bool show = RainMeadow.rainMeadowOptions.ShowFriends.Value || (owner.clientSettings.isMine && onlineTimeSinceSpawn < 120);
+         
+         if (HideAndSeekMode.IsHideAndSeekMode(out _))
+         {
+             if (OnlineManager.mePlayer.IsSeeker && !player.IsSeeker)
+             {
+                 self.alpha = 0f;
+                 show = false;
+             }
+         }
+         
+         if (RainMeadow.isArenaMode(out var a) && owner.RealizedPlayer?.isCamo == true)
+         {
+             bool isTeammate = TeamBattleMode.isTeamBattleMode(a, out _) && ArenaHelpers.CheckSameTeam(OnlineManager.mePlayer, player);
+
+             if (!player.isMe && !isTeammate)
+             {
+                 show = false;
+                 pos.x = -1000;
+                 this.alpha = 0f;
+             }
+         }
+         
+         if (show || this.alpha > 0 || flashIcons)
+         {
+             ...
          }
          ...
         */
@@ -245,27 +278,32 @@ public static class RainMeadowHooks
         try
         {
             ILCursor cursor = new(il);
-            ILLabel skip = cursor.DefineLabel();
             
-            // Emit Hide and Seek's check.
+            const int showLocIndex = 0; // Source code variable written and read from multiple times to check if the OnlinePlayerDisplay should be visible.
+            
+            cursor.GotoNext(
+                MoveType.After,
+                i => i.MatchStloc(showLocIndex)
+            );
+            
+            cursor.Emit(OpCodes.Ldarg, 0);
+            cursor.Emit(OpCodes.Ldloc, showLocIndex);
             cursor.EmitDelegate(
-                () => !HideAndSeekMode.IsHideAndSeekMode(out _) ||
-                      OnlineManager.mePlayer.CanEnableNametags
+                (OnlinePlayerDisplay self, bool show) =>
+                {
+                    if (HideAndSeekMode.IsHideAndSeekMode(out _))
+                    {
+                        if (OnlineManager.mePlayer.IsSeeker && !self.player.IsSeeker)
+                        {
+                            self.alpha = 0f;
+                            show = false;
+                        }
+                    }
+                    
+                    return show;
+                }
             );
-            cursor.Emit(OpCodes.Brfalse, skip);
-            
-            // Go past the if body, then past the else if body.
-            cursor.GotoNext(
-                MoveType.After,
-                i => i.MatchCallvirt(typeof(Configurable<bool>).GetProperty(nameof(Configurable<>.Value))!.GetSetMethod())
-            );
-            cursor.GotoNext(
-                MoveType.After,
-                i => i.MatchCallvirt(typeof(Configurable<bool>).GetProperty(nameof(Configurable<>.Value))!.GetSetMethod()),
-                i => i.MatchNop()
-            );
-            
-            cursor.MarkLabel(skip);
+            cursor.Emit(OpCodes.Stloc, showLocIndex);
         }
         catch (Exception exception)
         {
