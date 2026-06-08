@@ -29,18 +29,5 @@ public static class OnlinePlayerExtensions
                 return hideAndSeek.LobbyData.Seekers.Contains(self);
             }
         }
-        
-        
-        /// <summary>
-        /// Checks if an <see cref="OnlinePlayer"/>
-        /// is allowed to turn on name tags.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when:<br/>
-        /// - The online game mode is not <see cref="ArenaOnlineGameMode"/>.<br/>
-        /// - The external game mode is not <see cref="HideAndSeekMode"/>.
-        /// </exception>
-        /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
-        public bool CanEnableNametags => !self.IsSeeker;
     }
 }
