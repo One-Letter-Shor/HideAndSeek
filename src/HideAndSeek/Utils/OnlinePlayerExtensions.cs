@@ -5,7 +5,7 @@ namespace OneLetterShor.HideAndSeek.Utils;
 
 public static class OnlinePlayerExtensions
 {
-    extension(OnlinePlayer oPlayer)
+    extension(OnlinePlayer self)
     {
         /// <summary>
         /// Checks if the <see cref="OnlinePlayer"/> is a seeker or not.
@@ -15,7 +15,7 @@ public static class OnlinePlayerExtensions
         /// - The online game mode is not <see cref="ArenaOnlineGameMode"/>.<br/>
         /// - The external game mode is not <see cref="HideAndSeekMode"/>.
         /// </exception>
-        /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered yet.</exception>
+        /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
         public bool IsSeeker
         {
             get
@@ -26,7 +26,7 @@ public static class OnlinePlayerExtensions
                 if (!HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
                     throw new InvalidOperationException($"The external game mode ({arenaOnline.currentGameMode}) is not Hide and Seek.");
                 
-                return hideAndSeek.LobbyData.Seekers.Contains(oPlayer);
+                return hideAndSeek.LobbyData.Seekers.Contains(self);
             }
         }
         
@@ -40,7 +40,7 @@ public static class OnlinePlayerExtensions
         /// - The online game mode is not <see cref="ArenaOnlineGameMode"/>.<br/>
         /// - The external game mode is not <see cref="HideAndSeekMode"/>.
         /// </exception>
-        /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered yet.</exception>
-        public bool CanEnableNametags => !oPlayer.IsSeeker;
+        /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+        public bool CanEnableNametags => !self.IsSeeker;
     }
 }

@@ -330,8 +330,8 @@ public static class RainMeadowHooks
             OnlineCreature throwerOCreature = throwerPlayer.abstractCreature.GetOnlineCreature()!;
             OnlineCreature hitOCreature = hitPlayer.abstractCreature.GetOnlineCreature()!;
             
-            if (throwerOCreature.isAvatar && hitOCreature.isAvatar &&
-                throwerOCreature.owner.IsSeeker == hitOCreature.owner.IsSeeker
+            if (throwerOCreature is { isAvatar: true, owner.IsSeeker: true } &&
+                hitOCreature     is { isAvatar: true, owner.IsSeeker: true }
             ) 
                 return false;
         }

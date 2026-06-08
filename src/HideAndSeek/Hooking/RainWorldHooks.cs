@@ -28,7 +28,8 @@ public static class RainWorldHooks
     private static void IL_Player_ClassMechanicsSaint(ILContext il)
     {
         /*
-         (last updated: 6/6/26)
+         (last updated: 6/7/26)
+         Note: Rain Meadow hooks the same part of this method. (Arena/ArenaHooks.cs:1633)
          
          
          Current code:
@@ -45,9 +46,7 @@ public static class RainWorldHooks
                      (physicalObject as Creature).Die();
                  }
          ...
-         
-         Note: Rain Meadow hooks the same part of this method. (Arena/ArenaHooks.cs:1633)
-        
+                
          Desired code (excluding Rain Meadow's emitted instructions):
          ...
          foreach (BodyChunk bodyChunk in physicalObject.bodyChunks)
@@ -67,8 +66,8 @@ public static class RainWorldHooks
                          OnlineCreature otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature()!;
                          
                          if (hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
-                             saintOCreature is { isMine: true, isAvatar: true, owner.IsSeeker: true  } &&
-                             otherOCreature is {               isAvatar: true, owner.IsSeeker: false }
+                             saintOCreature.isMine &&
+                             saintOCreature.CanTag(otherOCreature)
                          )
                              hideAndSeek.MakeSeeker(otherOCreature.owner);
                      }
@@ -134,8 +133,8 @@ public static class RainWorldHooks
                         OnlineCreature otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature()!;
                         
                         if (hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
-                            saintOCreature is { isMine: true, isAvatar: true, owner.IsSeeker: true  } &&
-                            otherOCreature is {               isAvatar: true, owner.IsSeeker: false })
+                            saintOCreature.isMine &&
+                            saintOCreature.CanTag(otherOCreature))
                         {
                             Logger.Debug($"I tagged {otherOCreature.owner} with ascension!");
                             hideAndSeek.MakeSeeker(otherOCreature.owner);
@@ -187,11 +186,11 @@ public static class RainWorldHooks
             self.thrownBy is Player throwerPlayer &&
             result.obj is Player hitPlayer)
         {
-            OnlineCreature throwerOCreature = throwerPlayer.abstractCreature.GetOnlineCreature()!; // TODO: Possible NRE?
-            OnlineCreature hitOCreature = hitPlayer.abstractCreature.GetOnlineCreature()!;         // TODO: Possible NRE?
+            OnlineCreature throwerOCreature = throwerPlayer.abstractCreature.GetOnlineCreature()!;
+            OnlineCreature hitOCreature = hitPlayer.abstractCreature.GetOnlineCreature()!;
             
-            if (throwerOCreature is { isMine: true, isAvatar: true, owner.IsSeeker: true  } &&
-                hitOCreature     is {               isAvatar: true, owner.IsSeeker: false })
+            if (throwerOCreature.isMine &&
+                throwerOCreature.CanTag(hitOCreature))
             {
                 Logger.Debug($"I tagged {hitOCreature.owner} with a rock!");
                 hideAndSeek.MakeSeeker(hitOCreature.owner);
@@ -215,11 +214,11 @@ public static class RainWorldHooks
             hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
             otherObject is Player otherPlayer)
         {
-            OnlineCreature selfOCreature  = self.abstractCreature.GetOnlineCreature()!;             // TODO: Possible NRE?
-            OnlineCreature otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature()!; // TODO: Possible NRE?
+            OnlineCreature selfOCreature  = self.abstractCreature.GetOnlineCreature()!;
+            OnlineCreature otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature()!;
             
-            if (selfOCreature  is { isMine: true, isAvatar: true, owner.IsSeeker: true  } &&
-                otherOCreature is {               isAvatar: true, owner.IsSeeker: false })
+            if (selfOCreature.isMine &&
+                selfOCreature.CanTag(otherOCreature))
             {
                 Logger.Debug($"I tagged {otherOCreature.owner} by contact!");
                 hideAndSeek.MakeSeeker(otherOCreature.owner);

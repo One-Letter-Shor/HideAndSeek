@@ -9,10 +9,10 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
 {
     public static ArenaSetup.GameTypeID Id { get; } = new(Plugin.Name);
     
-    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered yet.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     public HideAndSeekLobbyData LobbyData => OnlineManager.lobby!.GetData<HideAndSeekLobbyData>();
     
-    /// <exception cref="KeyNotFoundException">Thrown if the client data is not registered yet.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the client data is not registered.</exception>
     public HideAndSeekClientData MyClientData => OnlineManager.lobby!
                                                               .clientSettings[OnlineManager.mePlayer]
                                                               .GetData<HideAndSeekClientData>();
@@ -48,7 +48,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     /// <exception cref="InvalidOperationException">
     /// Thrown if <see cref="SeekerSelection"/> is not <see cref="SeekerSelection.Random"/>.
     /// </exception>
-    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered yet.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     public void ChooseRandomSeekers()
     {
         if (LobbyData.EnabledSeekerSelection != SeekerSelection.Random)
@@ -115,7 +115,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         );
     }
     
-    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered yet.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     public void MakeSeeker(OnlinePlayer oPlayer)
     {
         if (OnlineManager.lobby!.isOwner)
@@ -124,7 +124,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
             OnlineManager.lobby.owner.InvokeRPC(MakeSeekerRpc, oPlayer);
     }
     
-    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered yet.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     public void RemoveSeeker(OnlinePlayer oPlayer)
     {
         if (OnlineManager.lobby!.isOwner)
@@ -133,7 +133,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
             OnlineManager.lobby.owner.InvokeRPC(RemoveSeekerRpc, oPlayer);
     }
     
-    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered yet.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     [RPCMethod]
     private static void MakeSeekerRpc(RPCEvent? rpcEvent, OnlinePlayer oPlayer)
     {
@@ -164,7 +164,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         hideAndSeek.LobbyData.Seekers.Add(oPlayer);
     }
     
-    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered yet.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     [RPCMethod]
     private static void RemoveSeekerRpc(RPCEvent? rpcEvent, OnlinePlayer oPlayer)
     {

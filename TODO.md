@@ -6,6 +6,7 @@ Issues:
 - Sometimes the game mode time lives longer than the lobby (reference from OnlineManager.lobby). This happened once from a kick.
 - Change Rain Meadow's scoring to reflect seeker and hider scores.
 - Configurables in the lobby UI do not save.
+- Figure out when and why GetOnlineCreature() returns null. Currently some code relies on it not returning null.
 
 Features:
 - Seekers should not be able to see, move, or tag during the safety timer.
@@ -14,13 +15,9 @@ Features:
 - Hiders may not hide inside walls. (move them to the last airpocket if in wall for too long)
 - Consider some way to prevent stun locking of seekers.
 - Consider some way to prevent hiding in excessively offscreen/foreground covered areas.
-- Consider reporting mods such as DMS and SB Camera Scroll.
 - Hiders and seekers should have different banned slugcats.
 - Add additional color picker for seekers. (modify Rain Meadow)
 - Add support for story.
-
-Refactors:
-- Consider adding a method in the Hide and Seek class to determine if an online creature can tag another.
 
 Misc:
 - Write external arena documentation for Rain Meadow after finishing.
