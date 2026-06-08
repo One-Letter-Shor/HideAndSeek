@@ -67,9 +67,8 @@ public static class RainWorldHooks
                          OnlineCreature otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature()!;
                          
                          if (hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
-                             saintOCreature.isMine &&
-                             saintOCreature.owner.IsSeeker &&
-                             !otherOCreature.owner.IsSeeker
+                             saintOCreature is { isMine: true, isAvatar: true, owner.IsSeeker: true  } &&
+                             otherOCreature is {               isAvatar: true, owner.IsSeeker: false }
                          )
                              hideAndSeek.MakeSeeker(otherOCreature.owner);
                      }
@@ -135,11 +134,10 @@ public static class RainWorldHooks
                         OnlineCreature otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature()!;
                         
                         if (hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
-                            saintOCreature.isMine &&
-                            saintOCreature.owner.IsSeeker &&
-                            !otherOCreature.owner.IsSeeker)
+                            saintOCreature is { isMine: true, isAvatar: true, owner.IsSeeker: true  } &&
+                            otherOCreature is {               isAvatar: true, owner.IsSeeker: false })
                         {
-                            Logger.Debug($"{saintOCreature.owner} hit {otherOCreature.owner} with ascension!");
+                            Logger.Debug($"I tagged {otherOCreature.owner} with ascension!");
                             hideAndSeek.MakeSeeker(otherOCreature.owner);
                         }
                         
@@ -192,11 +190,10 @@ public static class RainWorldHooks
             OnlineCreature throwerOCreature = throwerPlayer.abstractCreature.GetOnlineCreature()!; // TODO: Possible NRE?
             OnlineCreature hitOCreature = hitPlayer.abstractCreature.GetOnlineCreature()!;         // TODO: Possible NRE?
             
-            if (throwerOCreature.isMine &&
-                throwerOCreature.owner.IsSeeker &&
-                !hitOCreature.owner.IsSeeker)
+            if (throwerOCreature is { isMine: true, isAvatar: true, owner.IsSeeker: true  } &&
+                hitOCreature     is {               isAvatar: true, owner.IsSeeker: false })
             {
-                Logger.Debug($"{throwerOCreature.owner} hit {hitOCreature.owner} with a rock!");
+                Logger.Debug($"I tagged {hitOCreature.owner} with a rock!");
                 hideAndSeek.MakeSeeker(hitOCreature.owner);
             }
         }
@@ -212,20 +209,19 @@ public static class RainWorldHooks
         int chunkIndex,
         int otherChunkIndex)
     {
-        // TODO: Handle devtool teleporting and stuff.
+        // TODO: Handle devtool teleporting.
         
         if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
             hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
             otherObject is Player otherPlayer)
         {
-            OnlineCreature oCreature = self.abstractCreature.GetOnlineCreature()!;             // TODO: Possible NRE?
+            OnlineCreature selfOCreature  = self.abstractCreature.GetOnlineCreature()!;             // TODO: Possible NRE?
             OnlineCreature otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature()!; // TODO: Possible NRE?
             
-            if (oCreature.isMine &&
-                oCreature.owner.IsSeeker &&
-                !otherOCreature.owner.IsSeeker)
+            if (selfOCreature  is { isMine: true, isAvatar: true, owner.IsSeeker: true  } &&
+                otherOCreature is {               isAvatar: true, owner.IsSeeker: false })
             {
-                Logger.Debug($"{oCreature.owner} collided with {otherOCreature.owner}!");
+                Logger.Debug($"I tagged {otherOCreature.owner} by contact!");
                 hideAndSeek.MakeSeeker(otherOCreature.owner);
             }
         }

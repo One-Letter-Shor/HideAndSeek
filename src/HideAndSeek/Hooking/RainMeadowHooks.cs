@@ -239,8 +239,6 @@ public static class RainMeadowHooks
          
          if (show || this.alpha > 0 || flashIcons)
          {
-             ...
-         }
          ...
          
          desired code:
@@ -270,8 +268,6 @@ public static class RainMeadowHooks
          
          if (show || this.alpha > 0 || flashIcons)
          {
-             ...
-         }
          ...
         */
         
@@ -334,7 +330,9 @@ public static class RainMeadowHooks
             OnlineCreature throwerOCreature = throwerPlayer.abstractCreature.GetOnlineCreature()!;
             OnlineCreature hitOCreature = hitPlayer.abstractCreature.GetOnlineCreature()!;
             
-            if (throwerOCreature.owner.IsSeeker == hitOCreature.owner.IsSeeker)
+            if (throwerOCreature.isAvatar && hitOCreature.isAvatar &&
+                throwerOCreature.owner.IsSeeker == hitOCreature.owner.IsSeeker
+            ) 
                 return false;
         }
         
