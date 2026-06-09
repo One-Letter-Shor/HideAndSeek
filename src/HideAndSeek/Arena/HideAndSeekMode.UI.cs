@@ -15,14 +15,14 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
     public HideAndSeekSettingsTab? SettingsTab { get; private set; }
     
     public override string AddIcon(
-        ArenaOnlineGameMode arenaOnline,
+        ArenaOnlineGameMode __,
         OnlinePlayerDisplay display,
         PlayerSpecificOnlineHud onlineHud,
         SlugcatCustomization customization,
         OnlinePlayer oPlayer)
     {
         if (customization.globalMute)
-            return base.AddIcon(arenaOnline, display, onlineHud, customization, oPlayer);
+            return base.AddIcon(ArenaOnline, display, onlineHud, customization, oPlayer);
         
         return oPlayer.IsSeeker
             ? SeekerAtlasElementName
@@ -30,7 +30,7 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
     }
     
     public override Color IconColor(
-        ArenaOnlineGameMode arena,
+        ArenaOnlineGameMode __,
         OnlinePlayerDisplay display,
         PlayerSpecificOnlineHud onlineHud,
         SlugcatCustomization customization,
@@ -66,7 +66,6 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
     public override void OnUIDisabled(ArenaOnlineLobbyMenu menu)
     {
         Logger.Mark();
-        Assert(OnlineManager.lobby!.gameMode is ArenaOnlineGameMode);
         
         if (SettingsTab is null) return;
         

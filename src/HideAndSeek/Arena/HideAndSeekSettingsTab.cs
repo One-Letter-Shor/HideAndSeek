@@ -293,10 +293,4 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
             opCheckBox.SetValueBool(HideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(taggingMethod));
         }
     }
-    
-    public override void RemoveSprites()
-    {
-        Assert(OnlineManager.lobby!.gameMode is ArenaOnlineGameMode);
-        base.RemoveSprites();
-    }
 }

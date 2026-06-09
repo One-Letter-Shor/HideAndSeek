@@ -11,6 +11,8 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     public const int MagicNumber = 100;
     public static ArenaSetup.GameTypeID Id { get; } = new(Plugin.Name);
     
+    
+    public ArenaOnlineGameMode ArenaOnline { get; }
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     public HideAndSeekLobbyData LobbyData => OnlineManager.lobby!.GetData<HideAndSeekLobbyData>();
     
@@ -45,6 +47,13 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         }
         
         return false;
+    }
+    
+    public HideAndSeekMode()
+    {
+        AssertIs(OnlineManager.lobby!.gameMode, out ArenaOnlineGameMode arenaOnline);
+        
+        ArenaOnline = arenaOnline;
     }
     
     /// <exception cref="InvalidOperationException">
@@ -84,14 +93,14 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     
     public override string TimerText() => "Quickly, hide!";
     
-    public override int SetTimer(ArenaOnlineGameMode arenaOnline) => arenaOnline.setupTime = LobbyData.HideDurationSeconds;
+    public override int SetTimer(ArenaOnlineGameMode __) => ArenaOnline.setupTime = LobbyData.HideDurationSeconds;
     
     public override bool IsExitsOpen(
-        ArenaOnlineGameMode arenaOnline,
+        ArenaOnlineGameMode __,
         ExitManager.orig_ExitsOpen orig,
         ArenaBehaviors.ExitManager exitManager)
     {
-        bool areAllPlayersSeekers = ArenaOnlineHelper.GetPlayingOPlayers(arenaOnline)
+        bool areAllPlayersSeekers = ArenaOnlineHelper.GetPlayingOPlayers(ArenaOnline)
                                                      .All(oPlayer => oPlayer.IsSeeker);
         
         /* TODO: Magic number copied from Rain Meadow's FFA implementation.
@@ -103,27 +112,12 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     }
     
     public override void ArenaSessionCtor(
-        ArenaOnlineGameMode arenaOnline,
+        ArenaOnlineGameMode __,
         On.ArenaGameSession.orig_ctor orig,
         ArenaGameSession arena,
         RainWorldGame game)
     {
-        base.ArenaSessionCtor(arenaOnline, orig, arena, game);
-        
-        LogGameInfo(arena, arenaOnline);
-    }
-    
-    private void LogGameInfo(ArenaGameSession arena, ArenaOnlineGameMode arenaOnline) // temp
-    {
-        Logger.Info(
-            $"""
-            INFO:
-            - [arena]    players:  -  -  -  -  -  -  -  -  -  -  [ {string.Join(", ", arena.Players)} ]
-            - [arena]    arena sitting players:   -  -  -  -  -  [ {string.Join(", ", arena.arenaSitting.players)} ]
-            - [online]   waiting for next round count:  -  -  -  [ {string.Join(", ", arenaOnline.playersLateWaitingInLobbyForNextRound.Select(inLobbyId => ArenaHelpers.FindOnlinePlayerByLobbyId(inLobbyId)?.id.name ?? "null"))} ]
-            - [online]   equal to online sitting: -  -  -  -  -  {arenaOnline.playersEqualToOnlineSitting}
-            """
-        );
+        base.ArenaSessionCtor(ArenaOnline, orig, arena, game);
     }
     
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
