@@ -30,7 +30,10 @@ public static class OnlineCreatureExtensions
             if (OnlineManager.lobby!.gameMode is not ArenaOnlineGameMode arenaOnline)
                 throw new InvalidOperationException($"The online game mode ({OnlineManager.lobby.gameMode}) is not arena.");
             
-            return arenaOnline.session.exitManager.world.rainCycle.TimeUntilRain > HideAndSeekMode.MagicNumber &&
+            if (!HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
+                throw new InvalidOperationException($"The external game mode ({arenaOnline.currentGameMode}) is not Hide and Seek.");
+            
+            return !hideAndSeek.IsSeekingTimeOver &&
                    self  is { isAvatar: true, owner.IsSeeker: true  } &&
                    other is { isAvatar: true, owner.IsSeeker: false };
         }

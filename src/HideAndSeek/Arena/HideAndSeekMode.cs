@@ -7,8 +7,11 @@ namespace OneLetterShor.HideAndSeek.Arena;
 
 public sealed partial class HideAndSeekMode : ExternalArenaGameMode
 {
-    /// <remarks>See <see cref="IsExitsOpen"/>.</remarks>
-    public const int MagicNumber = 100;
+    /// <summary>
+    /// The duration, in ticks, where seekers
+    /// are no longer allowed to tag hiders.
+    /// </summary>
+    public const int RainCycleEndGraceTicks = 300;
     public static ArenaSetup.GameTypeID Id { get; } = new(Plugin.Name);
     
     
@@ -20,6 +23,8 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     public HideAndSeekClientData MyClientData => OnlineManager.lobby!
                                                               .clientSettings[OnlineManager.mePlayer]
                                                               .GetData<HideAndSeekClientData>();
+    public bool IsSeekingTimeOver => ArenaOnline.session.exitManager.world.rainCycle.TimeUntilRain <= RainCycleEndGraceTicks;
+    
     public override int TimerDuration
     {
         get => throw new InvalidOperationException("This should not be used.");
@@ -103,12 +108,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         bool areAllPlayersSeekers = ArenaOnlineHelper.GetPlayingOPlayers(ArenaOnline)
                                                      .All(oPlayer => oPlayer.IsSeeker);
         
-        /* TODO: Magic number copied from Rain Meadow's FFA implementation.
-                 Figure out what it means and refactor as needed. */
-        bool isRainNear = exitManager.world.rainCycle.TimeUntilRain <= MagicNumber;
-        
-        
-        return areAllPlayersSeekers || isRainNear;
+        return IsSeekingTimeOver || areAllPlayersSeekers;
     }
     
     public override void ArenaSessionCtor(
