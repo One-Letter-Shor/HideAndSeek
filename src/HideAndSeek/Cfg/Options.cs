@@ -166,7 +166,7 @@ public sealed class Options : OptionInterface
         CfgSeekDurationSeconds = BindCfg(nameof(SeekDurationSeconds), 60 * 8);
         CfgSeekerCount = BindCfg(nameof(SeekerCount), 1, new ConfigAcceptableRange<int>(1, 99));
         CfgEnabledSeekerSelection = BindCfg(nameof(EnabledSeekerSelection), SeekerSelection.Random);
-        CfgEnabledTaggingMethods = BindCfg(nameof(EnabledTaggingMethods), TaggingMethods.Ascension, new ConfigAcceptableRange<TaggingMethods>(TaggingMethods.None + 1, TaggingMethods.All));
+        CfgEnabledTaggingMethods = BindCfg(nameof(EnabledTaggingMethods), TaggingMethods.All, new ConfigAcceptableRange<TaggingMethods>(TaggingMethods.None + 1, TaggingMethods.All));
         CfgEnabledTagResult = BindCfg(nameof(EnabledTagResult), TagResult.Ghost);
         
         IsInitialized = true;

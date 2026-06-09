@@ -66,14 +66,15 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         
         bool IsReady(OnlinePlayer oPlayer)
         {
-            if (!OnlineManager.lobby!.clientSettings.TryGetValue(oPlayer, out ClientSettings clientSettings)
-                || !clientSettings.TryGetData(out ArenaClientSettings data))
+            ArenaClientSettings? clientData = ArenaHelpers.GetDataSettings<ArenaClientSettings>(oPlayer);
+            
+            if (clientData is null)
             {
                 Logger.Debug($"Could not find client data for {oPlayer}.");
                 return false;
             }
             
-            return data.ready;
+            return clientData.ready;
         }
     }
     
@@ -88,7 +89,15 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         ExitManager.orig_ExitsOpen orig,
         ArenaBehaviors.ExitManager exitManager)
     {
-        return orig(exitManager);
+        bool areAllPlayersSeekers = ArenaOnlineHelper.GetPlayingOPlayers(arenaOnline)
+                                                     .All(oPlayer => oPlayer.IsSeeker);
+        
+        /* TODO: Magic number copied from Rain Meadow's FFA implementation.
+                 Figure out what it means and adjust as needed. */
+        bool isRainNear = exitManager.world.rainCycle.TimeUntilRain <= 100;
+        
+        
+        return areAllPlayersSeekers || isRainNear;
     }
     
     public override void ArenaSessionCtor(
