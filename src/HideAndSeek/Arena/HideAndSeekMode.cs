@@ -7,6 +7,8 @@ namespace OneLetterShor.HideAndSeek.Arena;
 
 public sealed partial class HideAndSeekMode : ExternalArenaGameMode
 {
+    /// <remarks>See <see cref="IsExitsOpen"/>.</remarks>
+    public const int MagicNumber = 100;
     public static ArenaSetup.GameTypeID Id { get; } = new(Plugin.Name);
     
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
@@ -93,8 +95,8 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
                                                      .All(oPlayer => oPlayer.IsSeeker);
         
         /* TODO: Magic number copied from Rain Meadow's FFA implementation.
-                 Figure out what it means and adjust as needed. */
-        bool isRainNear = exitManager.world.rainCycle.TimeUntilRain <= 100;
+                 Figure out what it means and refactor as needed. */
+        bool isRainNear = exitManager.world.rainCycle.TimeUntilRain <= MagicNumber;
         
         
         return areAllPlayersSeekers || isRainNear;

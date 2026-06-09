@@ -8,12 +8,16 @@ public static class OnlineCreatureExtensions
     extension(OnlineCreature self)
     {
         /// <summary>
-        /// Determines if this <see cref="OnlineCreature"/> can tag another.
+        /// Determines whether this <see cref="OnlineCreature"/>
+        /// can tag the specified <see cref="OnlineCreature"/>.
         /// </summary>
         /// <returns>
-        /// <see langword="true"/> if both <see cref="OnlineCreature"/>s are avatars,
-        /// this <see cref="OnlineCreature"/> is a seeker, and the other
-        /// <see cref="OnlineCreature"/> is not a seeker. Otherwise, <see langword="false"/>.
+        /// <see langword="true"/> when the following are all true:<br/>
+        /// - There is still time for seekers to seek. (It is not about to rain)<br/>
+        /// - Both are avatars.<br/>
+        /// - This is a seeker.<br/>
+        /// - Other is not a seeker.<br/>
+        /// Otherwise, <see langword="false"/>.
         /// </returns>
         /// <exception cref="InvalidOperationException">
         /// Thrown when:<br/>
@@ -23,7 +27,11 @@ public static class OnlineCreatureExtensions
         /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
         public bool CanTag(OnlineCreature other)
         {
-            return self  is { isAvatar: true, owner.IsSeeker: true  } &&
+            if (OnlineManager.lobby!.gameMode is not ArenaOnlineGameMode arenaOnline)
+                throw new InvalidOperationException($"The online game mode ({OnlineManager.lobby.gameMode}) is not arena.");
+            
+            return arenaOnline.session.exitManager.world.rainCycle.TimeUntilRain > HideAndSeekMode.MagicNumber &&
+                   self  is { isAvatar: true, owner.IsSeeker: true  } &&
                    other is { isAvatar: true, owner.IsSeeker: false };
         }
     }
