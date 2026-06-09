@@ -28,7 +28,7 @@ public static class RainWorldHooks
     private static void IL_Player_ClassMechanicsSaint(ILContext il)
     {
         /*
-         (last updated: 6/7/26)
+         (last updated: 6/8/26)
          Note: Rain Meadow hooks the same part of this method. (Arena/ArenaHooks.cs:1633)
          
          
@@ -62,8 +62,11 @@ public static class RainWorldHooks
                      if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
                          otherPO is Player otherPlayer)
                      {
-                         OnlineCreature saintOCreature = saintPlayer.abstractCreature.GetOnlineCreature()!;
-                         OnlineCreature otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature()!;
+                         OnlineCreature saintOCreature = saintPlayer.abstractCreature.GetOnlineCreature();
+                         OnlineCreature otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature();
+                         
+                         Assert(saintOCreature is not null);
+                         Assert(otherOCreature is not null);
                          
                          if (hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
                              saintOCreature.isMine &&
@@ -129,8 +132,11 @@ public static class RainWorldHooks
                     if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
                         otherPO is Player otherPlayer)
                     {
-                        OnlineCreature saintOCreature = saintPlayer.abstractCreature.GetOnlineCreature()!;
-                        OnlineCreature otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature()!;
+                        OnlineCreature? saintOCreature = saintPlayer.abstractCreature.GetOnlineCreature();
+                        OnlineCreature? otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature();
+                        
+                        Assert(saintOCreature is not null);
+                        Assert(otherOCreature is not null);
                         
                         if (hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
                             saintOCreature.isMine &&
@@ -186,8 +192,11 @@ public static class RainWorldHooks
             self.thrownBy is Player throwerPlayer &&
             result.obj is Player hitPlayer)
         {
-            OnlineCreature throwerOCreature = throwerPlayer.abstractCreature.GetOnlineCreature()!;
-            OnlineCreature hitOCreature = hitPlayer.abstractCreature.GetOnlineCreature()!;
+            OnlineCreature? throwerOCreature = throwerPlayer.abstractCreature.GetOnlineCreature();
+            OnlineCreature? hitOCreature = hitPlayer.abstractCreature.GetOnlineCreature();
+            
+            Assert(throwerOCreature is not null);
+            Assert(hitOCreature is not null);
             
             if (throwerOCreature.isMine &&
                 throwerOCreature.CanTag(hitOCreature))
@@ -214,8 +223,11 @@ public static class RainWorldHooks
             hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
             otherObject is Player otherPlayer)
         {
-            OnlineCreature selfOCreature  = self.abstractCreature.GetOnlineCreature()!;
-            OnlineCreature otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature()!;
+            OnlineCreature? selfOCreature  = self.abstractCreature.GetOnlineCreature();
+            OnlineCreature? otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature();
+            
+            Assert(selfOCreature is not null);
+            Assert(otherOCreature is not null);
             
             if (selfOCreature.isMine &&
                 selfOCreature.CanTag(otherOCreature))

@@ -123,7 +123,7 @@ public static class RainMeadowHooks
     // private static void IL_GameplayExtensions_FriendlyFireSafetyCandidate(ILContext il)
     // {
     //     /*
-    //      (OnlineUIComponents/GameplayOverrides.cs:22 - last updated: 6/1/26)
+    //      (OnlineUIComponents/GameplayOverrides.cs:22 - last updated: 6/8/26)
     //      
     //      
     //      Current code:
@@ -149,8 +149,11 @@ public static class RainMeadowHooks
     //          {
     //              if (friend is null) return true;
     //              
-    //              OnlineCreature selfOCreature = self.abstractCreature.GetOnlineCreature()!;
-    //              OnlineCreature friendOCreature = friend?.abstractCreature.GetOnlineCreature()!;
+    //              OnlineCreature selfOCreature = self.abstractCreature.GetOnlineCreature();
+    //              OnlineCreature friendOCreature = friend?.abstractCreature.GetOnlineCreature();
+    //              
+    //              Assert(selfOCreature is not null);
+    //              Assert(friendOCreature is not null);
     //              
     //              return selfOCreature.owner.IsSeeker && friendOCreature.owner.IsSeeker;
     //          }
@@ -200,8 +203,11 @@ public static class RainMeadowHooks
     //             {
     //                 if (friend is null) return true;
     //                 
-    //                 OnlineCreature selfOCreature = self.abstractCreature.GetOnlineCreature()!;
-    //                 OnlineCreature friendOCreature = friend.abstractCreature.GetOnlineCreature()!;
+    //                 OnlineCreature selfOCreature = self.abstractCreature.GetOnlineCreature();
+    //                 OnlineCreature friendOCreature = friend.abstractCreature.GetOnlineCreature();
+    //                 
+    //                 Assert(selfOCreature is not null);
+    //                 Assert(friendOCreature is not null);
     //                 
     //                 return selfOCreature.owner.IsSeeker && friendOCreature.owner.IsSeeker;
     //             }
@@ -327,8 +333,11 @@ public static class RainMeadowHooks
                 return false;
             
             // Others should only phase if on different 'teams'.
-            OnlineCreature throwerOCreature = throwerPlayer.abstractCreature.GetOnlineCreature()!;
-            OnlineCreature hitOCreature = hitPlayer.abstractCreature.GetOnlineCreature()!;
+            OnlineCreature? throwerOCreature = throwerPlayer.abstractCreature.GetOnlineCreature();
+            OnlineCreature? hitOCreature = hitPlayer.abstractCreature.GetOnlineCreature();
+            
+            Assert(throwerOCreature is not null);
+            Assert(hitOCreature is not null);
             
             if (throwerOCreature is { isAvatar: true, owner.IsSeeker: true } &&
                 hitOCreature     is { isAvatar: true, owner.IsSeeker: true }
