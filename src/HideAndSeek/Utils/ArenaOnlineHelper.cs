@@ -16,8 +16,10 @@ internal static class ArenaOnlineHelper
         
         foreach (ArenaSitting.ArenaPlayer arenaPlayer in arenaSitting.players)
         {
+            // TODO: Understand why oPlayer is null when they exit to lobby. (that or the oPlayer WHO exits to the lobby sees everyone else as null)
             OnlinePlayer? oPlayer = ArenaHelpers.FindOnlinePlayerByFakePlayerNumber(arenaOnline, arenaPlayer.playerNumber);
-            Assert(oPlayer is not null);
+            if (oPlayer is null)
+                continue;
             
             ArenaClientSettings? clientData = ArenaHelpers.GetDataSettings<ArenaClientSettings>(oPlayer);
             Assert(clientData is not null);

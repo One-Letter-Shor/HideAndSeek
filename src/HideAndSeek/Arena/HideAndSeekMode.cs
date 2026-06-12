@@ -15,7 +15,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     public static ArenaSetup.GameTypeID Id { get; } = new(Plugin.Name);
     
     
-    public ArenaOnlineGameMode ArenaOnline { get; }
+    public ArenaOnlineGameMode ArenaOnline => (ArenaOnlineGameMode)OnlineManager.lobby!.gameMode;
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     public HideAndSeekLobbyData LobbyData => OnlineManager.lobby!.GetData<HideAndSeekLobbyData>();
     
@@ -52,13 +52,6 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         }
         
         return false;
-    }
-    
-    public HideAndSeekMode()
-    {
-        AssertIs(OnlineManager.lobby!.gameMode, out ArenaOnlineGameMode arenaOnline);
-        
-        ArenaOnline = arenaOnline;
     }
     
     /// <exception cref="InvalidOperationException">
