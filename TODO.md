@@ -12,13 +12,13 @@ Issues:
 Features:
 - Implement all tag results.
 - Implement all seeker selections.
-- Seekers should not be able to see, move, or tag during the safety timer.
+- Seekers should not be able to see, move, or tag during the safety timer. (look in GameplayOverrides.cs something like HaltPlayerMovement)
 - Hiders can change their colors during the safety timer.
 - Hiders may not hide inside walls. (move them to the last airpocket if in wall for too long)
 - Consider some way to prevent stun locking of seekers.
-- Consider some way to prevent hiding in excessively offscreen/foreground covered areas.
+- Consider some way to prevent hiding in excessively offscreen/foreground covered areas. (unlikely)
 - Hiders and seekers should have different banned slugcats.
-- Add additional color picker for seekers. (modify Rain Meadow)
+- Make the host decide the colors of the seekers.
 - Seeker colors must be clamped to high saturation.
 - Add support for story.
 
