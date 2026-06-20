@@ -1,6 +1,5 @@
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using MonoMod.RuntimeDetour;
 using OneLetterShor.HideAndSeek.Arena;
 using OneLetterShor.HideAndSeek.Utils;
 using RainMeadow;
@@ -14,24 +13,18 @@ public static class RainWorldHooks
         On.RainWorldGame.GrafUpdate += On_RainWorldGame_GrafUpdate;
         On.Player.Collide += On_Player_Collide;
         On.Rock.HitSomething += On_Rock_HitSomething;
+        IL.Player.ClassMechanicsSaint += IL_Player_ClassMechanicsSaint;
         
-        _ = new ILHook(
-            typeof(Player).GetMethod(
-                nameof(Player.ClassMechanicsSaint),
-                BindingFlags.Public | BindingFlags.Instance
-            ),
-            IL_Player_ClassMechanicsSaint
-        );
     }
     
     // Tag players when ascended.
     private static void IL_Player_ClassMechanicsSaint(ILContext il)
     {
         /*
-         (last updated: 6/8/26)
+         (last updated: 6/19/26)
          Note: Rain Meadow hooks the same part of this method. (Arena/ArenaHooks.cs:1633)
          
-         
+         (excluding Rain Meadow's emitted instructions)
          Current code:
          ...
          foreach (BodyChunk bodyChunk in physicalObject.bodyChunks)
@@ -46,8 +39,9 @@ public static class RainWorldHooks
                      (physicalObject as Creature).Die();
                  }
          ...
-                
-         Desired code (excluding Rain Meadow's emitted instructions):
+         
+         (excluding Rain Meadow's emitted instructions)
+         Desired code:
          ...
          foreach (BodyChunk bodyChunk in physicalObject.bodyChunks)
          {
@@ -68,7 +62,7 @@ public static class RainWorldHooks
                          Assert(saintOCreature is not null);
                          Assert(otherOCreature is not null);
                          
-                         if (hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
+                         if (hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Ascension) &&
                              saintOCreature.isMine &&
                              saintOCreature.CanTag(otherOCreature)
                          )
@@ -100,7 +94,7 @@ public static class RainWorldHooks
             ILCursor cursor = new(il);
             ILLabel skip = cursor.DefineLabel();
             
-            const int locIndex18 = 18; // No source code name provided. physical object that is used to kill if ascended.
+            const int locIndex18 = 18; // No source code name provided. Physical object that is used to kill if ascended.
             
             cursor.GotoNext(
                 MoveType.After,
@@ -138,7 +132,7 @@ public static class RainWorldHooks
                         Assert(saintOCreature is not null);
                         Assert(otherOCreature is not null);
                         
-                        if (hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
+                        if (hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Ascension) &&
                             saintOCreature.isMine &&
                             saintOCreature.CanTag(otherOCreature))
                         {
