@@ -62,11 +62,15 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     }
     
     /// <exception cref="InvalidOperationException">
-    /// Thrown if <see cref="SeekerSelection"/> is not <see cref="SeekerSelection.Random"/>.
+    /// Thrown when:<br/>
+    /// - The me player is not the host.<br/>
+    /// - <see cref="SeekerSelection"/> is not <see cref="SeekerSelection.Random"/>.
     /// </exception>
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     public void ChooseRandomSeekers()
     {
+        if (!OnlineManager.lobby!.isOwner)
+            throw new InvalidOperationException("You must be the host to choose random seekers.");
         if (LobbyData.EnabledSeekerSelection != SeekerSelection.Random)
             throw new InvalidOperationException($"{nameof(SeekerSelection)} '{LobbyData.EnabledSeekerSelection}' must be {nameof(SeekerSelection.Random)} to choose random seekers.");
         
