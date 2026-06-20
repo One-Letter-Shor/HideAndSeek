@@ -23,7 +23,6 @@ Refactors:
 - Update Options class design after making story and arena game modes.
 - Figure out naming of RPCs and how they should behave.
 - Decide on how to abbreviate types like OnlineCreature.
-- Should UI elements set lobby data as clients in the settings tab? Seems like there should be a check there just to make more sense.
 
 Misc:
 - Write external arena documentation for Rain Meadow after finishing.

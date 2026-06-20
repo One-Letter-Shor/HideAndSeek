@@ -80,8 +80,9 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         
         IsWillingToSeekCheckBox.OnValueChanged += (_, _, _) =>
         {
+            if (!OnlineManager.lobby!.isOwner) return;
+            
             HideAndSeek.MyClientData.IsWillingToSeek = IsWillingToSeekCheckBox.GetValueBool();
-            Assert(HideAndSeek.MyClientData.IsWillingToSeek == Plugin.Options.IsWillingToSeek);
         };
         
         
@@ -102,6 +103,8 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         
         SeekerCountUpdown.OnValueChanged += (_, _, _) =>
         {
+            if (!OnlineManager.lobby!.isOwner) return;
+            
             Assert(SeekerCountUpdown.accept == OpTextBox.Accept.Int);
             HideAndSeek.LobbyData.SeekerCount = SeekerCountUpdown.GetValueInt();
         };
@@ -124,6 +127,8 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         
         SeekerSelectionSelector.OnValueChanged += (_, valueAsString, _) =>
         {
+            if (!OnlineManager.lobby!.isOwner) return;
+            
             Assert(Enum.TryParse(valueAsString, out SeekerSelection value));
             HideAndSeek.LobbyData.EnabledSeekerSelection = value;
         };
@@ -208,6 +213,8 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         
         TagResultSelector.OnValueChanged += (_, valueAsString, _) =>
         {
+            if (!OnlineManager.lobby!.isOwner) return;
+            
             Assert(Enum.TryParse(valueAsString, out TagResult value));
             HideAndSeek.LobbyData.EnabledTagResult = value;
         };
@@ -219,6 +226,8 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         );
         SeekerBodyColorPicker.OnValueChanged += (_, valueAsString, _) =>
         {
+            if (!OnlineManager.lobby!.isOwner) return;
+            
             HideAndSeek.LobbyData.SeekerBodyColor = Custom.hexToColor(valueAsString);
         };
         
@@ -238,6 +247,8 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         );
         SeekerEyeColorPicker.OnValueChanged += (_, valueAsString, _) =>
         {
+            if (!OnlineManager.lobby!.isOwner) return;
+            
             HideAndSeek.LobbyData.SeekerEyeColor = Custom.hexToColor(valueAsString);
         };
         
@@ -257,6 +268,8 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         );
         SeekerTertiaryColorPicker.OnValueChanged += (_, valueAsString, _) =>
         {
+            if (!OnlineManager.lobby!.isOwner) return;
+            
             HideAndSeek.LobbyData.SeekerTertiaryColor = Custom.hexToColor(valueAsString);
         };
         
