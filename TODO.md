@@ -4,7 +4,6 @@ Issues:
 - Sometimes the game mode time lives longer than the lobby (reference from OnlineManager.lobby). This happened once from a kick.
 - Configurables in the lobby UI do not save.
 - Figure out when and why GetOnlineCreature() returns null. Currently some code relies on it not returning null.
-- Certain things in the name tags are visible to seekers such as ping and chat messages.
 
 Features:
 - Change Rain Meadow's scoring to reflect seeker and hider scores.

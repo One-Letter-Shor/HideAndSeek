@@ -255,8 +255,9 @@ public static class RainMeadowHooks
          {
              if (OnlineManager.mePlayer.IsSeeker && !player.IsSeeker)
              {
-                 self.alpha = 0f;
                  show = false;
+                 pos.x = -1000;
+                 this.alpha = 0f;
              }
          }
          
@@ -297,8 +298,9 @@ public static class RainMeadowHooks
                     {
                         if (OnlineManager.mePlayer.IsSeeker && !self.player.IsSeeker)
                         {
-                            self.alpha = 0f;
                             show = false;
+                            self.pos.x = -1000;
+                            self.alpha = 0f;
                         }
                     }
                     
