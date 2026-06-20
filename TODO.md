@@ -8,6 +8,7 @@ Issues:
 - Change Rain Meadow's scoring to reflect seeker and hider scores.
 - Configurables in the lobby UI do not save.
 - Figure out when and why GetOnlineCreature() returns null. Currently some code relies on it not returning null.
+- Certain things in the name tags are visible to seekers such as ping and chat messages.
 
 Features:
 - Implement all tag results.
@@ -21,6 +22,9 @@ Features:
 - Make the host decide the colors of the seekers.
 - Seeker colors must be clamped to high saturation.
 - Add support for story.
+
+Refactors:
+- Should UI elements set lobby data as clients in the settings tab? Seems like there should be a check there just to make more sense.
 
 Misc:
 - Write external arena documentation for Rain Meadow after finishing.

@@ -1,5 +1,6 @@
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using MoreSlugcats;
 using OneLetterShor.HideAndSeek.Arena;
 using OneLetterShor.HideAndSeek.Utils;
 using RainMeadow;
@@ -13,9 +14,199 @@ public static class RainWorldHooks
         On.RainWorldGame.GrafUpdate += On_RainWorldGame_GrafUpdate;
         On.Player.Collide += On_Player_Collide;
         On.Rock.HitSomething += On_Rock_HitSomething;
-        IL.Player.ClassMechanicsSaint += IL_Player_ClassMechanicsSaint;
+        On.PlayerGraphics.DrawSprites += On_PlayerGraphics_DrawSprites;
         
+        IL.Player.ClassMechanicsSaint += IL_Player_ClassMechanicsSaint;
     }
+    
+    private static void On_RainWorldGame_GrafUpdate(
+        On.RainWorldGame.orig_GrafUpdate orig,
+        RainWorldGame self,
+        float timeStacker)
+    {
+        if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
+        {
+            if (Input.GetKeyDown(KeyCode.PageDown))
+                hideAndSeek.MakeSeeker(OnlineManager.mePlayer!);
+            if (Input.GetKeyDown(KeyCode.End))
+                hideAndSeek.RemoveSeeker(OnlineManager.mePlayer!);
+        }
+        
+        orig(self, timeStacker);
+    }
+    
+    // Tag players when hit by a rock
+    private static bool On_Rock_HitSomething(
+        On.Rock.orig_HitSomething orig,
+        Rock self,
+        SharedPhysics.CollisionResult result,
+        bool eu)
+    {
+        bool hasHit = orig(self, result, eu);
+        
+        if (hasHit &&
+            HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
+            hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Rock) &&
+            self.thrownBy is Player throwerPlayer &&
+            result.obj is Player hitPlayer)
+        {
+            OnlineCreature? throwerOCreature = throwerPlayer.abstractCreature.GetOnlineCreature();
+            OnlineCreature? hitOCreature = hitPlayer.abstractCreature.GetOnlineCreature();
+            
+            Assert(throwerOCreature is not null);
+            Assert(hitOCreature is not null);
+            
+            if (throwerOCreature.isMine &&
+                throwerOCreature.CanTag(hitOCreature))
+            {
+                Logger.Debug($"I tagged {hitOCreature.owner} with a rock!");
+                hideAndSeek.MakeSeeker(hitOCreature.owner);
+            }
+        }
+        
+        return hasHit;
+    }
+    
+    // Tag players when colliding.
+    private static void On_Player_Collide(
+        On.Player.orig_Collide orig,
+        Player self,
+        PhysicalObject otherObject,
+        int chunkIndex,
+        int otherChunkIndex)
+    {
+        // TODO: Handle devtool teleporting.
+        
+        if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
+            hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
+            otherObject is Player otherPlayer)
+        {
+            OnlineCreature? selfOCreature  = self.abstractCreature.GetOnlineCreature();
+            OnlineCreature? otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature();
+            
+            Assert(selfOCreature is not null);
+            Assert(otherOCreature is not null);
+            
+            if (selfOCreature.isMine &&
+                selfOCreature.CanTag(otherOCreature))
+            {
+                Logger.Debug($"I tagged {otherOCreature.owner} by contact!");
+                hideAndSeek.MakeSeeker(otherOCreature.owner);
+            }
+        }
+        
+        orig(self, otherObject, chunkIndex, otherChunkIndex);
+    }
+    
+    // Implement custom seeker color that doesn't save and also can update on any frame (not just from palette updates).
+    private static void On_PlayerGraphics_DrawSprites(
+        On.PlayerGraphics.orig_DrawSprites orig,
+        PlayerGraphics self,
+        RoomCamera.SpriteLeaser sLeaser,
+        RoomCamera roomCamera,
+        float timeStacker,
+        Vector2 camPos)
+    {
+        orig(self, sLeaser, roomCamera, timeStacker, camPos);
+        
+        // TODO: Check out what Meadow Customizations does. This seems overcomplicated.
+        if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
+        {
+            RainMeadow.RainMeadow.creatureCustomizations.TryGetValue(self.player, out AvatarData creatureCustomization);
+            
+            if (creatureCustomization is SlugcatCustomization slugcatCustomization)
+            {
+                OnlinePlayer oPlayer = self.player.abstractCreature.GetOnlineCreature()!.owner;
+                
+                // Body and eye color
+                Color bodyColor = oPlayer.IsSeeker
+                    ? hideAndSeek.LobbyData.SeekerBodyColor
+                    : slugcatCustomization.bodyColor;
+                
+                Color eyeColor = oPlayer.IsSeeker
+                    ? hideAndSeek.LobbyData.SeekerEyeColor
+                    : slugcatCustomization.eyeColor;
+                
+                int[] bodySpriteIndexes = [ 0, 1, 2, 3, 4, 5, 6, 7, 8 ];
+                int[] eyeSpriteIndexes  = [ 9 ];
+                
+                // Saint's ascension dots are supposed to be the primary color.
+                if (ModManager.MSC && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint)
+                    bodySpriteIndexes = [ ..bodySpriteIndexes, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 ]; 
+                
+                foreach (int i in bodySpriteIndexes)
+                    sLeaser.sprites[i].color = bodyColor;
+                
+                foreach (int i in eyeSpriteIndexes)
+                    sLeaser.sprites[i].color = eyeColor;
+                
+                
+                // Tertiary color
+                if (slugcatCustomization.currentColors.Count > 3)
+                    Logger.Warning($"Color count ({slugcatCustomization.currentColors.Count}) is above 3. Continuing while pretending it is 3. slugcat: {self.player.SlugCatClass}");
+                
+                bool hasTertiaryColor = slugcatCustomization.currentColors.Count >= 3;
+                if (hasTertiaryColor)
+                {
+                    if (!ModManager.MSC)
+                    {
+                        Logger.Warning($"A tertiary color exists when MSC is disabled. (Could this be caused by another mod?) slugcat: {self.player.SlugCatClass}");
+                        return;
+                    }
+                    
+                    Color tertiaryColor = oPlayer.IsSeeker
+                        ? hideAndSeek.LobbyData.SeekerTertiaryColor
+                        : slugcatCustomization.currentColors[2];
+                    
+                    int[] tertiarySpriteIndexes;
+                    
+                    if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
+                        tertiarySpriteIndexes = [ 12 ];
+                    else if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Rivulet)
+                    {
+                        // Rivulet is different, there are sprites used to form a gradient between the body and gills.
+                        int[] gradientGillSpriteIndexes = [ 12, 13, 14, 15, 16, 17 ];
+                        foreach (int i in gradientGillSpriteIndexes)
+                            sLeaser.sprites[i].color = bodyColor;
+                        
+                        tertiarySpriteIndexes = [ 18, 19, 20, 21, 22, 23 ];                              // Gills
+                    }
+                    else if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Spear)
+                        tertiarySpriteIndexes = [ 13, 14, 16, 19, 20, 22, 25, 26, 27 ];                  // Spear dots
+                    else if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint)
+                        tertiarySpriteIndexes = [ 12 ];                                                  // Tongue
+                    else
+                    {
+                        Logger.Warning($"Unknown slugcat with a tertiary color. (Could this be caused by another mod?) slugcat: {self.player.SlugCatClass}");
+                        return;
+                    }
+                    
+                    foreach (int i in tertiarySpriteIndexes)
+                        sLeaser.sprites[i].color = tertiaryColor;
+                }
+                    
+                /*
+                 main body parts: 1-8
+                 eyes: 9
+                 
+                 artificer scar: 12
+                 
+                 rivulet "inner" gills: 12-17
+                 rivulet "outer" gills: 18-23
+                 
+                 spearmaster tail spots: 13, 14, 16, 19, 20, 22, 25, 26
+                 spearmaster spear: 27
+                 
+                 saint tongue: 12
+                 saint ascension x: 14
+                 saint ascension dots: 15-26 (note: reverse order of how they decay)
+                */
+            }
+            else
+                Logger.Warning($"Could not find slugcat customization for {self.player} ({self.player.abstractCreature.GetOnlineCreature()})");
+        }
+    }
+    
     
     // Tag players when ascended.
     private static void IL_Player_ClassMechanicsSaint(ILContext il)
@@ -153,84 +344,5 @@ public static class RainWorldHooks
         {
             Logger.Fatal(exception);
         }
-    }
-    
-    private static void On_RainWorldGame_GrafUpdate(
-        On.RainWorldGame.orig_GrafUpdate orig,
-        RainWorldGame self,
-        float timeStacker)
-    {
-        if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
-        {
-            if (Input.GetKeyDown(KeyCode.PageDown))
-                hideAndSeek.MakeSeeker(OnlineManager.mePlayer!);
-            if (Input.GetKeyDown(KeyCode.End))
-                hideAndSeek.RemoveSeeker(OnlineManager.mePlayer!);
-        }
-        
-        orig(self, timeStacker);
-    }
-    
-    // Tag players when hit by a rock
-    private static bool On_Rock_HitSomething(
-        On.Rock.orig_HitSomething orig,
-        Rock self,
-        SharedPhysics.CollisionResult result,
-        bool eu)
-    {
-        bool hasHit = orig(self, result, eu);
-        
-        if (hasHit &&
-            HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
-            hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Rock) &&
-            self.thrownBy is Player throwerPlayer &&
-            result.obj is Player hitPlayer)
-        {
-            OnlineCreature? throwerOCreature = throwerPlayer.abstractCreature.GetOnlineCreature();
-            OnlineCreature? hitOCreature = hitPlayer.abstractCreature.GetOnlineCreature();
-            
-            Assert(throwerOCreature is not null);
-            Assert(hitOCreature is not null);
-            
-            if (throwerOCreature.isMine &&
-                throwerOCreature.CanTag(hitOCreature))
-            {
-                Logger.Debug($"I tagged {hitOCreature.owner} with a rock!");
-                hideAndSeek.MakeSeeker(hitOCreature.owner);
-            }
-        }
-        
-        return hasHit;
-    }
-    
-    // Tag players when colliding.
-    private static void On_Player_Collide(
-        On.Player.orig_Collide orig,
-        Player self,
-        PhysicalObject otherObject,
-        int chunkIndex,
-        int otherChunkIndex)
-    {
-        // TODO: Handle devtool teleporting.
-        
-        if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
-            hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
-            otherObject is Player otherPlayer)
-        {
-            OnlineCreature? selfOCreature  = self.abstractCreature.GetOnlineCreature();
-            OnlineCreature? otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature();
-            
-            Assert(selfOCreature is not null);
-            Assert(otherOCreature is not null);
-            
-            if (selfOCreature.isMine &&
-                selfOCreature.CanTag(otherOCreature))
-            {
-                Logger.Debug($"I tagged {otherOCreature.owner} by contact!");
-                hideAndSeek.MakeSeeker(otherOCreature.owner);
-            }
-        }
-        
-        orig(self, otherObject, chunkIndex, otherChunkIndex);
     }
 }

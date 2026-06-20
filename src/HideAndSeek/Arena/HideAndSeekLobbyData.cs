@@ -18,6 +18,10 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
     public TaggingMethods    EnabledTaggingMethods    { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledTaggingMethods);  } = Plugin.Options.EnabledTaggingMethods;
     public TagResult         EnabledTagResult         { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledTagResult);       } = Plugin.Options.EnabledTagResult;
     
+    public Color             SeekerBodyColor          { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerBodyColor);        } = Plugin.Options.SeekerBodyColor;
+    public Color             SeekerEyeColor           { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerEyeColor);         } = Plugin.Options.SeekerEyeColor;
+    public Color             SeekerTertiaryColor      { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerTertiaryColor);    } = Plugin.Options.SeekerTertiaryColor;
+    
     public List<OnlinePlayer> Seekers
     {
         get;
@@ -76,6 +80,17 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         [OnlineField(group = _settings)]
         public byte EnabledTagResult;
         
+        
+        [OnlineFieldColorRgb(group = _settings)]
+        public Color SeekerBodyColor;
+        
+        [OnlineFieldColorRgb(group = _settings)]
+        public Color SeekerEyeColor;
+        
+        [OnlineFieldColorRgb(group = _settings)]
+        public Color SeekerTertiaryColor;
+        
+        
         [OnlineField]
         public DynamicOrderedUshorts Seekers = new([]);
         
@@ -95,6 +110,10 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
             EnabledTaggingMethods  = (byte)data.EnabledTaggingMethods;
             EnabledTagResult       = (byte)data.EnabledTagResult;
             
+            SeekerBodyColor     = data.SeekerBodyColor;
+            SeekerEyeColor      = data.SeekerEyeColor;
+            SeekerTertiaryColor = data.SeekerTertiaryColor;
+            
             Seekers = new DynamicOrderedUshorts(data.Seekers.Select(seeker => seeker.inLobbyId).ToList());
         }
         
@@ -111,6 +130,10 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
             data.EnabledSeekerSelection = (SeekerSelection)EnabledSeekerSelection;
             data.EnabledTaggingMethods  = (TaggingMethods)EnabledTaggingMethods;
             data.EnabledTagResult       = (TagResult)EnabledTagResult;
+            
+            data.SeekerBodyColor     = SeekerBodyColor;
+            data.SeekerEyeColor      = SeekerEyeColor;
+            data.SeekerTertiaryColor = SeekerTertiaryColor;
             
             data.Seekers = GetSeekers();
             

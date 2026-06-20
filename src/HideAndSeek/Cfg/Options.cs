@@ -104,6 +104,27 @@ public sealed class Options : OptionInterface
         set => CfgEnabledTagResult.Value = value;
     }
     
+    /// <inheritdoc cref="CfgSeekerBodyColor"/>
+    public Color SeekerBodyColor
+    {
+        get => CfgSeekerBodyColor.Value;
+        set => CfgSeekerBodyColor.Value = value;
+    }
+    /// <inheritdoc cref="CfgSeekerEyeColor"/>
+    public Color SeekerEyeColor
+    {
+        get => CfgSeekerEyeColor.Value;
+        set => CfgSeekerEyeColor.Value = value;
+    }
+    
+    /// <inheritdoc cref="CfgSeekerTertiaryColor"/>
+    public Color SeekerTertiaryColor
+    {
+        get => CfgSeekerTertiaryColor.Value;
+        set => CfgSeekerTertiaryColor.Value = value;
+    }
+    
+    
     
     // --- Configurables --- //
     /// <summary>For <see cref="Logging.Logger"/> to determine if a message should be logged.</summary>
@@ -131,6 +152,14 @@ public sealed class Options : OptionInterface
     
     // TODO: Add documentation.
     public Configurable<TagResult> CfgEnabledTagResult { get; }
+    
+    
+    // TODO: Add documentation.
+    public Configurable<Color> CfgSeekerBodyColor { get; }
+    // TODO: Add documentation.
+    public Configurable<Color> CfgSeekerEyeColor { get; }
+    // TODO: Add documentation.
+    public Configurable<Color> CfgSeekerTertiaryColor { get; }
     
     
     
@@ -168,6 +197,11 @@ public sealed class Options : OptionInterface
         CfgEnabledSeekerSelection = BindCfg(nameof(EnabledSeekerSelection), SeekerSelection.Random);
         CfgEnabledTaggingMethods = BindCfg(nameof(EnabledTaggingMethods), TaggingMethods.All, new ConfigAcceptableRange<TaggingMethods>(TaggingMethods.None + 1, TaggingMethods.All));
         CfgEnabledTagResult = BindCfg(nameof(EnabledTagResult), TagResult.Ghost);
+        
+        CfgSeekerBodyColor     = BindCfg(nameof(SeekerBodyColor),     new Color(1.00f, 0.00f, 0.00f));
+        CfgSeekerEyeColor      = BindCfg(nameof(SeekerEyeColor),      new Color(0.00f, 1.00f, 0.00f));
+        CfgSeekerTertiaryColor = BindCfg(nameof(SeekerTertiaryColor), new Color(0.00f, 0.00f, 1.00f));
+        
         
         IsInitialized = true;
     }

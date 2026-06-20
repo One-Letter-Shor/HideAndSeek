@@ -6,6 +6,7 @@ using RainMeadow;
 using RainMeadow.UI;
 using RainMeadow.UI.Components;
 using RainMeadow.UI.Components.Patched;
+using RWCustom;
 using EnumHelper = OneLetterShor.HideAndSeek.Utils.EnumHelper;
 
 namespace OneLetterShor.HideAndSeek.Arena;
@@ -26,6 +27,12 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
     public Dictionary<TaggingMethods, (ProperlyAlignedMenuLabel label, OpCheckBox checkBox)> UIByTaggingMethod { get; } = [];
     public ProperlyAlignedMenuLabel TagResultLabel { get; }
     public OpResourceSelector       TagResultSelector { get; }
+    public MenuLabel                SeekerBodyColorLabel { get; }
+    public OpColorPicker            SeekerBodyColorPicker { get; }
+    public MenuLabel                SeekerEyeColorLabel { get; }
+    public OpColorPicker            SeekerEyeColorPicker { get; }
+    public MenuLabel                SeekerTertiaryColorLabel { get; }
+    public OpColorPicker            SeekerTertiaryColorPicker { get; }
     
     public UIfocusable[] AllUIFocusables { get; }
     public UIfocusable[] LobbyUIFocusables { get; }
@@ -61,14 +68,14 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
             ArenaOnlineMenu,
             this,
             "Willing to Seek:",
-            new Vector2(288f, 35f),
-            new Vector2(80f, labelSize.y),
+            new Vector2(288f, 255f),
+            new Vector2(100f, labelSize.y),
             false
         );
         
         IsWillingToSeekCheckBox = new OpCheckBox(
             ConfigurableHelper.Clone(Plugin.Options.CfgIsWillingToSeek),
-            new Vector2(WillingToSeekLabel.pos.x + labelSize.x, WillingToSeekLabel.pos.y + labelAlignmentYFix)
+            new Vector2(WillingToSeekLabel.pos.x + WillingToSeekLabel.size.x, WillingToSeekLabel.pos.y + labelAlignmentYFix)
         );
         
         IsWillingToSeekCheckBox.OnValueChanged += (_, _, _) =>
@@ -206,17 +213,80 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         };
         
         
+        SeekerBodyColorPicker = new OpColorPicker(
+            ConfigurableHelper.Clone(Plugin.Options.CfgSeekerBodyColor),
+            new Vector2(0f, 12f)
+        );
+        SeekerBodyColorPicker.OnValueChanged += (_, valueAsString, _) =>
+        {
+            HideAndSeek.LobbyData.SeekerBodyColor = Custom.hexToColor(valueAsString);
+        };
+        
+        SeekerBodyColorLabel = new MenuLabel(
+            ArenaOnlineMenu,
+            this,
+            "Seeker Body Color",
+            SeekerBodyColorPicker.pos + new Vector2(0f, 155f),
+            new Vector2(150f, labelSize.y),
+            false
+        );
+        
+        
+        SeekerEyeColorPicker = new OpColorPicker(
+            ConfigurableHelper.Clone(Plugin.Options.CfgSeekerEyeColor),
+            SeekerBodyColorPicker.pos + new Vector2(SeekerBodyColorPicker.size.x, 0)
+        );
+        SeekerEyeColorPicker.OnValueChanged += (_, valueAsString, _) =>
+        {
+            HideAndSeek.LobbyData.SeekerEyeColor = Custom.hexToColor(valueAsString);
+        };
+        
+        SeekerEyeColorLabel = new MenuLabel(
+            ArenaOnlineMenu,
+            this,
+            "Seeker Eye Color",
+            SeekerEyeColorPicker.pos + new Vector2(0f, 155f),
+            new Vector2(150f, labelSize.y),
+            false
+        );
+        
+        
+        SeekerTertiaryColorPicker = new OpColorPicker(
+            ConfigurableHelper.Clone(Plugin.Options.CfgSeekerTertiaryColor),
+            SeekerEyeColorPicker.pos + new Vector2(SeekerEyeColorPicker.size.x, 0)
+        );
+        SeekerTertiaryColorPicker.OnValueChanged += (_, valueAsString, _) =>
+        {
+            HideAndSeek.LobbyData.SeekerTertiaryColor = Custom.hexToColor(valueAsString);
+        };
+        
+        SeekerTertiaryColorLabel = new MenuLabel(
+            ArenaOnlineMenu,
+            this,
+            "Seeker Tertiary Color",
+            SeekerTertiaryColorPicker.pos + new Vector2(0f, 155f),
+            new Vector2(150f, labelSize.y),
+            false
+        );
+        
+        
+        
         MenuObject[] taggingMethodMenuObjects = UIByTaggingMethod.Select(tuple => tuple.Value.label).ToArray<MenuObject>();
         UIfocusable[] taggingMethodUIFocusables = UIByTaggingMethod.Select(tuple => tuple.Value.checkBox).ToArray<UIfocusable>();
         
         // Add new UIFocusables here
-        LobbyUIFocusables = [ SeekerCountUpdown, SeekerSelectionSelector, ..taggingMethodUIFocusables, TagResultSelector ];
+        LobbyUIFocusables =
+        [
+            SeekerCountUpdown,
+            SeekerSelectionSelector,
+            ..taggingMethodUIFocusables,
+            TagResultSelector,
+            SeekerBodyColorPicker,
+            SeekerEyeColorPicker,
+            SeekerTertiaryColorPicker
+        ];
         ClientUIFocusables = [ IsWillingToSeekCheckBox ];
         DisabledUIFocusables = [];
-        
-        // LobbyUIFocusables = [];
-        // ClientUIFocusables = [ IsWillingToSeekCheckBox ];
-        // DisabledUIFocusables = [ SeekerCountUpdown, SeekerSelectionSelector, ..taggingMethodUIFocusables, TagResultSelector ];
         
         AllUIFocusables =
         [
@@ -237,14 +307,17 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         AddUIElements(AllUIFocusables.ToArray<UIelement>());
         
         // Add new MenuObjects here
-        this.SafeAddSubobjects([
+        AddObjects([
             myTabWrapper,
             WillingToSeekLabel,
             SeekerCountLabel,
             SeekerSelectionLabel,
             ..taggingMethodMenuObjects,
             TaggingMethodsLabel,
-            TagResultLabel
+            TagResultLabel,
+            SeekerBodyColorLabel,
+            SeekerEyeColorLabel,
+            SeekerTertiaryColorLabel
         ]);
         
         return;

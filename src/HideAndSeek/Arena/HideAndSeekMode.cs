@@ -32,7 +32,14 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     }
     public override ArenaSetup.GameTypeID GetGameModeId => Id;
     
-    /// <exception cref="InvalidOperationException">Thrown if the game mode is not registered.</exception>
+    /// <summary>Determines if the current game mode is Hide and Seek.</summary>
+    /// <returns>
+    /// <see langword="true"/> if a <see cref="Lobby"/> exists, the
+    /// online game mode is <see cref="ArenaOnlineGameMode"/>, and
+    /// the external game mode is <see cref="HideAndSeekMode"/>,
+    /// otherwise <see langword="false"/>.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">Thrown if <see cref="HideAndSeekMode"/> is not registered.</exception>
     public static bool IsHideAndSeekMode([NotNullWhen(true)] out HideAndSeekMode? hideAndSeek)
     {
         hideAndSeek = null;
