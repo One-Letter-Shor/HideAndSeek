@@ -70,6 +70,14 @@ public static class RainMeadowHooks
             ),
             On_RainMeadow_RainMeadow_Weapon_HitThisObject
         );
+        
+        _ = new ILHook(
+            typeof(ChatLogOverlay).GetMethod(
+                nameof(ChatLogOverlay.OpacityUpdate),
+                BindingFlags.Public | BindingFlags.Instance
+            ),
+            IL_RainMeadow_ChatLogOverlay_OpacityUpdate
+        );
     }
     
     // Game mode
@@ -348,5 +356,96 @@ public static class RainMeadowHooks
         }
         
         return orig(self, hitThisObjectOrig, weapon, hitPO);
+    }
+    
+    
+    // Prevent hiders from making seekers' chat fade.
+    private static void IL_RainMeadow_ChatLogOverlay_OpacityUpdate(ILContext il)
+    {
+        /*
+         (OnlineUIComponents/ChatLogOverlay.cs:148 - last updated: 6/20/26)
+        
+         current code:
+         ...
+         bool fade = false;
+         
+         if (inactivityTimer > RainMeadow.rainMeadowOptions.ChatInactivityTimer.Value * 40)
+         {
+             fade = true;
+         }
+         else
+         {
+             foreach (var avatar in OnlineManager.lobby.playerAvatars)
+             {
+                 var entity = avatar.Value.FindEntity(true);
+                 if (entity is OnlineCreature oc && oc.abstractCreature != null && oc.abstractCreature.realizedCreature != null && !oc.abstractCreature.realizedCreature.dead)
+                 {
+                     if (chatRect.Contains(oc.abstractCreature.realizedCreature.mainBodyChunk.pos - chatHud.camera.pos))
+                     {
+                         // A player avatar is currently being obscured by chat.
+                         fade = true;
+                         break;
+                     }
+                 }
+             }
+         }
+         ...
+        
+         desired code:
+         ...
+         bool fade = false;
+           
+         if (inactivityTimer > RainMeadow.rainMeadowOptions.ChatInactivityTimer.Value * 40)
+         {
+             fade = true;
+         }
+         else
+         {
+             foreach (var avatar in OnlineManager.lobby.playerAvatars)
+             {
+                 var entity = avatar.Value.FindEntity(true);
+                 
+                 if (entity is OnlineCreature oc && oc.abstractCreature != null && oc.abstractCreature.realizedCreature != null && !oc.abstractCreature.realizedCreature.dead)
+                 {
+                     if (OnlineManager.mePlayer.IsSeeker && !oc.owner.IsSeeker)
+                         continue;
+                     
+                     if (chatRect.Contains(oc.abstractCreature.realizedCreature.mainBodyChunk.pos - chatHud.camera.pos))
+                     {
+                         // A player avatar is currently being obscured by chat.
+                         fade = true;
+                         break;
+                     }
+                 }
+             }
+         }
+         ...
+        */
+        
+        try
+        {
+            ILCursor cursor = new(il);
+            ILLabel? continueLoop = null;
+                
+            const int ocLocIndex = 7; // Source code variable used in the foreach of player avatars to check the owner.
+            
+            cursor.GotoNext(
+                MoveType.After,
+                i => i.MatchCallvirt<Creature>("get_" + nameof(Creature.dead)) // dead is the last check in the if statement. 
+            );
+            cursor.GotoNext(
+                MoveType.After,
+                i => i.MatchBrfalse(out continueLoop) // This brfalse is equivalent to the continue keyword.
+            );
+            Assert(continueLoop is not null);
+            
+            cursor.Emit(OpCodes.Ldloc, ocLocIndex);
+            cursor.EmitDelegate((OnlineCreature oc) => OnlineManager.mePlayer!.IsSeeker && !oc.owner.IsSeeker);
+            cursor.Emit(OpCodes.Brtrue, continueLoop);
+        }
+        catch (Exception exception)
+        {
+            Logger.Fatal(exception);
+        }
     }
 }

@@ -7,7 +7,6 @@ Issues:
 
 Features:
 - Change Rain Meadow's scoring to reflect seeker and hider scores.
-- Prevent the chat from becoming slightly transparent for seekers when a hider is there.
 - Implement all tag results.
 - Implement all seeker selections.
 - Seekers should not be able to see, move, or tag during the safety timer. (look in GameplayOverrides.cs something like HaltPlayerMovement)
