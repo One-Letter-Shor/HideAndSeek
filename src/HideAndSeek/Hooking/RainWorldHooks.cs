@@ -35,6 +35,37 @@ public static class RainWorldHooks
         orig(self, timeStacker);
     }
     
+    // Tag players when colliding.
+    private static void On_Player_Collide(
+        On.Player.orig_Collide orig,
+        Player self,
+        PhysicalObject otherObject,
+        int chunkIndex,
+        int otherChunkIndex)
+    {
+        // TODO: Handle devtool teleporting.
+        
+        if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
+            hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
+            otherObject is Player otherPlayer)
+        {
+            OnlineCreature? selfOCreature  = self.abstractCreature.GetOnlineCreature();
+            OnlineCreature? otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature();
+            
+            Assert(selfOCreature is not null);
+            Assert(otherOCreature is not null);
+            
+            if (selfOCreature.isMine &&
+                selfOCreature.CanTag(otherOCreature))
+            {
+                Logger.Debug($"I tagged {otherOCreature.owner} by contact!");
+                hideAndSeek.MakeSeeker(otherOCreature.owner);
+            }
+        }
+        
+        orig(self, otherObject, chunkIndex, otherChunkIndex);
+    }
+    
     // Tag players when hit by a rock
     private static bool On_Rock_HitSomething(
         On.Rock.orig_HitSomething orig,
@@ -65,37 +96,6 @@ public static class RainWorldHooks
         }
         
         return hasHit;
-    }
-    
-    // Tag players when colliding.
-    private static void On_Player_Collide(
-        On.Player.orig_Collide orig,
-        Player self,
-        PhysicalObject otherObject,
-        int chunkIndex,
-        int otherChunkIndex)
-    {
-        // TODO: Handle devtool teleporting.
-        
-        if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
-            hideAndSeek.LobbyData.EnabledTaggingMethods.HasFlag(TaggingMethods.Contact) &&
-            otherObject is Player otherPlayer)
-        {
-            OnlineCreature? selfOCreature  = self.abstractCreature.GetOnlineCreature();
-            OnlineCreature? otherOCreature = otherPlayer.abstractCreature.GetOnlineCreature();
-            
-            Assert(selfOCreature is not null);
-            Assert(otherOCreature is not null);
-            
-            if (selfOCreature.isMine &&
-                selfOCreature.CanTag(otherOCreature))
-            {
-                Logger.Debug($"I tagged {otherOCreature.owner} by contact!");
-                hideAndSeek.MakeSeeker(otherOCreature.owner);
-            }
-        }
-        
-        orig(self, otherObject, chunkIndex, otherChunkIndex);
     }
     
     // Implement custom seeker color that doesn't save and also can update on any frame (not just from palette updates).
