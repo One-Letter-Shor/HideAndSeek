@@ -13,9 +13,7 @@ Features:
 - Hiders can change their colors during the safety timer.
 - Hiders may not hide inside walls. (move them to the last airpocket if in wall for too long)
 - Consider some way to prevent stun locking of seekers.
-- Consider some way to prevent hiding in excessively offscreen/foreground covered areas. (unlikely)
 - Hiders and seekers should have different banned slugcats.
-- Seeker colors must be clamped to high saturation.
 - Add support for story.
 
 Refactors:

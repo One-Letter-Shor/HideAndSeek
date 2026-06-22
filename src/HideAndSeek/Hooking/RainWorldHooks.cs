@@ -117,6 +117,10 @@ public static class RainWorldHooks
             if (creatureCustomization is SlugcatCustomization slugcatCustomization)
             {
                 OnlinePlayer oPlayer = self.player.abstractCreature.GetOnlineCreature()!.owner;
+                bool isArtificer = ModManager.MSC && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Artificer;
+                bool isRivulet = ModManager.MSC && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Rivulet;
+                bool isSpearmaster = ModManager.MSC && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Spear;
+                bool isSaint = ModManager.MSC && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint;
                 
                 // Body and eye color
                 Color bodyColor = oPlayer.IsSeeker
@@ -131,14 +135,16 @@ public static class RainWorldHooks
                 int[] eyeSpriteIndexes  = [ 9 ];
                 
                 // Saint's ascension dots are supposed to be the primary color.
-                if (ModManager.MSC && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint)
+                if (isSaint)
                     bodySpriteIndexes = [ ..bodySpriteIndexes, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 ]; 
                 
                 foreach (int i in bodySpriteIndexes)
                     sLeaser.sprites[i].color = bodyColor;
                 
-                foreach (int i in eyeSpriteIndexes)
-                    sLeaser.sprites[i].color = eyeColor;
+                // During saint's ascension, his eyes and X sprite change color rapidly regardless of custom colors.
+                if (!(isSaint && self.player.monkAscension)) 
+                    foreach (int i in eyeSpriteIndexes)
+                        sLeaser.sprites[i].color = eyeColor;
                 
                 
                 // Tertiary color
@@ -160,21 +166,21 @@ public static class RainWorldHooks
                     
                     int[] tertiarySpriteIndexes;
                     
-                    if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Artificer)
+                    if (isArtificer)
                         tertiarySpriteIndexes = [ 12 ];
-                    else if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Rivulet)
+                    else if (isRivulet)
                     {
                         // Rivulet is different, there are sprites used to form a gradient between the body and gills.
                         int[] gradientGillSpriteIndexes = [ 12, 13, 14, 15, 16, 17 ];
                         foreach (int i in gradientGillSpriteIndexes)
                             sLeaser.sprites[i].color = bodyColor;
                         
-                        tertiarySpriteIndexes = [ 18, 19, 20, 21, 22, 23 ];                              // Gills
+                        tertiarySpriteIndexes = [ 18, 19, 20, 21, 22, 23 ];             // Gills
                     }
-                    else if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Spear)
-                        tertiarySpriteIndexes = [ 13, 14, 16, 19, 20, 22, 25, 26, 27 ];                  // Spear dots
-                    else if (self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint)
-                        tertiarySpriteIndexes = [ 12 ];                                                  // Tongue
+                    else if (isSpearmaster)
+                        tertiarySpriteIndexes = [ 13, 14, 16, 19, 20, 22, 25, 26, 27 ]; // Spear dots
+                    else if (isSaint)
+                        tertiarySpriteIndexes = [ 12 ];                                 // Tongue
                     else
                     {
                         Logger.Warning($"Unknown slugcat with a tertiary color. (Could this be caused by another mod?) slugcat: {self.player.SlugCatClass}");
