@@ -251,7 +251,7 @@ public static class RainMeadowHooks
     private static void IL_RainMeadow_ChatLogOverlay_OpacityUpdate(ILContext il)
     {
         /*
-         (OnlineUIComponents/ChatLogOverlay.cs:148 - last updated: 6/20/26)
+         (OnlineUIComponents/ChatLogOverlay.cs:148 - last updated: 6/22/26)
         
          current code:
          ...
@@ -295,7 +295,7 @@ public static class RainMeadowHooks
                  
                  if (entity is OnlineCreature oc && oc.abstractCreature != null && oc.abstractCreature.realizedCreature != null && !oc.abstractCreature.realizedCreature.dead)
                  {
-                     if (OnlineManager.mePlayer.IsSeeker && !oc.owner.IsSeeker)
+                     if (HideAndSeekMode.IsHideAndSeekMode(out _) && OnlineManager.mePlayer.IsSeeker && !oc.owner.IsSeeker)
                          continue;
                      
                      if (chatRect.Contains(oc.abstractCreature.realizedCreature.mainBodyChunk.pos - chatHud.camera.pos))
@@ -328,7 +328,7 @@ public static class RainMeadowHooks
             Assert(continueLoop is not null);
             
             cursor.Emit(OpCodes.Ldloc, ocLocIndex);
-            cursor.EmitDelegate((OnlineCreature oc) => OnlineManager.mePlayer!.IsSeeker && !oc.owner.IsSeeker);
+            cursor.EmitDelegate((OnlineCreature oc) => HideAndSeekMode.IsHideAndSeekMode(out _) && OnlineManager.mePlayer!.IsSeeker && !oc.owner.IsSeeker);
             cursor.Emit(OpCodes.Brtrue, continueLoop);
         }
         catch (Exception exception)
