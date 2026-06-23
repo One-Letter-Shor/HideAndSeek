@@ -116,7 +116,11 @@ public static class RainWorldHooks
             
             if (creatureCustomization is SlugcatCustomization slugcatCustomization)
             {
-                OnlinePlayer oPlayer = self.player.abstractCreature.GetOnlineCreature()!.owner;
+                OnlinePlayer? oPlayer = self.player.abstractCreature.GetOnlineCreature()?.owner; 
+                
+                if (oPlayer is null) // Null when the session ends/transitions.
+                    return;
+                
                 bool isArtificer = ModManager.MSC && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Artificer;
                 bool isRivulet = ModManager.MSC && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Rivulet;
                 bool isSpearmaster = ModManager.MSC && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Spear;
