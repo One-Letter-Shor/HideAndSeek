@@ -28,7 +28,25 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         set
         {
             if (!value.SequenceEqual(field))
-                Logger.Info($"Seekers: [ {string.Join(", ", value)} ]");
+                Logger.Debug($"Seekers: [ {string.Join(", ", value)} ]");
+            
+            field = value;
+        }
+    } = [];
+    
+    /// <summary>
+    /// The <see cref="OnlinePlayer"/>s who started as seekers.
+    /// </summary>
+    /// <remarks>
+    /// This is only set from <see cref="HideAndSeekMode.ArenaSessionCtor"/>.
+    /// </remarks>
+    public List<OnlinePlayer> InitialSeekers
+    {
+        get;
+        set
+        {
+            if (!value.SequenceEqual(field))
+                Logger.Debug($"Seekers: [ {string.Join(", ", value)} ]");
             
             field = value;
         }
@@ -90,9 +108,12 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         [OnlineFieldColorRgb(group = _settings)]
         public Color SeekerTertiaryColor;
         
-        
-        [OnlineField]
+        // TODO: Why do these lists need to have groups or be marked as nullable in order to be serializable? If only one exists it is fine, but as soon as there are two it fails.
+        [OnlineField(group = nameof(Seekers))]
         public DynamicOrderedUshorts Seekers = new([]);
+        
+        [OnlineField(group = nameof(InitialSeekers))]
+        public DynamicOrderedUshorts InitialSeekers = new([]);
         
         /// <remarks>Rain Meadow requires a ctor with no params.</remarks>
         public State() { }
@@ -114,7 +135,8 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
             SeekerEyeColor      = data.SeekerEyeColor;
             SeekerTertiaryColor = data.SeekerTertiaryColor;
             
-            Seekers = new DynamicOrderedUshorts(data.Seekers.Select(seeker => seeker.inLobbyId).ToList());
+            Seekers        = new DynamicOrderedUshorts(data.Seekers.Select(seeker => seeker.inLobbyId).ToList());
+            InitialSeekers = new DynamicOrderedUshorts(data.InitialSeekers.Select(seeker => seeker.inLobbyId).ToList());
         }
         
         public override void ReadTo(OnlineResource.ResourceData data_, OnlineResource onlineResource)
@@ -135,15 +157,16 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
             data.SeekerEyeColor      = SeekerEyeColor;
             data.SeekerTertiaryColor = SeekerTertiaryColor;
             
-            data.Seekers = GetSeekers();
+            data.Seekers        = GetSeekersByInLobbyIds(Seekers.list, "seekers");
+            data.InitialSeekers = GetSeekersByInLobbyIds(InitialSeekers.list, "initial seekers");
             
             return;
             
-            List<OnlinePlayer> GetSeekers()
+            static List<OnlinePlayer> GetSeekersByInLobbyIds(List<ushort> seekerInLobbyIds, string seekerLoggingName)
             {
-                List<(ushort id, OnlinePlayer oPlayer)> seekerResults = Seekers.list
-                                                                               .Select(id => (id, ArenaHelpers.FindOnlinePlayerByLobbyId(id)))
-                                                                               .ToList();
+                List<(ushort id, OnlinePlayer oPlayer)> seekerResults = seekerInLobbyIds
+                                                                        .Select(id => (id, ArenaHelpers.FindOnlinePlayerByLobbyId(id)))
+                                                                        .ToList();
                 
                 List<OnlinePlayer> seekers = seekerResults
                                              .Where(result => result.oPlayer is not null)
@@ -152,10 +175,10 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
                 
                 if (seekers.Count != seekerResults.Count)
                 {
-                    Logger.Info(
+                    Logger.Warning(
                         $"""
-                        Found {seekers.Count}/{seekerResults.Count} seekers.
-                        - seeker results: [ {string.Join(", ", seekerResults.Select(result => $"({result.id}, {result.oPlayer?.ToString() ?? "null"})"))} ]
+                        Found {seekers.Count}/{seekerResults.Count} {seekerLoggingName}.
+                        - {seekerLoggingName} results: [ {string.Join(", ", seekerResults.Select(result => $"({result.id}, {result.oPlayer?.ToString() ?? "null"})"))} ]
                         """
                     );
                 }

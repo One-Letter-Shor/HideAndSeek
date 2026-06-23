@@ -121,6 +121,9 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         ArenaGameSession arena,
         RainWorldGame game)
     {
+        if (OnlineManager.lobby!.isOwner)
+            LobbyData.InitialSeekers = LobbyData.Seekers.ToList(); // Clone it, don't set the reference!!!! (I made this mistake)
+        
         base.ArenaSessionCtor(ArenaOnline, orig, arena, game);
     }
     

@@ -5,6 +5,8 @@ Issues:
 - Configurables in the lobby UI do not save.
 - Figure out when and why GetOnlineCreature() returns null. Currently some code relies on it not returning null.
 - The Hide and Seek tab has UI elements which poorly overlap. It needs to be redesigned.
+- The current way to switch teams via hotkeys breaks some logic as the player is left in the initial seeker list but not the seeker list. There needs to be a special list and RPCs for this debugging tool.
+- Seekers and initial seekers need to be reselected every arena session end.
 
 Features:
 - Change Rain Meadow's scoring to reflect seeker and hider scores.
