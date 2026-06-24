@@ -1,6 +1,7 @@
 using OneLetterShor.HideAndSeek.Utils;
 using RainMeadow;
 using RainMeadow.UI;
+using RainMeadow.UI.Components;
 
 namespace OneLetterShor.HideAndSeek.Arena;
 
@@ -11,6 +12,17 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
         HiderAtlasElementName = "SaintA";
     public Color SeekerUIColor => LobbyData.SeekerBodyColor;
     public Color HiderUIColor { get; } = new(0.10f, 0.60f, 0.10f);
+    
+    /// <summary>
+    /// Used to determine if the key bind for toggling seekers via the
+    /// <see cref="SlugcatColorableButton"/>s in the arena menu is pressed.
+    /// </summary>
+    private bool IsToggleSeekerPressed { get; set; }
+    /// <summary>
+    /// Used to remember the value of
+    /// <see cref="IsToggleSeekerPressed"/> last UI Update.
+    /// </summary>
+    private bool PreviousIsToggleSeekerPressed { get; set; }
     
     public HideAndSeekSettingsTab? SettingsTab { get; private set; }
     
@@ -82,11 +94,57 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
         menu.arenaMainLobbyPage.tabContainer.AddTab(SettingsTab, Plugin.Name);
     }
     
+    public override void OnUIUpdate(ArenaOnlineLobbyMenu menu)
+    {
+        PreviousIsToggleSeekerPressed = IsToggleSeekerPressed;
+        IsToggleSeekerPressed = RWInput.PlayerInput(0).pckp;
+        
+        if (IsToggleSeekerPressed && !PreviousIsToggleSeekerPressed && !ArenaOnline.initiateLobbyCountdown)
+        {
+            List<ArenaPlayerBox> arenaPlayerBoxes = menu.arenaMainLobbyPage.playerDisplayer.buttons
+                                                        .Cast<ArenaPlayerBox>()
+                                                        .ToList();
+            
+            if (menu.selectedObject is SlugcatColorableButton slugcatButton)
+            {
+                ArenaPlayerBox? playerBox = arenaPlayerBoxes.FirstOrDefault(box => box.slugcatButton == slugcatButton);
+                
+                if (playerBox is null)
+                {
+                    Logger.Error(
+                        $"""
+                         Unable to find the arena player box that owns the slugcat button.
+                         - selected object: {menu.selectedObject}
+                         - player boxes: [ {string.Join(", ", arenaPlayerBoxes)} ]
+                         """
+                    );
+                    base.OnUIUpdate(menu);
+                    return;
+                }
+                
+                OnlinePlayer oPlayer = playerBox.profileIdentifier;
+                
+                if (LobbyData.EnabledSeekerSelection == SeekerSelection.Host &&
+                    OnlineManager.lobby!.isOwner ||
+                    LobbyData.EnabledSeekerSelection == SeekerSelection.Self &&
+                    oPlayer.isMe)
+                {
+                    ToggleSeeker(oPlayer);
+                }
+            }
+        }
+        
+        base.OnUIUpdate(menu);
+    }
+    
     public override void OnUIDisabled(ArenaOnlineLobbyMenu menu)
     {
         Logger.Mark();
         
         if (SettingsTab is null) return;
+        
+        PreviousIsToggleSeekerPressed = false;
+        IsToggleSeekerPressed = false;
         
         SettingsTab.RemoveSprites();
         menu.arenaMainLobbyPage.tabContainer.RemoveTab(SettingsTab);

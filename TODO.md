@@ -4,11 +4,11 @@ Issues:
 - Sometimes the game mode time lives longer than the lobby (reference from OnlineManager.lobby). This happened once from a kick.
 - Configurables in the lobby UI do not save.
 - Figure out when and why GetOnlineCreature() returns null. Currently some code relies on it not returning null.
+- The Hide and Seek tab has UI elements which poorly overlap. It needs to be redesigned.
 
 Features:
 - Change Rain Meadow's scoring to reflect seeker and hider scores.
 - Implement all tag results.
-- Implement all seeker selections.
 - Seekers should not be able to see, move, or tag during the safety timer. (look in GameplayOverrides.cs something like HaltPlayerMovement)
 - Hiders can change their colors during the safety timer.
 - Hiders may not hide inside walls. (move them to the last airpocket if in wall for too long)

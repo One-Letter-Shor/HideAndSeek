@@ -143,6 +143,15 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     }
     
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    public void ToggleSeeker(OnlinePlayer oPlayer)
+    {
+        if (oPlayer.IsSeeker)
+            RemoveSeeker(oPlayer);
+        else
+            AddSeeker(oPlayer);
+    }
+    
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     [RPCMethod]
     private static void MakeSeekerRpc(RPCEvent? rpcEvent, OnlinePlayer oPlayer)
     {

@@ -59,7 +59,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         // TODO: Improve UI logic.
         Vector2 rowRootPos = new(42f, 417f);      // Starting position for most settings.
         const float rowOffsetY = 40f;             // Offset between most settings. 
-        const float resourceSelectorSizeX = 130f; // Used by every resource selector.
+        const float resourceSelectorSizeX = 100f; // Used by every resource selector.
         const float labelAlignmentYFix = -5f;     // ProperlyAlignedMenuLabel isn't properly aligned. (Text is always put to the bottom left)
         Vector2 labelSize = new(122f, 25f);       // Used by most settings labels.
         
@@ -235,7 +235,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
             ArenaOnlineMenu,
             this,
             "Seeker Body Color",
-            SeekerBodyColorPicker.pos + new Vector2(0f, 155f),
+            SeekerBodyColorPicker.pos + new Vector2(0f, 152f),
             new Vector2(150f, labelSize.y),
             false
         );
@@ -256,7 +256,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
             ArenaOnlineMenu,
             this,
             "Seeker Eye Color",
-            SeekerEyeColorPicker.pos + new Vector2(0f, 155f),
+            SeekerEyeColorPicker.pos + new Vector2(0f, 152f),
             new Vector2(150f, labelSize.y),
             false
         );
@@ -277,7 +277,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
             ArenaOnlineMenu,
             this,
             "Seeker Tertiary Color",
-            SeekerTertiaryColorPicker.pos + new Vector2(0f, 155f),
+            SeekerTertiaryColorPicker.pos + new Vector2(0f, 152f),
             new Vector2(150f, labelSize.y),
             false
         );
