@@ -99,7 +99,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
             ConfigurableHelper.Clone(Plugin.Options.CfgSeekerCount),
             new Vector2(SeekerCountLabel.pos.x + labelSize.x, SeekerCountLabel.pos.y + labelAlignmentYFix - 4f), // OpUpdown is taller than most UI elements. Offset y further to center it with the label.
             50f
-        ) { description = "How many seekers can be selected. (Ignored if the selection type is set to host choice)" };
+        ) { description = $"How many seekers can be selected. (Ignored if the {nameof(SeekerSelection)} is {nameof(SeekerSelection.Host)})" };
         
         SeekerCountUpdown.OnValueChanged += (_, _, _) =>
         {

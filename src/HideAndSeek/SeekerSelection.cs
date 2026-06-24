@@ -7,6 +7,6 @@ namespace OneLetterShor.HideAndSeek;
 public enum SeekerSelection
 {
     Random,
-    HostChoice,
-    AllChoice
+    Host,
+    Self
 }
