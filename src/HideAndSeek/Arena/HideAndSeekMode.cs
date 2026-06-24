@@ -125,7 +125,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     }
     
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
-    public void MakeSeeker(OnlinePlayer oPlayer)
+    public void AddSeeker(OnlinePlayer oPlayer)
     {
         if (OnlineManager.lobby!.isOwner)
             MakeSeekerRpc(null, oPlayer);
