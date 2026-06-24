@@ -9,8 +9,8 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
     public const string
         SeekerAtlasElementName = "HunterA",
         HiderAtlasElementName = "SaintA";
-    public static Color SeekerColor { get; } = new(0.80f, 0.10f, 0.10f);
-    public static Color HiderColor { get; }  = new(0.10f, 0.60f, 0.10f);
+    public static Color SeekerUIColor { get; } = new(0.80f, 0.10f, 0.10f);
+    public static Color HiderUIColor { get; }  = new(0.10f, 0.60f, 0.10f);
     
     public HideAndSeekSettingsTab? SettingsTab { get; private set; }
     
@@ -37,8 +37,8 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
         OnlinePlayer oPlayer)
     {
         Color color = oPlayer.IsSeeker
-            ? SeekerColor
-            : HiderColor;
+            ? SeekerUIColor
+            : HiderUIColor;
         
         // Note: On the first IconColor call, the UI elements are not initialized.
         display.arrowSprite?.color = color;
