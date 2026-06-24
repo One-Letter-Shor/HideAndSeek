@@ -68,7 +68,8 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
         }
         
         ArenaClientSettings? clientData = ArenaHelpers.GetDataSettings<ArenaClientSettings>(oPlayer);
-        Assert(clientData is not null);
+        if (clientData is null) // Null when first joining the lobby.
+            return base.GetPortraitColor(ArenaOnline, oPlayer, originalColor);
         
         if (clientData.playingAs == RainMeadow.RainMeadow.Ext_SlugcatStatsName.OnlineOverseerSpectator)
             return originalColor;
