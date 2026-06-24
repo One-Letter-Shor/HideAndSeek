@@ -126,39 +126,30 @@ public sealed class Options : OptionInterface
     
     
     
+    // TODO: Add documentation for all configurables.
     // --- Configurables --- //
     /// <summary>For <see cref="Logging.Logger"/> to determine if a message should be logged.</summary>
     public Configurable<LogLevel> CfgEnabledLogLevels { get; }
     
     
-    // TODO: Add documentation.
     public Configurable<bool> CfgIsWillingToSeek { get; }
     
     
-    // TODO: Add documentation.
     public Configurable<int> CfgHideDurationSeconds { get; }
     
-    // TODO: Add documentation.
     public Configurable<int> CfgSeekDurationSeconds { get; }
     
-    // TODO: Add documentation.
     public Configurable<int> CfgSeekerCount { get; }
     
-    // TODO: Add documentation.
     public Configurable<SeekerSelection> CfgEnabledSeekerSelection { get; }
     
-    // TODO: Add documentation.
     public Configurable<TaggingMethods> CfgEnabledTaggingMethods { get; }
     
-    // TODO: Add documentation.
     public Configurable<TagResult> CfgEnabledTagResult { get; }
     
     
-    // TODO: Add documentation.
     public Configurable<Color> CfgSeekerBodyColor { get; }
-    // TODO: Add documentation.
     public Configurable<Color> CfgSeekerEyeColor { get; }
-    // TODO: Add documentation.
     public Configurable<Color> CfgSeekerTertiaryColor { get; }
     
     

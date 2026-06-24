@@ -121,10 +121,10 @@ public static class RainWorldHooks
                 if (oPlayer is null) // Null when the session ends/transitions.
                     return;
                 
-                bool isArtificer = ModManager.MSC && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Artificer;
-                bool isRivulet = ModManager.MSC && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Rivulet;
+                bool isArtificer   = ModManager.MSC && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Artificer;
+                bool isRivulet     = ModManager.MSC && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Rivulet;
                 bool isSpearmaster = ModManager.MSC && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Spear;
-                bool isSaint = ModManager.MSC && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint;
+                bool isSaint       = ModManager.MSC && self.player.SlugCatClass == MoreSlugcatsEnums.SlugcatStatsName.Saint;
                 
                 // Body and eye color
                 Color bodyColor = oPlayer.IsSeeker
