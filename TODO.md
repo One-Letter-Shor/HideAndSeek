@@ -15,6 +15,7 @@ Features:
 - Consider some way to prevent stun locking of seekers.
 - Hiders and seekers should have different banned slugcats.
 - Add support for story.
+- Protect against all weapon friendly fire.
 
 Refactors:
 - Update Options class design after making story and arena game modes.

@@ -66,7 +66,7 @@ public static class RainWorldHooks
         orig(self, otherObject, chunkIndex, otherChunkIndex);
     }
     
-    // Tag players when hit by a rock
+    // Tag players when hit by a rock and protect against friendly fire.
     private static bool On_Rock_HitSomething(
         On.Rock.orig_HitSomething orig,
         Rock self,
@@ -93,6 +93,9 @@ public static class RainWorldHooks
                 Logger.Debug($"I tagged {hitOCreature.owner} with a rock!");
                 hideAndSeek.AddSeeker(hitOCreature.owner);
             }
+            
+            if (throwerOCreature.owner.IsSeeker == hitOCreature.owner.IsSeeker)
+                return false;
         }
         
         return hasHit;
