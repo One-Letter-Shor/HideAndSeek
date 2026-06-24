@@ -9,8 +9,8 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
     public const string
         SeekerAtlasElementName = "HunterA",
         HiderAtlasElementName = "SaintA";
-    public static Color SeekerUIColor { get; } = new(0.80f, 0.10f, 0.10f);
-    public static Color HiderUIColor { get; }  = new(0.10f, 0.60f, 0.10f);
+    public Color SeekerUIColor => LobbyData.SeekerBodyColor;
+    public Color HiderUIColor { get; } = new(0.10f, 0.60f, 0.10f);
     
     public HideAndSeekSettingsTab? SettingsTab { get; private set; }
     
@@ -45,6 +45,25 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
         display.username?.color = color;
         
         return color;
+    }
+    
+    public override Color GetPortraitColor(ArenaOnlineGameMode __, OnlinePlayer? oPlayer, Color originalColor)
+    {
+        if (oPlayer is null)
+        {
+            Logger.Warning($"Null player. Color: {originalColor}");
+            return base.GetPortraitColor(ArenaOnline, oPlayer, originalColor);
+        }
+        
+        ArenaClientSettings? clientData = ArenaHelpers.GetDataSettings<ArenaClientSettings>(oPlayer);
+        Assert(clientData is not null);
+        
+        if (clientData.playingAs == RainMeadow.RainMeadow.Ext_SlugcatStatsName.OnlineOverseerSpectator)
+            return originalColor;
+        else
+            return oPlayer.IsSeeker
+                ? SeekerUIColor
+                : HiderUIColor;
     }
     
     public override void OnUIEnabled(ArenaOnlineLobbyMenu menu)
