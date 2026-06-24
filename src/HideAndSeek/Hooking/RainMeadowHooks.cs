@@ -112,8 +112,12 @@ public static class RainMeadowHooks
         
         if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
         {
-            if (OnlineManager.lobby.isOwner && arenaOnline.lobbyCountDown > 0)
+            if (OnlineManager.lobby.isOwner &&
+                arenaOnline.lobbyCountDown > 0 &&
+                hideAndSeek.LobbyData.EnabledSeekerSelection == SeekerSelection.Random)
+            {
                 hideAndSeek.ChooseRandomSeekers();
+            }
         }
         
         orig(self);
