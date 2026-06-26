@@ -11,6 +11,8 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
 {
     public static bool CanApplySettings { get; set; } = true;
     
+    public bool AreSeekerDebugToolsEnabled   { get; set => ApplySetting(value, out field, Plugin.Options.CfgAreSeekerDebugToolsEnabled); } = Plugin.Options.AreSeekerDebugToolsEnabled;
+    
     public int               HideDurationSeconds      { get; set => ApplySetting(value, out field, Plugin.Options.CfgHideDurationSeconds);    } = Plugin.Options.HideDurationSeconds;
     public int               SeekDurationSeconds      { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekDurationSeconds);    } = Plugin.Options.SeekDurationSeconds;
     public int               SeekerCount              { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerCount);            } = Plugin.Options.SeekerCount;
@@ -18,9 +20,11 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
     public TaggingMethods    EnabledTaggingMethods    { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledTaggingMethods);  } = Plugin.Options.EnabledTaggingMethods;
     public TagResult         EnabledTagResult         { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledTagResult);       } = Plugin.Options.EnabledTagResult;
     
-    public Color             SeekerBodyColor          { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerBodyColor);        } = Plugin.Options.SeekerBodyColor;
-    public Color             SeekerEyeColor           { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerEyeColor);         } = Plugin.Options.SeekerEyeColor;
-    public Color             SeekerTertiaryColor      { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerTertiaryColor);    } = Plugin.Options.SeekerTertiaryColor;
+    public Color SeekerBodyColor       { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerBodyColor);     } = Plugin.Options.SeekerBodyColor;
+    public Color SeekerEyeColor        { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerEyeColor);      } = Plugin.Options.SeekerEyeColor;
+    public Color SeekerTertiaryColor   { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerTertiaryColor); } = Plugin.Options.SeekerTertiaryColor;
+    
+    // TODO: Add documentation for Seekers and InitialSeekers. The documentation should include the helper properties & methods and why this should not be directly accessed for adding and removing players.
     
     public List<OnlinePlayer> Seekers
     {
@@ -37,9 +41,6 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
     /// <summary>
     /// The <see cref="OnlinePlayer"/>s who started as seekers.
     /// </summary>
-    /// <remarks>
-    /// This is only set from <see cref="HideAndSeekMode.ArenaSessionCtor"/>.
-    /// </remarks>
     public List<OnlinePlayer> InitialSeekers
     {
         get;
@@ -78,7 +79,12 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
     
     internal sealed class State : ResourceDataState
     {
-        private const string _settings = nameof(_settings);
+        private const string
+            _settings = nameof(_settings),
+            _debug = nameof(_debug);
+        
+        [OnlineField(group = _debug)]
+        public bool AreSeekerDebugToolsEnabled;
         
         [OnlineField(group = _settings)]
         public int HideDurationSeconds;
@@ -124,6 +130,8 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
             
             if (!HideAndSeekMode.IsHideAndSeekMode(out _)) return;
             
+            AreSeekerDebugToolsEnabled = data.AreSeekerDebugToolsEnabled;
+            
             HideDurationSeconds    = data.HideDurationSeconds;
             SeekDurationSeconds    = data.SeekDurationSeconds;
             SeekerCount            = data.SeekerCount;
@@ -145,6 +153,8 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
             Assert(onlineResource is Lobby);
             
             if (!HideAndSeekMode.IsHideAndSeekMode(out _)) return;
+            
+            data.AreSeekerDebugToolsEnabled = AreSeekerDebugToolsEnabled;
             
             data.HideDurationSeconds    = HideDurationSeconds;
             data.SeekDurationSeconds    = SeekDurationSeconds;

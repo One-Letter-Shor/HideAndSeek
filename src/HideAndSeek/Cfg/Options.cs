@@ -124,6 +124,12 @@ public sealed class Options : OptionInterface
         set => CfgSeekerTertiaryColor.Value = value;
     }
     
+    /// <inheritdoc cref="CfgAreSeekerDebugToolsEnabled"/>
+    public bool AreSeekerDebugToolsEnabled
+    {
+        get => CfgAreSeekerDebugToolsEnabled.Value;
+        set => CfgAreSeekerDebugToolsEnabled.Value = value;
+    }
     
     
     // TODO: Add documentation for all configurables.
@@ -151,6 +157,7 @@ public sealed class Options : OptionInterface
     public Configurable<Color> CfgSeekerBodyColor { get; }
     public Configurable<Color> CfgSeekerEyeColor { get; }
     public Configurable<Color> CfgSeekerTertiaryColor { get; }
+    public Configurable<bool> CfgAreSeekerDebugToolsEnabled { get; }
     
     
     
@@ -182,18 +189,18 @@ public sealed class Options : OptionInterface
         
         CfgIsWillingToSeek = BindCfg(nameof(IsWillingToSeek), true);
         
-        CfgHideDurationSeconds = BindCfg(nameof(HideDurationSeconds), 10);
-        CfgSeekDurationSeconds = BindCfg(nameof(SeekDurationSeconds), 60 * 8);
-        CfgSeekerCount = BindCfg(nameof(SeekerCount), 1, new ConfigAcceptableRange<int>(1, 99));
+        CfgHideDurationSeconds    = BindCfg(nameof(HideDurationSeconds), 10);
+        CfgSeekDurationSeconds    = BindCfg(nameof(SeekDurationSeconds), 60 * 8);
+        CfgSeekerCount            = BindCfg(nameof(SeekerCount), 1, new ConfigAcceptableRange<int>(1, 99));
         CfgEnabledSeekerSelection = BindCfg(nameof(EnabledSeekerSelection), SeekerSelection.Random);
-        CfgEnabledTaggingMethods = BindCfg(nameof(EnabledTaggingMethods), TaggingMethods.All, new ConfigAcceptableRange<TaggingMethods>(TaggingMethods.None + 1, TaggingMethods.All));
-        CfgEnabledTagResult = BindCfg(nameof(EnabledTagResult), TagResult.Ghost);
+        CfgEnabledTaggingMethods  = BindCfg(nameof(EnabledTaggingMethods), TaggingMethods.All, new ConfigAcceptableRange<TaggingMethods>(TaggingMethods.None + 1, TaggingMethods.All));
+        CfgEnabledTagResult       = BindCfg(nameof(EnabledTagResult), TagResult.Ghost);
         
         CfgSeekerBodyColor     = BindCfg(nameof(SeekerBodyColor),     new Color(1.00f, 0.00f, 0.00f));
         CfgSeekerEyeColor      = BindCfg(nameof(SeekerEyeColor),      new Color(0.00f, 1.00f, 0.00f));
         CfgSeekerTertiaryColor = BindCfg(nameof(SeekerTertiaryColor), new Color(0.00f, 0.00f, 1.00f));
         
-        
+        CfgAreSeekerDebugToolsEnabled = BindDevToggleCfg(nameof(AreSeekerDebugToolsEnabled), true, new Vector2Int(0, 0), "Enable seeker debug tools");
         IsInitialized = true;
     }
     

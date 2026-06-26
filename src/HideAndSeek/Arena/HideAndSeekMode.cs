@@ -23,13 +23,25 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     public HideAndSeekClientData MyClientData => OnlineManager.lobby!
                                                               .clientSettings[OnlineManager.mePlayer]
                                                               .GetData<HideAndSeekClientData>();
-    public bool IsSeekingTimeOver => ArenaOnline.session.exitManager.world.rainCycle.TimeUntilRain <= RainCycleEndGraceTicks;
+    
+    /// <exception cref="InvalidOperationException">Thrown if not in a game.</exception>
+    public bool IsSeekingTimeOver
+    {
+        get
+        {
+            if (!GameHelper.IsInGame)
+                throw new InvalidOperationException("Not in a game.");
+            
+            return ArenaOnline.session!.exitManager.world.rainCycle.TimeUntilRain <= RainCycleEndGraceTicks;
+        }
+    }
     
     public override int TimerDuration
     {
         get => throw new InvalidOperationException("This should not be used.");
         set => throw new InvalidOperationException("This should not be used.");
     }
+    
     public override ArenaSetup.GameTypeID GetGameModeId => Id;
     
     /// <summary>Determines if the current game mode is Hide and Seek.</summary>
@@ -59,6 +71,171 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         }
         
         return false;
+    }
+    
+    /// <summary>
+    /// Determines whether an <see cref="OnlinePlayer"/> can select
+    /// the other specified <see cref="OnlinePlayer"/> to be a seeker.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when the following are all true:<br/>
+    /// - <paramref name="seekerSelection"/> is not <see cref="SeekerSelection.Random"/>.<br/>
+    /// - The <paramref name="selector"/> and <paramref name="target"/>
+    /// are valid based on the value of <paramref name="seekerSelection"/>.<br/>
+    /// Otherwise, <see langword="false"/>.
+    /// </returns>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    public bool CanSelectSeeker(
+        SeekerSelection seekerSelection,
+        OnlinePlayer selector,
+        OnlinePlayer target)
+    {
+        return CanSelectSeeker(seekerSelection, selector, target, out _);
+    }
+    
+    /// <inheritdoc cref="CanSelectSeeker(SeekerSelection, OnlinePlayer, OnlinePlayer)"/>
+    public bool CanSelectSeeker(
+        SeekerSelection seekerSelection,
+        OnlinePlayer selector,
+        OnlinePlayer target,
+        [NotNullWhen(false)] out string? failureReason)
+    {
+        bool isSelectorHost = selector == OnlineManager.lobby!.owner;
+        failureReason = null;
+        
+        switch (seekerSelection)
+        {
+            case SeekerSelection.Random:
+                failureReason = "Seeker selection is random. No one can select seekers.";
+                return false;
+            
+            case SeekerSelection.Host:
+                if (isSelectorHost)
+                    return true;
+                else
+                {
+                    failureReason = $"Selector ({selector}) is not the host.";
+                    return false;
+                }
+            
+            case SeekerSelection.Self:
+                if (selector == target)
+                    return true;
+                else
+                {
+                    failureReason = $"Selector ({selector}) can only select themselves. (target is {target}).";
+                    return false;
+                }
+            
+            default:
+                throw new ArgumentOutOfRangeException(
+                    nameof(seekerSelection),
+                    seekerSelection,
+                    $"Unrecognized {nameof(SeekerSelection)}."
+                );
+        }
+    }
+    
+    /// <summary>
+    /// Determines whether an <see cref="OnlinePlayer"/>
+    /// can tag the other specified <see cref="OnlinePlayer"/>.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/> when the following are all true:<br/>
+    /// - There is still time for seekers to seek. (It is not about to rain)<br/>
+    /// - <paramref name="tagger"/> is not trying to tag themself.<br/>
+    /// - <paramref name="tagger"/> is a seeker.<br/>
+    /// - <paramref name="target"/> is not a seeker.<br/>
+    /// Otherwise, <see langword="false"/>.
+    /// </returns>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    public bool CanTagPlayer(OnlinePlayer tagger, OnlinePlayer target)
+    {
+        return CanTagPlayer(tagger, target, out _);
+    }
+    
+    /// <inheritdoc cref="CanTagPlayer(OnlinePlayer, OnlinePlayer)"/>
+    /// <exception cref="InvalidOperationException">Thrown if not in a game.</exception>
+    public bool CanTagPlayer(
+        OnlinePlayer tagger,
+        OnlinePlayer target,
+        [NotNullWhen(false)] out string? failureReason)
+    {
+        failureReason = null;
+        List<string> failureReasons = [];
+        
+        if (IsSeekingTimeOver)
+            failureReasons.Add("Seeking time is over.");
+        if (tagger == target)
+            failureReasons.Add($"Tagger ({tagger}) is trying to tag themself.");
+        if (!tagger.IsSeeker)
+            failureReasons.Add($"Tagger ({tagger}) is not a seeker.");
+        if (target.IsSeeker)
+            failureReasons.Add($"Target ({target}) is a seeker.");
+        
+        if (failureReasons.Count > 0)
+        {
+            failureReason = string.Join(" ", failureReasons);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    public override bool SpawnBatflies(FliesWorldAI fliesWorldAI, int spawnRoom) => false;
+    
+    public override string TimerText() => "Quickly, hide!";
+    
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    public override int SetTimer(ArenaOnlineGameMode __) => ArenaOnline.setupTime = LobbyData.HideDurationSeconds;
+    
+    /// <exception cref="InvalidOperationException">Thrown if not in a game.</exception>
+    public override bool IsExitsOpen(
+        ArenaOnlineGameMode __,
+        ExitManager.orig_ExitsOpen orig,
+        ArenaBehaviors.ExitManager exitManager)
+    {
+        bool areAllPlayersSeekers = ArenaOnlineHelper.GetPlayingOPlayers(ArenaOnline)
+                                                     .All(oPlayer => oPlayer.IsSeeker);
+        
+        return IsSeekingTimeOver || areAllPlayersSeekers;
+    }
+    
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    public void TagPlayer(OnlinePlayer oPlayer)
+    {
+        if (OnlineManager.lobby!.isOwner)
+            TagPlayerRpc(null, oPlayer);
+        else
+            OnlineManager.lobby.owner.InvokeRPC(TagPlayerRpc, oPlayer);
+    }
+    
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    [RPCMethod]
+    public static void TagPlayerRpc(RPCEvent? rpcEvent, OnlinePlayer target)
+    {
+        Assert(rpcEvent?.from.isMe != true);
+        string fromText = "From: " + (rpcEvent?.from.ToString() ?? "(local)") + ".";
+        OnlinePlayer tagger = rpcEvent?.from ?? OnlineManager.mePlayer;
+        
+        if (!OnlineManager.lobby!.isOwner)
+        {
+            Logger.Warning($"Me player is not the host. {fromText}");
+            return;
+        }
+        if (!IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
+        {
+            Logger.Warning($"The game mode is not Hide and Seek. {fromText}");
+            return;
+        }
+        if (hideAndSeek.CanTagPlayer(tagger, target, out string? failureReason))
+        {
+            Logger.Debug($"{tagger} is trying to tag {target} when they cannot. Reason: {failureReason} {fromText}");
+            return;
+        }
+        
+        Logger.Debug($"Making {target} a seeker. {fromText}");
+        hideAndSeek.LobbyData.Seekers.Add(target);
     }
     
     /// <exception cref="InvalidOperationException">
@@ -95,7 +272,8 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
             );
         }
         
-        LobbyData.Seekers = selectedSeekers;
+        LobbyData.Seekers        = selectedSeekers.ToList();
+        LobbyData.InitialSeekers = selectedSeekers.ToList();
         
         return;
         
@@ -126,122 +304,258 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         }
     }
     
-    public override bool SpawnBatflies(FliesWorldAI fliesWorldAI, int spawnRoom) => false;
-    
-    public override string TimerText() => "Quickly, hide!";
-    
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
-    public override int SetTimer(ArenaOnlineGameMode __) => ArenaOnline.setupTime = LobbyData.HideDurationSeconds;
-    
-    public override bool IsExitsOpen(
-        ArenaOnlineGameMode __,
-        ExitManager.orig_ExitsOpen orig,
-        ArenaBehaviors.ExitManager exitManager)
-    {
-        bool areAllPlayersSeekers = ArenaOnlineHelper.GetPlayingOPlayers(ArenaOnline)
-                                                     .All(oPlayer => oPlayer.IsSeeker);
-        
-        return IsSeekingTimeOver || areAllPlayersSeekers;
-    }
-    
-    public override void ArenaSessionCtor(
-        ArenaOnlineGameMode __,
-        On.ArenaGameSession.orig_ctor orig,
-        ArenaGameSession arena,
-        RainWorldGame game)
+    public void SelectSeeker(OnlinePlayer target)
     {
         if (OnlineManager.lobby!.isOwner)
-            LobbyData.InitialSeekers = LobbyData.Seekers.ToList(); // Clone it, don't set the reference!!!! (I made this mistake)
-        
-        base.ArenaSessionCtor(ArenaOnline, orig, arena, game);
+            SelectSeekerRpc(null, target);
+        else
+            OnlineManager.lobby.owner.InvokeRPC(SelectSeekerRpc, target);
     }
     
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
-    public void AddSeeker(OnlinePlayer oPlayer)
+    public void DeselectSeeker(OnlinePlayer target)
     {
         if (OnlineManager.lobby!.isOwner)
-            MakeSeekerRpc(null, oPlayer);
+            DeselectSeekerRpc(null, target);
         else
-            OnlineManager.lobby.owner.InvokeRPC(MakeSeekerRpc, oPlayer);
+            OnlineManager.lobby.owner.InvokeRPC(DeselectSeekerRpc, target);
     }
     
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
-    public void RemoveSeeker(OnlinePlayer oPlayer)
+    public void ToggleSelectSeeker(OnlinePlayer target)
     {
-        if (OnlineManager.lobby!.isOwner)
-            RemoveSeekerRpc(null, oPlayer);
+        if (target.IsSeeker)
+            DeselectSeeker(target);
         else
-            OnlineManager.lobby.owner.InvokeRPC(RemoveSeekerRpc, oPlayer);
-    }
-    
-    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
-    public void ToggleSeeker(OnlinePlayer oPlayer)
-    {
-        if (oPlayer.IsSeeker)
-            RemoveSeeker(oPlayer);
-        else
-            AddSeeker(oPlayer);
+            SelectSeeker(target);
     }
     
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     [RPCMethod]
-    private static void MakeSeekerRpc(RPCEvent? rpcEvent, OnlinePlayer oPlayer)
+    public static void SelectSeekerRpc(RPCEvent? rpcEvent, OnlinePlayer target)
     {
         Assert(rpcEvent?.from.isMe != true);
+        string fromText = "From: " + (rpcEvent?.from.ToString() ?? "(local)") + ".";
+        OnlinePlayer selector = rpcEvent?.from ?? OnlineManager.mePlayer;
         
         if (!OnlineManager.lobby!.isOwner)
         {
-            Logger.Warning($"Received {nameof(MakeSeekerRpc)} when not the host.");
-            return;
-        }
-        if (OnlineManager.lobby.gameMode is not ArenaOnlineGameMode arenaOnline)
-        {
-            Logger.Warning($"Received {nameof(MakeSeekerRpc)} when the online game mode ({OnlineManager.lobby!.gameMode}) is not Arena Online.");
+            Logger.Warning($"Me player is not the host. {fromText}");
             return;
         }
         if (!IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
         {
-            Logger.Warning($"Received {nameof(MakeSeekerRpc)} when the game mode ({arenaOnline.currentGameMode}) is not Hide and Seek.");
+            Logger.Warning($"The game mode is not Hide and Seek. {fromText}");
             return;
         }
-        if (oPlayer.IsSeeker)
+        if (!hideAndSeek.CanSelectSeeker(hideAndSeek.LobbyData.EnabledSeekerSelection, selector, target, out string? failureReason))
         {
-            Logger.Debug($"Received {nameof(MakeSeekerRpc)} when {oPlayer.id.name} is already a seeker.");
+            Logger.Debug($"{selector} cannot select {target}. Reason: {failureReason}");
             return;
+        }
+        if (target.IsSeeker != target.IsAnInitialSeeker)
+        {
+            Logger.Warning(
+                "Player has inconsistent seeker flags during selection. " +
+                $"Is seeker: {target.IsSeeker}. Is an initial seeker: {target.IsAnInitialSeeker}. {fromText}"
+            );
         }
         
-        Logger.Debug($"Making {oPlayer.id.name} a seeker. From: {rpcEvent?.from.id.name ?? "(self)"}");
+        // If this logic changes, ensure SelectRandomSeekers is up to date.
+        if (!target.IsSeeker)
+        {
+            Logger.Debug($"Selecting {target} to be seeker. {fromText}");
+            hideAndSeek.LobbyData.Seekers.Add(target);
+        }
+        if (!target.IsAnInitialSeeker)
+            hideAndSeek.LobbyData.InitialSeekers.Add(target);
+    }
+    
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    [RPCMethod]
+    public static void DeselectSeekerRpc(RPCEvent? rpcEvent, OnlinePlayer target)
+    {
+        Assert(rpcEvent?.from.isMe != true);
+        string fromText = "From: " + (rpcEvent?.from.ToString() ?? "(local)") + ".";
+        OnlinePlayer selector = rpcEvent?.from ?? OnlineManager.mePlayer;
+        
+        if (!OnlineManager.lobby!.isOwner)
+        {
+            Logger.Warning($"Me player is not the host. {fromText}");
+            return;
+        }
+        if (!IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
+        {
+            Logger.Warning($"The game mode is not Hide and Seek. {fromText}");
+            return;
+        }
+        if (!hideAndSeek.CanSelectSeeker(hideAndSeek.LobbyData.EnabledSeekerSelection, selector, target, out string? failureReason))
+        {
+            Logger.Debug($"{selector} cannot select {target}. Reason: {failureReason} {fromText}");
+            return;
+        }
+        if (target.IsSeeker != target.IsAnInitialSeeker)
+        {
+            Logger.Error(
+                "Player has inconsistent seeker flags during selection. " +
+                $"Is seeker: {target.IsSeeker}. Is an initial seeker: {target.IsAnInitialSeeker}. {fromText}"
+            );
+        }
+        
+        if (target.IsSeeker)
+        {
+            Logger.Debug($"Deselecting {target} from being a seeker. {fromText}");
+            hideAndSeek.LobbyData.Seekers.Remove(target);
+        }
+        
+        if (target.IsAnInitialSeeker)
+            hideAndSeek.LobbyData.InitialSeekers.Remove(target);
+    }
+    
+    
+    
+    
+    /// <exception cref="InvalidOperationException">Thrown if seeker debug tools are not enabled.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    public void DebugAddSeeker(OnlinePlayer target)
+    {
+        if (!LobbyData.AreSeekerDebugToolsEnabled)
+            throw new InvalidOperationException("Seeker debug tools are not enabled.");
+        
+        if (OnlineManager.lobby!.isOwner)
+            DebugAddSeekerRpc(null, target);
+        else
+            OnlineManager.lobby.owner.InvokeRPC(DebugAddSeekerRpc, target);
+    }
+    
+    /// <exception cref="InvalidOperationException">Thrown if seeker debug tools are not enabled.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    public void DebugRemoveSeeker(OnlinePlayer oPlayer)
+    {
+        if (!LobbyData.AreSeekerDebugToolsEnabled)
+            throw new InvalidOperationException("Seeker debug tools are not enabled.");
+        
+        if (OnlineManager.lobby!.isOwner)
+            DebugRemoveSeekerRpc(null, oPlayer);
+        else
+            OnlineManager.lobby.owner.InvokeRPC(DebugRemoveSeekerRpc, oPlayer);
+    }
+    
+    /// <exception cref="InvalidOperationException">Thrown if seeker debug tools are not enabled.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    public void DebugToggleSeeker(OnlinePlayer oPlayer)
+    {
+        if (!LobbyData.AreSeekerDebugToolsEnabled)
+            throw new InvalidOperationException("Seeker debug tools are not enabled.");
+        
+        if (oPlayer.IsSeeker)
+            DebugRemoveSeeker(oPlayer);
+        else
+            DebugAddSeeker(oPlayer);
+    }
+    
+    /// <exception cref="InvalidOperationException">Thrown if seeker debug tools are not enabled.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    public void DebugAddInitialSeeker(OnlinePlayer oPlayer)
+    {
+        if (!LobbyData.AreSeekerDebugToolsEnabled)
+            throw new InvalidOperationException("Seeker debug tools are not enabled.");
+        
+        if (OnlineManager.lobby!.isOwner)
+            DebugAddInitialSeekerRpc(null, oPlayer);
+        else
+            OnlineManager.lobby.owner.InvokeRPC(DebugAddInitialSeekerRpc, oPlayer);
+    }
+    
+    /// <exception cref="InvalidOperationException">Thrown if seeker debug tools are not enabled.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    public void DebugRemoveInitialSeeker(OnlinePlayer oPlayer)
+    {
+        if (!LobbyData.AreSeekerDebugToolsEnabled)
+            throw new InvalidOperationException("Seeker debug tools are not enabled.");
+        
+        if (OnlineManager.lobby!.isOwner)
+            DebugRemoveInitialSeekerRpc(null, oPlayer);
+        else
+            OnlineManager.lobby.owner.InvokeRPC(DebugRemoveInitialSeekerRpc, oPlayer);
+    }
+    
+    /// <exception cref="InvalidOperationException">Thrown if seeker debug tools are not enabled.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    public void DebugToggleInitialSeeker(OnlinePlayer oPlayer)
+    {
+        if (!LobbyData.AreSeekerDebugToolsEnabled)
+            throw new InvalidOperationException("Seeker debug tools are not enabled.");
+        
+        if (oPlayer.IsAnInitialSeeker)
+            DebugRemoveInitialSeeker(oPlayer);
+        else
+            DebugAddInitialSeeker(oPlayer);
+    }
+    
+    
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    [RPCMethod]
+    public static void DebugAddSeekerRpc(RPCEvent? rpcEvent, OnlinePlayer oPlayer)
+    {
+        Assert(rpcEvent?.from.isMe != true);
+        string fromText = "From: " + (rpcEvent?.from.ToString() ?? "(local)") + ".";
+        
+        if (!OnlineManager.lobby!.isOwner) return;
+        if (!IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek)) return;
+        if (!hideAndSeek.LobbyData.AreSeekerDebugToolsEnabled) return;
+        if (oPlayer.IsSeeker) return;
+        
+        Logger.Debug($"(Debug) Adding {oPlayer} to seekers. {fromText}");
         hideAndSeek.LobbyData.Seekers.Add(oPlayer);
     }
     
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     [RPCMethod]
-    private static void RemoveSeekerRpc(RPCEvent? rpcEvent, OnlinePlayer oPlayer)
+    public static void DebugRemoveSeekerRpc(RPCEvent? rpcEvent, OnlinePlayer oPlayer)
     {
         Assert(rpcEvent?.from.isMe != true);
+        string fromText = "From: " + (rpcEvent?.from.ToString() ?? "(local)") + ".";
         
-        if (!OnlineManager.lobby!.isOwner)
-        {
-            Logger.Warning($"Received {nameof(RemoveSeekerRpc)} when not the host.");
-            return;
-        }
-        if (OnlineManager.lobby.gameMode is not ArenaOnlineGameMode arenaOnline)
-        {
-            Logger.Warning($"Received {nameof(RemoveSeekerRpc)} when the online game mode ({OnlineManager.lobby!.gameMode}) is not Arena Online.");
-            return;
-        }
-        if (!IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
-        {
-            Logger.Warning($"Received {nameof(RemoveSeekerRpc)} when the game mode ({arenaOnline.currentGameMode}) is not Hide and Seek.");
-            return;
-        }
-        if (!oPlayer.IsSeeker)
-        {
-            Logger.Debug($"Received {nameof(RemoveSeekerRpc)} when {oPlayer.id.name} is already a Hider.");
-            return;
-        }
+        if (!OnlineManager.lobby!.isOwner) return;
+        if (!IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek)) return;
+        if (!hideAndSeek.LobbyData.AreSeekerDebugToolsEnabled) return;
+        if (!oPlayer.IsSeeker) return;
         
-        Logger.Debug($"Removing {oPlayer.id.name} from seekers. From: {rpcEvent?.from.id.name ?? "(self)"}");
+        Logger.Debug($"(Debug) Removing {oPlayer} from seekers. {fromText}");
         hideAndSeek.LobbyData.Seekers.Remove(oPlayer);
+    }
+    
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    [RPCMethod]
+    public static void DebugAddInitialSeekerRpc(RPCEvent? rpcEvent, OnlinePlayer oPlayer)
+    {
+        Assert(rpcEvent?.from.isMe != true);
+        string fromText = "From: " + (rpcEvent?.from.ToString() ?? "(local)") + ".";
+        
+        if (!OnlineManager.lobby!.isOwner) return;
+        if (!IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek)) return;
+        if (!hideAndSeek.LobbyData.AreSeekerDebugToolsEnabled) return;
+        if (oPlayer.IsAnInitialSeeker) return;
+        
+        Logger.Debug($"(Debug) Adding {oPlayer} to initial seekers. {fromText}");
+        hideAndSeek.LobbyData.InitialSeekers.Add(oPlayer);
+    }
+    
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    [RPCMethod]
+    public static void DebugRemoveInitialSeekerRpc(RPCEvent? rpcEvent, OnlinePlayer oPlayer)
+    {
+        Assert(rpcEvent?.from.isMe != true);
+        string fromText = "From: " + (rpcEvent?.from.ToString() ?? "(local)") + ".";
+        
+        if (!OnlineManager.lobby!.isOwner) return;
+        if (!IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek)) return;
+        if (!hideAndSeek.LobbyData.AreSeekerDebugToolsEnabled) return;
+        if (!oPlayer.IsAnInitialSeeker) return;
+        
+        Logger.Debug($"(Debug) Removing {oPlayer} from initial seekers. {fromText}");
+        hideAndSeek.LobbyData.InitialSeekers.Remove(oPlayer);
     }
 }

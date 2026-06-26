@@ -8,11 +8,15 @@ internal static class ArenaOnlineHelper
     /// Finds all the <see cref="OnlinePlayer"/>s who
     /// are in the actual game and not a spectator.
     /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if not in a game.</exception>
     internal static List<OnlinePlayer> GetPlayingOPlayers(ArenaOnlineGameMode arenaOnline)
     {
+        if (!GameHelper.IsInGame)
+            throw new InvalidOperationException("Not in a game.");
+        
         List<OnlinePlayer> playingOPlayers = [];
         
-        ArenaSitting arenaSitting = arenaOnline.session.arenaSitting;
+        ArenaSitting arenaSitting = arenaOnline.session!.arenaSitting;
         
         foreach (ArenaSitting.ArenaPlayer arenaPlayer in arenaSitting.players)
         {

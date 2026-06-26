@@ -5,14 +5,13 @@ Issues:
 - Configurables in the lobby UI do not save.
 - Figure out when and why GetOnlineCreature() returns null. Currently some code relies on it not returning null.
 - The Hide and Seek tab has UI elements which poorly overlap. It needs to be redesigned.
-- The current way to switch teams via hotkeys breaks some logic as the player is left in the initial seeker list but not the seeker list. There needs to be a special list and RPCs for this debugging tool.
 - Seekers and initial seekers need to be reselected every arena session end.
 
 Features:
 - Change Rain Meadow's scoring to reflect seeker and hider scores.
 - Implement all tag results.
 - Seekers should not be able to see, move, or tag during the safety timer. (look in GameplayOverrides.cs something like HaltPlayerMovement)
-- Hiders can change their colors during the safety timer.
+- Hiders should be able to change their colors in game. For balancing purposes they should only be able to change colors during fixed times. Perhaps during the hiding timer works well.
 - Hiders may not hide inside walls. (move them to the last airpocket if in wall for too long)
 - Consider some way to prevent stun locking of seekers.
 - Hiders and seekers should have different banned slugcats.
@@ -24,6 +23,10 @@ Refactors:
 - Update Options class design after making story and arena game modes.
 - Figure out naming of RPCs and how they should behave.
 - Decide on how to abbreviate types like OnlineCreature.
+
+Testing:
+- Make clients send RPCs incorrectly to ensure the host handles them correctly.
+- Play with high ping to ensure code is reliable.
 
 Misc:
 - Write external arena documentation for Rain Meadow after finishing.

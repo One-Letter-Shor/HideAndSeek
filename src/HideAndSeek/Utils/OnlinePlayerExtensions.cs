@@ -62,6 +62,7 @@ public static class OnlinePlayerExtensions
         /// - The external game mode is not <see cref="HideAndSeekMode"/>.
         /// </exception>
         /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+        /// <remarks>Equivalent to <c>IsSeeker &amp;&amp; !IsAnInfectedSeeker</c>.</remarks>
         public bool IsAnInfectedSeeker => self.IsSeeker && !self.IsAnInitialSeeker;
     }
 }

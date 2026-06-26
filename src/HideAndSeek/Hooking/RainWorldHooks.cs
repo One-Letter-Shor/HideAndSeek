@@ -24,12 +24,13 @@ public static class RainWorldHooks
         RainWorldGame self,
         float timeStacker)
     {
-        if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
+        if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
+            hideAndSeek.LobbyData.AreSeekerDebugToolsEnabled)
         {
             if (Input.GetKeyDown(KeyCode.PageDown))
-                hideAndSeek.AddSeeker(OnlineManager.mePlayer!);
+                hideAndSeek.DebugToggleSeeker(OnlineManager.mePlayer!);
             if (Input.GetKeyDown(KeyCode.End))
-                hideAndSeek.RemoveSeeker(OnlineManager.mePlayer!);
+                hideAndSeek.DebugToggleInitialSeeker(OnlineManager.mePlayer!);
         }
         
         orig(self, timeStacker);
@@ -59,7 +60,7 @@ public static class RainWorldHooks
                 selfOCreature.CanTag(otherOCreature))
             {
                 Logger.Debug($"I tagged {otherOCreature.owner} by contact!");
-                hideAndSeek.AddSeeker(otherOCreature.owner);
+                hideAndSeek.TagPlayer(otherOCreature.owner);
             }
         }
         
@@ -91,7 +92,7 @@ public static class RainWorldHooks
                 throwerOCreature.CanTag(hitOCreature))
             {
                 Logger.Debug($"I tagged {hitOCreature.owner} with a rock!");
-                hideAndSeek.AddSeeker(hitOCreature.owner);
+                hideAndSeek.TagPlayer(hitOCreature.owner);
             }
             
             if (throwerOCreature.owner.IsSeeker == hitOCreature.owner.IsSeeker)
@@ -341,7 +342,7 @@ public static class RainWorldHooks
                             saintOCreature.CanTag(otherOCreature))
                         {
                             Logger.Debug($"I tagged {otherOCreature.owner} with ascension!");
-                            hideAndSeek.AddSeeker(otherOCreature.owner);
+                            hideAndSeek.TagPlayer(otherOCreature.owner);
                         }
                         
                         return true;

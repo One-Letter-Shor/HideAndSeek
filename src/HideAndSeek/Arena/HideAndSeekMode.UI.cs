@@ -10,6 +10,8 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
     public const string
         SeekerAtlasElementName = "HunterA",
         HiderAtlasElementName = "SaintA";
+    
+    public Color ErrorColor => Color.gray;
     public Color InitialSeekerUIColor => LobbyData.SeekerBodyColor;
     public Color InfectedSeekerUIColor => InitialSeekerUIColor.ToHSL().lightness < 0.7f
                                               ? Color.Lerp(InitialSeekerUIColor, Color.white, 0.32f)
@@ -37,8 +39,14 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
     /// is used if spectators need to be handled differently.
     /// </remarks>
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
-    public Color GetOPlayerUIColor(OnlinePlayer oPlayer)
+    public Color GetPlayerUIColor(OnlinePlayer oPlayer)
     {
+        if (oPlayer.IsAnInitialSeeker && !oPlayer.IsSeeker)
+        {
+            Logger.Error($"Player ({oPlayer}) cannot logically be an initial seeker but not a seeker.");
+            return ErrorColor;
+        }
+        
         if (oPlayer.IsAnInitialSeeker)
             return InitialSeekerUIColor;
         else if (oPlayer.IsAnInfectedSeeker)
@@ -69,7 +77,7 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
         SlugcatCustomization customization,
         OnlinePlayer oPlayer)
     {
-        Color color = GetOPlayerUIColor(oPlayer);
+        Color color = GetPlayerUIColor(oPlayer);
         
         // Note: On the first IconColor call, the UI elements are not initialized.
         display.arrowSprite?.color = color;
@@ -91,7 +99,7 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
         if (clientData.playingAs == RainMeadow.RainMeadow.Ext_SlugcatStatsName.OnlineOverseerSpectator)
             return originalColor;
         
-        return GetOPlayerUIColor(oPlayer);
+        return GetPlayerUIColor(oPlayer);
     }
     
     public override void OnUIEnabled(ArenaOnlineLobbyMenu menu)
@@ -127,7 +135,7 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
                 
                 if (playerBox is null)
                 {
-                    Logger.Error(
+                    Logger.Warning(
                         $"""
                          Unable to find the arena player box that owns the slugcat button.
                          - selected object: {menu.selectedObject}
@@ -138,15 +146,10 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
                     return;
                 }
                 
-                OnlinePlayer oPlayer = playerBox.profileIdentifier;
+                OnlinePlayer target = playerBox.profileIdentifier;
                 
-                if (LobbyData.EnabledSeekerSelection == SeekerSelection.Host &&
-                    OnlineManager.lobby!.isOwner ||
-                    LobbyData.EnabledSeekerSelection == SeekerSelection.Self &&
-                    oPlayer.isMe)
-                {
-                    ToggleSeeker(oPlayer);
-                }
+                if (CanSelectSeeker(LobbyData.EnabledSeekerSelection, OnlineManager.mePlayer, target))
+                    ToggleSelectSeeker(target);
             }
         }
         

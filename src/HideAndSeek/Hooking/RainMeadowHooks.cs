@@ -151,7 +151,7 @@ public static class RainMeadowHooks
             
             if (throwerOCreature is { isAvatar: true, owner.IsSeeker: true } &&
                 hitOCreature     is { isAvatar: true, owner.IsSeeker: true }
-               )
+            )
                 return false;
         }
         
