@@ -16,8 +16,9 @@ Features:
 - Hiders may not hide inside walls. (move them to the last airpocket if in wall for too long)
 - Consider some way to prevent stun locking of seekers.
 - Hiders and seekers should have different banned slugcats.
-- Add support for story.
 - Protect against all weapon friendly fire.
+- Prevent the host from starting the game when, for example, no one is willing to seek or when no seeker is selected (on other settings).
+- Add support for story.
 
 Refactors:
 - Update Options class design after making story and arena game modes.

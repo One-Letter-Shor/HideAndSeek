@@ -67,20 +67,35 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     /// - <see cref="SeekerSelection"/> is not <see cref="SeekerSelection.Random"/>.
     /// </exception>
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
-    public void ChooseRandomSeekers()
+    public void SelectRandomSeekers()
     {
         if (!OnlineManager.lobby!.isOwner)
-            throw new InvalidOperationException("You must be the host to choose random seekers.");
+            throw new InvalidOperationException("You must be the host to select random seekers.");
         if (LobbyData.EnabledSeekerSelection != SeekerSelection.Random)
-            throw new InvalidOperationException($"{nameof(SeekerSelection)} '{LobbyData.EnabledSeekerSelection}' must be {nameof(SeekerSelection.Random)} to choose random seekers.");
+            throw new InvalidOperationException($"Cannot select random seekers when selection mode is '{LobbyData.EnabledSeekerSelection}'.");
         
-        List<OnlinePlayer> readyPlayers = OnlineManager.players.Where(IsReady).ToList();
-        readyPlayers.Shuffle();
+        List<OnlinePlayer> selectablePlayers = OnlineManager.players
+                                                            .Where(player => IsReady(player) &&
+                                                                             IsWillingToSeek(player)
+                                                            ).ToList();
+        selectablePlayers.Shuffle();
         
-        int seekerCount = Mathf.Min(LobbyData.SeekerCount, readyPlayers.Count);
-        LobbyData.Seekers = readyPlayers
-                                .Take(seekerCount)
-                                .ToList();
+        int seekerCount = Mathf.Min(LobbyData.SeekerCount, selectablePlayers.Count);
+        List<OnlinePlayer> selectedSeekers = selectablePlayers
+                                                .Take(seekerCount)
+                                                .ToList();
+        
+        if (selectedSeekers.Count != seekerCount)
+        {
+            Logger.Error(
+                $"Desired seeker count is '{seekerCount}' but there " +
+                $"are only {selectedSeekers.Count} selectable players." +
+                $"\n- All players:        [ {string.Join(", ", OnlineManager.players)} ]." + 
+                $"\n- Selectable players: [ {string.Join(", ", selectablePlayers)} ]." 
+            );
+        }
+        
+        LobbyData.Seekers = selectedSeekers;
         
         return;
         
@@ -96,12 +111,26 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
             
             return clientData.ready;
         }
+        
+        bool IsWillingToSeek(OnlinePlayer oPlayer)
+        {
+            HideAndSeekClientData? clientData = ArenaHelpers.GetDataSettings<HideAndSeekClientData>(oPlayer);
+            
+            if (clientData is null)
+            {
+                Logger.Debug($"Could not find client data for {oPlayer}.");
+                return false;
+            }
+            
+            return clientData.IsWillingToSeek;
+        }
     }
     
     public override bool SpawnBatflies(FliesWorldAI fliesWorldAI, int spawnRoom) => false;
     
     public override string TimerText() => "Quickly, hide!";
     
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     public override int SetTimer(ArenaOnlineGameMode __) => ArenaOnline.setupTime = LobbyData.HideDurationSeconds;
     
     public override bool IsExitsOpen(

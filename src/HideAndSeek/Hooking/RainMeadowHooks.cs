@@ -103,7 +103,7 @@ public static class RainMeadowHooks
         self.clientSettings.AddData(new HideAndSeekClientData { IsMine = true });
     }
     
-    // Choose random seekers when the start button is pressed.
+    // Select random seekers when the start button is pressed.
     private static void On_RainMeadow_ArenaOnlineLobbyMenu_StartGame(
         Action<ArenaOnlineLobbyMenu> orig,
         ArenaOnlineLobbyMenu self)
@@ -116,7 +116,7 @@ public static class RainMeadowHooks
                 arenaOnline.lobbyCountDown > 0 &&
                 hideAndSeek.LobbyData.EnabledSeekerSelection == SeekerSelection.Random)
             {
-                hideAndSeek.ChooseRandomSeekers();
+                hideAndSeek.SelectRandomSeekers();
             }
         }
         
