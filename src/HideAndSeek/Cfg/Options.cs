@@ -399,12 +399,13 @@ public sealed class Options : OptionInterface
         string text,
         ConfigurableInfo? configInfo = null)
     {
-        if (   gridCoord.x < 0
-            || gridCoord.x > _devToggleUIData.GetLength(0)
-            || gridCoord.y < 0
-            || gridCoord.y > _devToggleUIData.GetLength(1)
-        )
+        if (gridCoord.x < 0                             ||
+            gridCoord.x > _devToggleUIData.GetLength(0) ||
+            gridCoord.y < 0                             ||
+            gridCoord.y > _devToggleUIData.GetLength(1))
+        {
             throw new ArgumentOutOfRangeException(nameof(gridCoord), gridCoord, $"Coordinates '{gridCoord}' is out of bounds.");
+        }
         
         Configurable<bool> configurable = BindCfg(key, defaultValue, configInfo);
         _devToggleUIData[gridCoord.x, gridCoord.y] = (configurable, text);

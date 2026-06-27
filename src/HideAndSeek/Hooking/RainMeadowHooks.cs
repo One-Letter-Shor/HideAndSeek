@@ -138,9 +138,10 @@ public static class RainMeadowHooks
         {
             // Some weapons should non-conditionally phase.
             if (weapon is Spear ||
-                ModManager.DLCShared && weapon is LillyPuck
-               )
+                ModManager.DLCShared && weapon is LillyPuck)
+            {
                 return false;
+            }
             
             // Others should only phase if on different 'teams'.
             OnlineCreature? throwerOCreature = throwerPlayer.abstractCreature.GetOnlineCreature();
@@ -150,9 +151,10 @@ public static class RainMeadowHooks
             Assert(hitOCreature is not null);
             
             if (throwerOCreature is { isAvatar: true, owner.IsSeeker: true } &&
-                hitOCreature     is { isAvatar: true, owner.IsSeeker: true }
-            )
+                hitOCreature     is { isAvatar: true, owner.IsSeeker: true })
+            {
                 return false;
+            }
         }
         
         return orig(self, hitThisObjectOrig, weapon, hitPO);
