@@ -1,5 +1,5 @@
 Issues:
-- Some assertions are being used purely to learn when/why something is null. These will almost certainly fail when Hide and Seek does nothing wrong at some point. Remove before release.
+- Some assertions are being used purely to learn when/why something is null. These will almost certainly fail at some point even if Hide and Seek does nothing wrong. Remove before release.
 - Find and fix the problem where Rain Meadow switches to challenge mode in arena if the tab name has a ' in it.
 - Sometimes the game mode time lives longer than the lobby (reference from OnlineManager.lobby). This happened once from a kick.
 - Configurables in the lobby UI do not save.
@@ -16,7 +16,6 @@ Features:
 - Consider some way to prevent stun locking of seekers.
 - Hiders and seekers should have different banned slugcats.
 - Protect against all weapon friendly fire.
-- Prevent the host from starting the game when, for example, no one is willing to seek or when no seeker is selected (on other settings).
 - Add support for story.
 
 Refactors:

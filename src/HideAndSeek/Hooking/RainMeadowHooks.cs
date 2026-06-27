@@ -6,6 +6,7 @@ using OneLetterShor.HideAndSeek.Arena;
 using OneLetterShor.HideAndSeek.Utils;
 using RainMeadow;
 using RainMeadow.UI;
+using RainMeadow.UI.Pages;
 
 namespace OneLetterShor.HideAndSeek.Hooking;
 
@@ -53,6 +54,14 @@ public static class RainMeadowHooks
                 BindingFlags.NonPublic | BindingFlags.Instance
             ),
             On_RainMeadow_RainMeadow_Weapon_HitThisObject
+        );
+        
+        _ = new Hook(
+            typeof(ArenaMainLobbyPage).GetMethod(
+                nameof(ArenaMainLobbyPage.UpdateMatchButtons),
+                BindingFlags.Public | BindingFlags.Instance
+            ),
+            RainMeadow_UI_Pages_ArenaMainLobbyPage_UpdateMatchButtons
         );
         
         _ = new ILHook(
@@ -158,6 +167,20 @@ public static class RainMeadowHooks
         }
         
         return orig(self, hitThisObjectOrig, weapon, hitPO);
+    }
+    
+    // Ensure Hide and Seek can be started before allowing host to press start game.
+    private static void RainMeadow_UI_Pages_ArenaMainLobbyPage_UpdateMatchButtons(
+        Action<ArenaMainLobbyPage> orig,
+        ArenaMainLobbyPage self)
+    {
+        orig(self);
+        
+        if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
+            !hideAndSeek.CanStartNewGame)
+        {
+            self.startButton?.buttonBehav.greyedOut = true;
+        }
     }
     
     // Prevent seekers from seeing hider nametags.
