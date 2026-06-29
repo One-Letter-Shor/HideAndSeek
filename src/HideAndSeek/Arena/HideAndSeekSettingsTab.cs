@@ -37,7 +37,6 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
     public UIfocusable[] AllUIFocusables { get; }
     public UIfocusable[] LobbyUIFocusables { get; }
     public UIfocusable[] ClientUIFocusables { get; }
-    public UIfocusable[] DisabledUIFocusables { get; }
     
     public Dictionary<TaggingMethods, (string friendlyName, string description)> DataByTaggingMethod = new()
     {
@@ -299,13 +298,11 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
             SeekerTertiaryColorPicker
         ];
         ClientUIFocusables = [ IsWillingToSeekCheckBox ];
-        DisabledUIFocusables = [];
         
         AllUIFocusables =
         [
             ..LobbyUIFocusables,
-            ..ClientUIFocusables,
-            ..DisabledUIFocusables
+            ..ClientUIFocusables
         ];
         
         Assert(
@@ -341,7 +338,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
             {
                 if (uiElement is UIfocusable uiFocusable)
                 {
-                    UIfocusable[][] uiFocusableArrays = [ LobbyUIFocusables, ClientUIFocusables, DisabledUIFocusables ];
+                    UIfocusable[][] uiFocusableArrays = [ LobbyUIFocusables, ClientUIFocusables ];
                     Assert(uiFocusableArrays.Count(uiFocusables => uiFocusables.Contains(uiFocusable)) == 1, $"Only one array should contain {uiFocusable}.");
                 }
                 
@@ -361,8 +358,11 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         foreach (UIfocusable uiFocusable in ClientUIFocusables)
             uiFocusable.greyedOut = ArenaOnline.initiateLobbyCountdown;
         
-        foreach (UIfocusable uiFocusable in DisabledUIFocusables)
-            uiFocusable.greyedOut = true;
+        
+        if (HideAndSeek.LobbyData.EnabledSeekerSelection != SeekerSelection.Random)
+            SeekerCountUpdown.greyedOut = true;
+        
+        TagResultSelector.greyedOut = true; // Not implemented yet.
         
         base.Update();
         
