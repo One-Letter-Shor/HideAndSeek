@@ -11,7 +11,7 @@ public static class RainWorldHooks
 {
     internal static void Apply()
     {
-        On.RainWorldGame.GrafUpdate += On_RainWorldGame_GrafUpdate;
+        On.ProcessManager.Update += On_ProcessManager_Update;
         On.Player.Collide += On_Player_Collide;
         On.Rock.HitSomething += On_Rock_HitSomething;
         On.PlayerGraphics.DrawSprites += On_PlayerGraphics_DrawSprites;
@@ -19,21 +19,30 @@ public static class RainWorldHooks
         IL.Player.ClassMechanicsSaint += IL_Player_ClassMechanicsSaint;
     }
     
-    private static void On_RainWorldGame_GrafUpdate(
-        On.RainWorldGame.orig_GrafUpdate orig,
-        RainWorldGame self,
-        float timeStacker)
+    private static bool IsToggleSeekerPressed { get; set; }
+    private static bool PreviousIsToggleSeekerPressed { get; set; }
+    private static bool IsToggleInitialSeekerPressed { get; set; }
+    private static bool PreviousIsToggleInitialSeekerPressed { get; set; }
+    private static void On_ProcessManager_Update(
+        On.ProcessManager.orig_Update orig,
+        ProcessManager self,
+        float time)
     {
+        PreviousIsToggleSeekerPressed        = IsToggleSeekerPressed;
+        PreviousIsToggleInitialSeekerPressed = IsToggleInitialSeekerPressed;
+        IsToggleSeekerPressed        = Input.GetKey(KeyCode.PageDown);
+        IsToggleInitialSeekerPressed = Input.GetKey(KeyCode.End);
+        
         if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
             hideAndSeek.LobbyData.AreSeekerDebugToolsEnabled)
         {
-            if (Input.GetKeyDown(KeyCode.PageDown))
+            if (IsToggleSeekerPressed && !PreviousIsToggleSeekerPressed)
                 hideAndSeek.DebugToggleSeeker(OnlineManager.mePlayer!);
-            if (Input.GetKeyDown(KeyCode.End))
+            if (IsToggleInitialSeekerPressed && !PreviousIsToggleInitialSeekerPressed)
                 hideAndSeek.DebugToggleInitialSeeker(OnlineManager.mePlayer!);
         }
         
-        orig(self, timeStacker);
+        orig(self, time);
     }
     
     // Tag players when colliding.
