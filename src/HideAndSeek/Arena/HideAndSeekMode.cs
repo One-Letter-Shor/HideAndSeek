@@ -122,6 +122,15 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         return false;
     }
     
+    /// <inheritdoc cref="CanSelectSeeker(SeekerSelection, OnlinePlayer, OnlinePlayer, out string)"/>
+    public bool CanSelectSeeker(
+        SeekerSelection seekerSelection,
+        OnlinePlayer selector,
+        OnlinePlayer target)
+    {
+        return CanSelectSeeker(seekerSelection, selector, target, out _);
+    }
+    
     /// <summary>
     /// Determines whether an <see cref="OnlinePlayer"/> can select
     /// the other specified <see cref="OnlinePlayer"/> to be a seeker.
@@ -133,16 +142,12 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     /// are valid based on the value of <paramref name="seekerSelection"/>.<br/>
     /// Otherwise, <see langword="false"/>.
     /// </returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown if <paramref name="seekerSelection"/> is not <see cref="SeekerSelection.Random"/>,
+    /// <see cref="SeekerSelection.Host"/>, or <see cref="SeekerSelection.Self"/>.
+    /// (Update this method if a new <see cref="SeekerSelection"/> is added.)
+    /// </exception>
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
-    public bool CanSelectSeeker(
-        SeekerSelection seekerSelection,
-        OnlinePlayer selector,
-        OnlinePlayer target)
-    {
-        return CanSelectSeeker(seekerSelection, selector, target, out _);
-    }
-    
-    /// <inheritdoc cref="CanSelectSeeker(SeekerSelection, OnlinePlayer, OnlinePlayer)"/>
     public bool CanSelectSeeker(
         SeekerSelection seekerSelection,
         OnlinePlayer selector,
@@ -204,6 +209,13 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         }
     }
     
+    
+    /// <inheritdoc cref="CanTagPlayer(OnlinePlayer, OnlinePlayer, out string)"/>
+    public bool CanTagPlayer(OnlinePlayer tagger, OnlinePlayer target)
+    {
+        return CanTagPlayer(tagger, target, out _);
+    }
+    
     /// <summary>
     /// Determines whether an <see cref="OnlinePlayer"/>
     /// can tag the other specified <see cref="OnlinePlayer"/>.
@@ -216,14 +228,8 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     /// - <paramref name="target"/> is not a seeker.<br/>
     /// Otherwise, <see langword="false"/>.
     /// </returns>
-    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
-    public bool CanTagPlayer(OnlinePlayer tagger, OnlinePlayer target)
-    {
-        return CanTagPlayer(tagger, target, out _);
-    }
-    
-    /// <inheritdoc cref="CanTagPlayer(OnlinePlayer, OnlinePlayer)"/>
     /// <exception cref="InvalidOperationException">Thrown if not in a game.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     public bool CanTagPlayer(
         OnlinePlayer tagger,
         OnlinePlayer target,
