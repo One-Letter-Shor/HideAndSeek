@@ -61,7 +61,7 @@ public static class RainMeadowHooks
                 nameof(ArenaMainLobbyPage.UpdateMatchButtons),
                 BindingFlags.Public | BindingFlags.Instance
             ),
-            RainMeadow_UI_Pages_ArenaMainLobbyPage_UpdateMatchButtons
+            On_RainMeadow_UI_Pages_ArenaMainLobbyPage_UpdateMatchButtons
         );
         
         _ = new ILHook(
@@ -170,7 +170,7 @@ public static class RainMeadowHooks
     }
     
     // Ensure Hide and Seek can be started before allowing host to press start game.
-    private static void RainMeadow_UI_Pages_ArenaMainLobbyPage_UpdateMatchButtons(
+    private static void On_RainMeadow_UI_Pages_ArenaMainLobbyPage_UpdateMatchButtons(
         Action<ArenaMainLobbyPage> orig,
         ArenaMainLobbyPage self)
     {
