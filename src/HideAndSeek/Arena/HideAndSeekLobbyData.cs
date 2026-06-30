@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using RainMeadow;
 using RainMeadow.Generics;
 
@@ -121,7 +122,8 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         [OnlineField(group = nameof(InitialSeekers))]
         public DynamicOrderedUshorts InitialSeekers = new([]);
         
-        /// <remarks>Rain Meadow requires a ctor with no params.</remarks>
+        // Rain Meadow requires a ctor with no params.
+        [UsedImplicitly]
         public State() { }
         
         internal State(HideAndSeekLobbyData data, Lobby lobby)

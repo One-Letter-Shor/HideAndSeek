@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using RainMeadow;
 
 namespace OneLetterShor.HideAndSeek.Arena;
@@ -44,7 +45,8 @@ public sealed class HideAndSeekClientData : OnlineEntity.EntityData
         public bool IsWillingToSeek;
         
         
-        /// <remarks>Rain Meadow requires a ctor with no params.</remarks>
+        // Rain Meadow requires a ctor with no params.
+        [UsedImplicitly]
         public State() { }
         
         internal State(HideAndSeekClientData data)
