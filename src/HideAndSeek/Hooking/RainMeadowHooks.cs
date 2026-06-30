@@ -65,14 +65,6 @@ public static class RainMeadowHooks
         );
         
         _ = new ILHook(
-            typeof(OnlinePlayerDisplay).GetMethod(
-                nameof(OnlinePlayerDisplay.Update),
-                BindingFlags.Public | BindingFlags.Instance
-            ),
-            IL_RainMeadow_OnlinePlayerDisplay_Update
-        );
-        
-        _ = new ILHook(
             typeof(ChatLogOverlay).GetMethod(
                 nameof(ChatLogOverlay.OpacityUpdate),
                 BindingFlags.Public | BindingFlags.Instance

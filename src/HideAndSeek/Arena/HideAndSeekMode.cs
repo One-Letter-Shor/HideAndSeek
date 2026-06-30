@@ -122,6 +122,28 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         return false;
     }
     
+    public HideAndSeekMode()
+    {
+        MatchmakingManager.OnPlayerListReceived += OnPlayerListReceived;
+        MatchmakingManager.OnLobbyLeaving += OnLobbyLeaving;
+    }
+    
+    private void OnPlayerListReceived(PlayerInfo[] playerList)
+    {
+        LobbyData.Seekers.RemoveAll(
+            seeker => !OnlineManager.players.Contains(seeker)
+        );
+        LobbyData.InitialSeekers.RemoveAll(
+            initialSeeker => !OnlineManager.players.Contains(initialSeeker)
+        );
+    }
+    
+    private void OnLobbyLeaving()
+    {
+        MatchmakingManager.OnPlayerListReceived -= OnPlayerListReceived;
+        MatchmakingManager.OnLobbyLeaving -= OnLobbyLeaving;
+    }
+    
     /// <inheritdoc cref="CanSelectSeeker(SeekerSelection, OnlinePlayer, OnlinePlayer, out string)"/>
     public bool CanSelectSeeker(
         SeekerSelection seekerSelection,
