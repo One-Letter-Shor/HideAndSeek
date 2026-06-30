@@ -256,6 +256,18 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         return true;
     }
     
+    public override void ArenaSessionNextLevel(
+        ArenaOnlineGameMode __,
+        On.ArenaSitting.orig_NextLevel orig,
+        ArenaSitting self,
+        ProcessManager process)
+    {
+        if (OnlineManager.lobby!.isOwner)
+            LobbyData.Seekers = LobbyData.InitialSeekers.ToList();
+        
+        base.ArenaSessionNextLevel(ArenaOnline, orig, self, process);
+    }
+    
     public override bool SpawnBatflies(FliesWorldAI fliesWorldAI, int spawnRoom) => false;
     
     public override string TimerText() => "Quickly, hide!";

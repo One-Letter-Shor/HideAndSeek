@@ -108,6 +108,12 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
         Assert(SettingsTab is null);
         AssertIs(OnlineManager.lobby!.gameMode, out ArenaOnlineGameMode arenaOnline);
         
+        if (OnlineManager.lobby!.isOwner)
+        {
+            LobbyData.Seekers = [];
+            LobbyData.InitialSeekers = [];
+        }
+        
         base.OnUIEnabled(menu);
         SettingsTab = new HideAndSeekSettingsTab(
             menu,
