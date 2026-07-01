@@ -25,22 +25,24 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
                                                               .clientSettings[OnlineManager.mePlayer]
                                                               .GetData<HideAndSeekClientData>();
     
-    /// <summary>Determines if the host should be able to start a new game.<br/></summary>
-    /// <exception cref="KeyNotFoundException">Thrown if the client data is not registered.</exception>
-    /// <remarks>This only considers Hide and Seek relevant data</remarks>
+    /// <summary>
+    /// Determines if the host is able to start a new game
+    /// </summary>
+    /// <remarks>
+    /// This property only considers gameplay-related Hide
+    /// and Seek data. Debug settings, such as
+    /// <see cref="HideAndSeekLobbyData.AreSeekerDebugToolsEnabled"/>,
+    /// are ignored.
+    /// </remarks>
     public bool CanStartNewGame
     {
         get
         {
             // If this logic or the functions below change, ensure SelectRandomSeekers is updated too.
-            if (LobbyData.AreSeekerDebugToolsEnabled)
-                return true;
-            
             if (LobbyData.EnabledSeekerSelection == SeekerSelection.Random)
             {
                 int selectablePlayerCount = OnlineManager.players
-                                                          .Count(player => IsReady(player) &&
-                                                                           IsWillingToSeek(player));
+                    .Count(player => IsReady(player) && IsWillingToSeek(player));
                 
                 return selectablePlayerCount >= LobbyData.SeekerCount + 1; // Enough players for all seekers + 1 hider
             }

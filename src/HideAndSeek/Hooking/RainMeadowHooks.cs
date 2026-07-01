@@ -169,7 +169,7 @@ public static class RainMeadowHooks
         orig(self);
         
         if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
-            !hideAndSeek.CanStartNewGame)
+            (!hideAndSeek.CanStartNewGame && !hideAndSeek.LobbyData.AreSeekerDebugToolsEnabled))
         {
             self.startButton?.buttonBehav.greyedOut = true;
         }
