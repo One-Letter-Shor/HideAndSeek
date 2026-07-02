@@ -357,7 +357,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
             Logger.Warning($"The game mode is not Hide and Seek. {fromText}");
             return;
         }
-        if (hideAndSeek.CanTagPlayer(tagger, target, out string? failureReason))
+        if (!hideAndSeek.CanTagPlayer(tagger, target, out string? failureReason))
         {
             Logger.Debug($"{tagger} is trying to tag {target} when they cannot. Reason: {failureReason} {fromText}");
             return;
