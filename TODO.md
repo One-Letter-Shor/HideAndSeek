@@ -31,6 +31,7 @@ Testing:
 - Make clients send RPCs incorrectly to ensure the host handles them correctly.
 - Play with high ping to ensure code is reliable.
 - Ensure there is not too much network usage. A lot of lobby data fields can easily be optimized to bytes and ushorts.
+- Ensure the scoring for seekers and hiders is balanced.
 
 Misc:
 - Write external arena documentation for Rain Meadow after finishing.

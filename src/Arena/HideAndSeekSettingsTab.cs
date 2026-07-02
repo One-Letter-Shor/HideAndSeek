@@ -29,6 +29,13 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
     public ProperlyAlignedMenuLabel TagResultLabel { get; }
     public OpResourceSelector       TagResultSelector { get; }
     
+    public MenuLabel SeekerWinScoreLabel { get; }
+    public OpUpdown  SeekerWinScoreUpdown { get; }
+    public MenuLabel SeekerTagScoreLabel { get; }
+    public OpUpdown  SeekerTagScoreUpdown { get; }
+    public MenuLabel HiderWinScoreLabel { get; }
+    public OpUpdown  HiderWinScoreUpdown { get; }
+    
     public MenuLabel     SeekerBodyColorLabel { get; }
     public OpColorPicker SeekerBodyColorPicker { get; }
     public MenuLabel     SeekerEyeColorLabel { get; }
@@ -58,18 +65,20 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         ArenaOnlineMenu = menu;
         
         // TODO: Improve UI logic.
-        Vector2 rowRootPos = new(42f, 417f);      // Starting position for most settings.
-        const float rowOffsetY = 40f;             // Offset between most settings. 
-        const float resourceSelectorSizeX = 100f; // Used by every resource selector.
-        const float labelAlignmentYFix = -5f;     // ProperlyAlignedMenuLabel isn't properly aligned. (Text is always put to the bottom left)
-        Vector2 labelSize = new(122f, 25f);       // Used by most settings labels.
+        float tabSizeX = 450f;
+        
+        Vector2 rowRootPos = new(42f, 417f);   // Starting position for most settings.
+        float rowOffsetY = 40f;                // Offset between most settings. 
+        float resourceSelectorSizeX = 100f;    // Used by every resource selector.
+        float labelAlignmentYFix = -5f;        // ProperlyAlignedMenuLabel isn't properly aligned. (Text is always put to the bottom left)
+        Vector2 labelSize = new(122f, 25f);    // Used by most settings labels.
         
         
         IsWillingToSeekLabel = new ProperlyAlignedMenuLabel(
             ArenaOnlineMenu,
             this,
             "Willing to Seek:",
-            new Vector2(288f, 255f),
+            new Vector2(288f, 417f),
             new Vector2(100f, labelSize.y),
             false
         );
@@ -167,7 +176,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
                     
                     TaggingMethods currentValue = HideAndSeek.LobbyData.EnabledTaggingMethods;
                     TaggingMethods newValue = value
-                        ? currentValue | taggingMethod 
+                        ? currentValue | taggingMethod
                         : currentValue & ~taggingMethod;
                     
                     if (newValue == currentValue) return;
@@ -219,6 +228,77 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         };
         
         
+        float scoreUpdownSizeX         = 50f;
+        float scoreColumnOffsetX       = 120f;                                                     // How far from one column to another.
+        float scoreColumnInitialOffset = (tabSizeX - scoreColumnOffsetX * 2)/2 - scoreUpdownSizeX; // How far from the left most edge.
+        
+        SeekerWinScoreUpdown = new OpUpdown(
+            ConfigurableHelper.Clone(Plugin.Options.CfgSeekerWinScore),
+            new Vector2(scoreUpdownSizeX/2 + scoreColumnInitialOffset, 220f),
+            scoreUpdownSizeX
+        );
+        SeekerWinScoreUpdown.OnValueChanged += (_, _, _) =>
+        {
+            if (!OnlineManager.lobby!.isOwner) return;
+            
+            Assert(SeekerWinScoreUpdown.accept == OpTextBox.Accept.Int);
+            HideAndSeek.LobbyData.SeekerWinScore = SeekerWinScoreUpdown.GetValueInt();
+        };
+        
+        SeekerWinScoreLabel = new MenuLabel(
+            ArenaOnlineMenu,
+            this,
+            "Seeker Win Score",
+            SeekerWinScoreUpdown.pos + new Vector2(-(scoreColumnOffsetX - scoreUpdownSizeX)/2, 30f),
+            new Vector2(scoreColumnOffsetX, labelSize.y),
+            false
+        );
+        
+        SeekerTagScoreUpdown = new OpUpdown(
+            ConfigurableHelper.Clone(Plugin.Options.CfgSeekerTagScore),
+            SeekerWinScoreUpdown.pos + new Vector2(scoreColumnOffsetX, 0f),
+            scoreUpdownSizeX
+        );
+        SeekerTagScoreUpdown.OnValueChanged += (_, _, _) =>
+        {
+            if (!OnlineManager.lobby!.isOwner) return;
+            
+            Assert(SeekerTagScoreUpdown.accept == OpTextBox.Accept.Int);
+            HideAndSeek.LobbyData.SeekerTagScore = SeekerTagScoreUpdown.GetValueInt();
+        };
+        
+        SeekerTagScoreLabel = new MenuLabel(
+            ArenaOnlineMenu,
+            this,
+            "Seeker Tag Score",
+            SeekerTagScoreUpdown.pos + new Vector2(-(scoreColumnOffsetX - scoreUpdownSizeX)/2, 30f),
+            new Vector2(120f, labelSize.y),
+            false
+        );
+        
+        HiderWinScoreUpdown = new OpUpdown(
+            ConfigurableHelper.Clone(Plugin.Options.CfgHiderWinScore),
+            SeekerTagScoreUpdown.pos + new Vector2(scoreColumnOffsetX, 0f),
+            scoreUpdownSizeX
+        );
+        HiderWinScoreUpdown.OnValueChanged += (_, _, _) =>
+        {
+            if (!OnlineManager.lobby!.isOwner) return;
+            
+            Assert(HiderWinScoreUpdown.accept == OpTextBox.Accept.Int);
+            HideAndSeek.LobbyData.HiderWinScore = HiderWinScoreUpdown.GetValueInt();
+        };
+        
+        HiderWinScoreLabel = new MenuLabel(
+            ArenaOnlineMenu,
+            this,
+            "Hider Win Score",
+            HiderWinScoreUpdown.pos + new Vector2(-(scoreColumnOffsetX - scoreUpdownSizeX)/2, 30f),
+            new Vector2(scoreColumnOffsetX, labelSize.y),
+            false
+        );
+        
+        
         SeekerBodyColorPicker = new OpColorPicker(
             ConfigurableHelper.Clone(Plugin.Options.CfgSeekerBodyColor),
             new Vector2(0f, 12f)
@@ -234,7 +314,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
             ArenaOnlineMenu,
             this,
             "Seeker Body Color",
-            SeekerBodyColorPicker.pos + new Vector2(0f, 152f),
+            SeekerBodyColorPicker.pos + new Vector2(0f, 150f),
             new Vector2(150f, labelSize.y),
             false
         );
@@ -255,7 +335,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
             ArenaOnlineMenu,
             this,
             "Seeker Eye Color",
-            SeekerEyeColorPicker.pos + new Vector2(0f, 152f),
+            SeekerEyeColorPicker.pos + new Vector2(0f, 150f),
             new Vector2(150f, labelSize.y),
             false
         );
@@ -276,7 +356,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
             ArenaOnlineMenu,
             this,
             "Seeker Tertiary Color",
-            SeekerTertiaryColorPicker.pos + new Vector2(0f, 152f),
+            SeekerTertiaryColorPicker.pos + new Vector2(0f, 150f),
             new Vector2(150f, labelSize.y),
             false
         );
@@ -293,6 +373,9 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
             SeekerSelectionSelector,
             ..taggingMethodUIFocusables,
             TagResultSelector,
+            SeekerWinScoreUpdown,
+            SeekerTagScoreUpdown,
+            HiderWinScoreUpdown,
             SeekerBodyColorPicker,
             SeekerEyeColorPicker,
             SeekerTertiaryColorPicker
@@ -325,6 +408,9 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
             ..taggingMethodMenuObjects,
             TaggingMethodsLabel,
             TagResultLabel,
+            SeekerWinScoreLabel,
+            SeekerTagScoreLabel,
+            HiderWinScoreLabel,
             SeekerBodyColorLabel,
             SeekerEyeColorLabel,
             SeekerTertiaryColorLabel
@@ -373,6 +459,13 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
             SeekerCountUpdown.SetValueInt(HideAndSeek.LobbyData.SeekerCount);
         SeekerSelectionSelector.value = HideAndSeek.LobbyData.EnabledSeekerSelection.ToString();
         TagResultSelector.value = HideAndSeek.LobbyData.EnabledTagResult.ToString();
+        
+        if (!SeekerWinScoreUpdown.held)
+            SeekerWinScoreUpdown.SetValueInt(HideAndSeek.LobbyData.SeekerWinScore);
+        if (!SeekerTagScoreUpdown.held)
+            SeekerTagScoreUpdown.SetValueInt(HideAndSeek.LobbyData.SeekerTagScore);
+        if (!HiderWinScoreUpdown.held)
+            HiderWinScoreUpdown.SetValueInt(HideAndSeek.LobbyData.HiderWinScore);
         
         foreach (var kvp in UIByTaggingMethod)
         {
