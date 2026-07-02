@@ -97,13 +97,13 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         public int SeekerCount;
         
         [OnlineField(group = _settings)]
-        public byte EnabledSeekerSelection;
+        public int EnabledSeekerSelection;
         
         [OnlineField(group = _settings)]
-        public byte EnabledTaggingMethods;
+        public int EnabledTaggingMethods;
         
         [OnlineField(group = _settings)]
-        public byte EnabledTagResult;
+        public int EnabledTagResult;
         
         
         [OnlineFieldColorRgb(group = _settings)]
@@ -137,9 +137,9 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
             HideDurationSeconds    = data.HideDurationSeconds;
             SeekDurationSeconds    = data.SeekDurationSeconds;
             SeekerCount            = data.SeekerCount;
-            EnabledSeekerSelection = (byte)data.EnabledSeekerSelection;
-            EnabledTaggingMethods  = (byte)data.EnabledTaggingMethods;
-            EnabledTagResult       = (byte)data.EnabledTagResult;
+            EnabledSeekerSelection = (int)data.EnabledSeekerSelection;
+            EnabledTaggingMethods  = (int)data.EnabledTaggingMethods;
+            EnabledTagResult       = (int)data.EnabledTagResult;
             
             SeekerBodyColor     = data.SeekerBodyColor;
             SeekerEyeColor      = data.SeekerEyeColor;

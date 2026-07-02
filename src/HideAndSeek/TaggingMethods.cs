@@ -2,7 +2,7 @@ namespace OneLetterShor.HideAndSeek;
 
 // TODO: Add documentation.
 [Flags]
-public enum TaggingMethods : byte
+public enum TaggingMethods
 {
     None      = 0,
     Rock      = 1 << 0,
