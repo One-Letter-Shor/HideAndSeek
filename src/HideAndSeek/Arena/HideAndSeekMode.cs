@@ -132,12 +132,15 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     
     private void OnPlayerListReceived(PlayerInfo[] playerList)
     {
-        LobbyData.Seekers.RemoveAll(
-            seeker => !OnlineManager.players.Contains(seeker)
-        );
-        LobbyData.InitialSeekers.RemoveAll(
-            initialSeeker => !OnlineManager.players.Contains(initialSeeker)
-        );
+        if (OnlineManager.lobby!.isOwner)
+        {
+            LobbyData.Seekers.RemoveAll(
+                seeker => !OnlineManager.players.Contains(seeker)
+            );
+            LobbyData.InitialSeekers.RemoveAll(
+                initialSeeker => !OnlineManager.players.Contains(initialSeeker)
+            );
+        }
     }
     
     private void OnLobbyLeaving()
