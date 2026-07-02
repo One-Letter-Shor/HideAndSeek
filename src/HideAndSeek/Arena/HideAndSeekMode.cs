@@ -233,7 +233,6 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         }
     }
     
-    
     /// <inheritdoc cref="CanTagPlayer(OnlinePlayer, OnlinePlayer, out string)"/>
     public bool CanTagPlayer(OnlinePlayer tagger, OnlinePlayer target)
     {
@@ -309,6 +308,26 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
                                                      .All(oPlayer => oPlayer.IsSeeker);
         
         return IsSeekingTimeOver || areAllPlayersSeekers;
+    }
+    
+    public override void Killing(
+        ArenaOnlineGameMode __,
+        On.ArenaGameSession.orig_Killing orig,
+        ArenaGameSession self,
+        Player player,
+        Creature killedCreature)
+    {
+        Logger.Error("This should not run in Hide and Seek.");
+    }
+    
+    public override void LandSpear(
+        ArenaOnlineGameMode __,
+        ArenaGameSession self,
+        Player player,
+        Creature target,
+        ArenaSitting.ArenaPlayer arenaPlayer)
+    {
+        Logger.Error("This should not run in Hide and Seek.");
     }
     
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
