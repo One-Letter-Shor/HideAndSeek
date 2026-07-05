@@ -23,9 +23,6 @@ Refactors:
 - Figure out naming of RPCs and how they should behave.
 - Decide on how to abbreviate types like OnlineCreature.
 
-Chores:
-- Update .editorconfig for newline method indentation.
-
 Testing:
 - Make clients send RPCs incorrectly to ensure the host handles them correctly.
 - Play with high ping to ensure code is reliable.

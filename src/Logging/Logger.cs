@@ -33,7 +33,7 @@ public static class Logger
     
     /// <summary>
     /// Logs a <see cref="LogLevel.Fatal"/> message if that log level
-    /// is enabled in <see cref="Cfg.Options.EnabledLogLevels"/>.
+    /// is enabled in <see cref="ModOptions.EnabledLogLevels"/>.
     /// </summary>
     /// <inheritdoc cref="Log"/>
     public static void Fatal(
@@ -47,7 +47,7 @@ public static class Logger
     
     /// <summary>
     /// Logs a <see cref="LogLevel.Error"/> message if that log level
-    /// is enabled in <see cref="Cfg.Options.EnabledLogLevels"/>.
+    /// is enabled in <see cref="ModOptions.EnabledLogLevels"/>.
     /// </summary>
     /// <inheritdoc cref="Log"/>
     public static void Error(
@@ -61,7 +61,7 @@ public static class Logger
     
     /// <summary>
     /// Logs a <see cref="LogLevel.Warning"/> message if that log level
-    /// is enabled in <see cref="Cfg.Options.EnabledLogLevels"/>.
+    /// is enabled in <see cref="ModOptions.EnabledLogLevels"/>.
     /// </summary>
     /// <inheritdoc cref="Log"/>
     public static void Warning(
@@ -75,7 +75,7 @@ public static class Logger
     
     /// <summary>
     /// Logs a <see cref="LogLevel.Message"/> message if that log level
-    /// is enabled in <see cref="Cfg.Options.EnabledLogLevels"/>.
+    /// is enabled in <see cref="ModOptions.EnabledLogLevels"/>.
     /// </summary>
     /// <inheritdoc cref="Log"/>
     public static void Message(
@@ -89,7 +89,7 @@ public static class Logger
     
     /// <summary>
     /// Logs a <see cref="LogLevel.Info"/> message if that log level
-    /// is enabled in <see cref="Cfg.Options.EnabledLogLevels"/>.
+    /// is enabled in <see cref="ModOptions.EnabledLogLevels"/>.
     /// </summary>
     /// <inheritdoc cref="Log"/>
     public static void Info(
@@ -103,7 +103,7 @@ public static class Logger
     
     /// <summary>
     /// Logs a <see cref="LogLevel.Debug"/> message if that log level
-    /// is enabled in <see cref="Cfg.Options.EnabledLogLevels"/>.
+    /// is enabled in <see cref="ModOptions.EnabledLogLevels"/>.
     /// </summary>
     /// <inheritdoc cref="Log"/>
     public static void Debug(
@@ -125,10 +125,10 @@ public static class Logger
     /// <param name="loggingFilePath">Caller info</param>
     /// <remarks>
     /// Logging is allowed when either is <see langword="true"/>:
-    /// <br/>- At least one flag in <paramref name="logLevels"/> is enabled in <see cref="Cfg.Options.EnabledLogLevels"/>.
-    /// <br/>- <paramref name="logLevels"/> is <see cref="LogLevel.None"/> and <see cref="Cfg.Options.EnabledLogLevels"/> is not <see cref="LogLevel.None"/>.<br/>
+    /// <br/>- At least one flag in <paramref name="logLevels"/> is enabled in <see cref="ModOptions.EnabledLogLevels"/>.
+    /// <br/>- <paramref name="logLevels"/> is <see cref="LogLevel.None"/> and <see cref="ModOptions.EnabledLogLevels"/> is not <see cref="LogLevel.None"/>.<br/>
     /// NOTE: If messages are logged before configurables are initialized then the
-    /// default <see cref="Cfg.Options.CfgEnabledLogLevels"/> value will be used.
+    /// default <see cref="ModOptions.CfgEnabledLogLevels"/> value will be used.
     /// </remarks>
     public static void Log(
         LogLevel logLevels,
@@ -152,7 +152,7 @@ public static class Logger
     
     /// <summary>
     /// Behaves the same as <see cref="Log"/> except messages are always logged
-    /// regardless of <see cref="Cfg.Options.EnabledLogLevels"/>'s value. 
+    /// regardless of <see cref="ModOptions.EnabledLogLevels"/>'s value. 
     /// </summary>
     /// <inheritdoc cref="Log"/>
     public static void ForceLog(

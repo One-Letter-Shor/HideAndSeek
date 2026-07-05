@@ -4,9 +4,9 @@ using Menu.Remix.MixedUI;
 using Menu.Remix.MixedUI.ValueTypes;
 using EnumHelper = OneLetterShor.HideAndSeek.Utils.EnumHelper;
 
-namespace OneLetterShor.HideAndSeek.Cfg;
+namespace OneLetterShor.HideAndSeek;
 
-public sealed class Options : OptionInterface
+public sealed class ModOptions : OptionInterface
 {
     /// <remarks>Primarily for assertions.</remarks>
     public bool IsInitialized { get; private set; } = false;
@@ -163,7 +163,7 @@ public sealed class Options : OptionInterface
     
     // --- Initialization --- //
     
-    internal Options()
+    internal ModOptions()
     {
         Assert(!IsInitialized);
         

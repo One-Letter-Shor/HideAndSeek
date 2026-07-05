@@ -22,7 +22,7 @@ public sealed class Plugin : BaseUnityPlugin
         Name = "Hide N Seek",
         Version = "0.0.0";
     public static Plugin Instance { get; private set; } = null!;
-    public static Cfg.Options Options { get; private set; } = null!;
+    public static ModOptions Options { get; private set; } = null!;
     public static ModManager.Mod Mod { get; private set; } = null!;
     internal static ManualLogSource __Logger = null!;
     
@@ -45,7 +45,7 @@ public sealed class Plugin : BaseUnityPlugin
     private void OnEnable()
     {
         Assert(!IsInitialized);
-        Options = new Cfg.Options();
+        Options = new ModOptions();
         On.RainWorld.OnModsInit += On_RainWorld_OnModsInit;
     }
     
