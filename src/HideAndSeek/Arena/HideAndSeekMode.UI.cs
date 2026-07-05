@@ -22,12 +22,12 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
     /// Used to determine if the key bind for toggling seekers via the
     /// <see cref="SlugcatColorableButton"/>s in the arena menu is pressed.
     /// </summary>
-    private bool IsToggleSeekerPressed { get; set; }
+    private bool _isToggleSeekerPressed { get; set; }
     /// <summary>
     /// Used to remember the value of
-    /// <see cref="IsToggleSeekerPressed"/> last UI Update.
+    /// <see cref="_isToggleSeekerPressed"/> last UI Update.
     /// </summary>
-    private bool PreviousIsToggleSeekerPressed { get; set; }
+    private bool _previousIsToggleSeekerPressed { get; set; }
     
     public HideAndSeekSettingsTab? SettingsTab { get; private set; }
     
@@ -126,10 +126,10 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
     
     public override void OnUIUpdate(ArenaOnlineLobbyMenu menu)
     {
-        PreviousIsToggleSeekerPressed = IsToggleSeekerPressed;
-        IsToggleSeekerPressed = RWInput.PlayerInput(0).pckp;
+        _previousIsToggleSeekerPressed = _isToggleSeekerPressed;
+        _isToggleSeekerPressed = RWInput.PlayerInput(0).pckp;
         
-        if (IsToggleSeekerPressed && !PreviousIsToggleSeekerPressed && !ArenaOnline.initiateLobbyCountdown)
+        if (_isToggleSeekerPressed && !_previousIsToggleSeekerPressed && !ArenaOnline.initiateLobbyCountdown)
         {
             List<ArenaPlayerBox> arenaPlayerBoxes = menu.arenaMainLobbyPage.playerDisplayer.buttons
                                                         .Cast<ArenaPlayerBox>()
@@ -168,8 +168,8 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
         
         if (SettingsTab is null) return;
         
-        PreviousIsToggleSeekerPressed = false;
-        IsToggleSeekerPressed = false;
+        _previousIsToggleSeekerPressed = false;
+        _isToggleSeekerPressed = false;
         
         SettingsTab.RemoveSprites();
         menu.arenaMainLobbyPage.tabContainer.RemoveTab(SettingsTab);

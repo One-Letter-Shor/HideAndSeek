@@ -13,9 +13,9 @@ namespace OneLetterShor.HideAndSeek.Arena;
 
 public sealed class HideAndSeekSettingsTab : TabContainer.Tab
 {
-    private ArenaOnlineGameMode ArenaOnline { get; }
+    public ArenaOnlineGameMode ArenaOnline { get; }
     public ArenaOnlineLobbyMenu ArenaOnlineMenu { get; }
-    private HideAndSeekMode HideAndSeek { get; }
+    public HideAndSeekMode HideAndSeek { get; }
     
     public ProperlyAlignedMenuLabel WillingToSeekLabel { get; }
     public OpCheckBox               IsWillingToSeekCheckBox { get; }

@@ -19,26 +19,26 @@ public static class RainWorldHooks
         IL.Player.ClassMechanicsSaint += IL_Player_ClassMechanicsSaint;
     }
     
-    private static bool IsToggleSeekerPressed { get; set; }
-    private static bool PreviousIsToggleSeekerPressed { get; set; }
-    private static bool IsToggleInitialSeekerPressed { get; set; }
-    private static bool PreviousIsToggleInitialSeekerPressed { get; set; }
+    private static bool _isToggleSeekerPressed { get; set; }
+    private static bool _previousIsToggleSeekerPressed { get; set; }
+    private static bool _isToggleInitialSeekerPressed { get; set; }
+    private static bool _previousIsToggleInitialSeekerPressed { get; set; }
     private static void On_ProcessManager_Update(
         On.ProcessManager.orig_Update orig,
         ProcessManager self,
         float time)
     {
-        PreviousIsToggleSeekerPressed        = IsToggleSeekerPressed;
-        PreviousIsToggleInitialSeekerPressed = IsToggleInitialSeekerPressed;
-        IsToggleSeekerPressed        = Input.GetKey(KeyCode.PageDown);
-        IsToggleInitialSeekerPressed = Input.GetKey(KeyCode.End);
+        _previousIsToggleSeekerPressed        = _isToggleSeekerPressed;
+        _previousIsToggleInitialSeekerPressed = _isToggleInitialSeekerPressed;
+        _isToggleSeekerPressed        = Input.GetKey(KeyCode.PageDown);
+        _isToggleInitialSeekerPressed = Input.GetKey(KeyCode.End);
         
         if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
             hideAndSeek.LobbyData.AreSeekerDebugToolsEnabled)
         {
-            if (IsToggleSeekerPressed && !PreviousIsToggleSeekerPressed)
+            if (_isToggleSeekerPressed && !_previousIsToggleSeekerPressed)
                 hideAndSeek.DebugToggleSeeker(OnlineManager.mePlayer!);
-            if (IsToggleInitialSeekerPressed && !PreviousIsToggleInitialSeekerPressed)
+            if (_isToggleInitialSeekerPressed && !_previousIsToggleInitialSeekerPressed)
                 hideAndSeek.DebugToggleInitialSeeker(OnlineManager.mePlayer!);
         }
         
