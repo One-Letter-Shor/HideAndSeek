@@ -200,7 +200,7 @@ public sealed class Options : OptionInterface
         CfgSeekerEyeColor      = BindCfg(nameof(SeekerEyeColor),      new Color(0.00f, 1.00f, 0.00f));
         CfgSeekerTertiaryColor = BindCfg(nameof(SeekerTertiaryColor), new Color(0.00f, 0.00f, 1.00f));
         
-        CfgAreSeekerDebugToolsEnabled = BindDevToggleCfg(nameof(AreSeekerDebugToolsEnabled), true, new Vector2Int(0, 0), "Enable seeker debug tools");
+        CfgAreSeekerDebugToolsEnabled = BindDevToggleCfg(nameof(AreSeekerDebugToolsEnabled), true, new Vector2Int(0, 12), "Enable Seeker Debug Tools");
         IsInitialized = true;
     }
     
