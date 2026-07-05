@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using BepInEx.Logging;
@@ -184,7 +183,7 @@ public static class Logger
         [CallerLineNumber] int loggingLineNumber = 0,
         [CallerFilePath] string loggingFilePath = "")
     {
-        StringBuilder stringBuilder = new(TrimPath(loggingFilePath), 100);
+        StringBuilder stringBuilder = new(loggingFilePath, 100);
         
         stringBuilder
             .Append(':')
@@ -194,28 +193,6 @@ public static class Logger
             .Append("()");
         
         return stringBuilder;
-        
-        static string TrimPath(string path)
-        {
-            if (_relativePathByPath.TryGetValue(path, out string relativePath))
-                return relativePath; // Happy path.
-            
-            string[] elements = path.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            int srcDirIndex = Array.IndexOf(elements, "src");
-            int projectDirIndex = srcDirIndex + 1;
-            
-            if (srcDirIndex == -1 || projectDirIndex >= elements.Length - 1)
-            {
-                StackTrace stackTrace = new(0, true);
-                Plugin.__Logger.LogError($"Path '{path}' does not source code directory 'src'. Using full path for logging.\n{stackTrace}");
-                return _relativePathByPath[path] = path;
-            }
-            
-            relativePath = string.Join(Path.AltDirectorySeparatorChar.ToString(), elements.Skip(projectDirIndex + 1).ToArray());
-            
-            _relativePathByPath[path] = relativePath;
-            return relativePath; // Only runs once per path.
-        }
     }
     
     /// <inheritdoc cref="GenerateLogCallerInfoOptimized"/>

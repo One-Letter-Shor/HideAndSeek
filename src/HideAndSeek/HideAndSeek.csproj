@@ -4,13 +4,14 @@
         <ModAuthor>OneLetterShor</ModAuthor>
         <RootNamespace>$(ModAuthor).$(ModName)</RootNamespace>
         <AssemblyName>$(RootNamespace)</AssemblyName>
-        <SolutionDir_>$(MSBuildThisFileDirectory)../../</SolutionDir_>
+        <SolutionDir>$(MSBuildThisFileDirectory)../../</SolutionDir>
         <TargetFramework>net48</TargetFramework>
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
         <WarningsAsErrors>$(WarningsAsErrors);Nullable</WarningsAsErrors>
         <GenerateNullableAttributes>true</GenerateNullableAttributes>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <PathMap>$([System.String]::Copy($([MSBuild]::NormalizeDirectory('$(SolutionDir)'))).Replace(',', ',,').Replace('=', '=='))=/</PathMap>
         
         <DefineConstants>$(DefineConstants);<!--SHOULD_EXPLICITLY_LOG_ASSERTION_FAILURES--></DefineConstants>
         
@@ -30,6 +31,7 @@
         </PolySharpIncludeGeneratedTypes>
     </PropertyGroup>
     
+    
     <ItemGroup>
         <Reference Include="Microsoft.CSharp" />
         <Reference Include="System" />
@@ -40,7 +42,7 @@
         <Reference Include="System.Xml.Linq" />
     </ItemGroup>
     <ItemGroup>
-        <Reference Include="$(SolutionDir_)lib/*.dll" Private="False" />
+        <Reference Include="$(SolutionDir)lib/*.dll" Private="False" />
     </ItemGroup>
     <ItemGroup>
         <Compile Update="Arena/HideAndSeekMode.UI.cs">
@@ -56,6 +58,6 @@
     
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
         <Copy SourceFiles="$(TargetDir)$(TargetName).dll;$(TargetDir)$(TargetName).pdb"
-              DestinationFolder="$(SolutionDir_)dist/plugins" />
+              DestinationFolder="$(SolutionDir)dist/plugins" />
     </Target>
 </Project>
