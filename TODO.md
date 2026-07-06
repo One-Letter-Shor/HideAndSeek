@@ -5,7 +5,6 @@ Fixes:
 - Configurables in the lobby UI do not save.
 - Figure out when and why GetOnlineCreature() returns null. Currently some code relies on it not returning null.
 - The Hide and Seek tab has UI elements which poorly overlap. It needs to be redesigned.
-- seekers can see hider nametags (broke at some point)
 - restarting the round (session) doesn't remove infected seekers
 
 Features:
