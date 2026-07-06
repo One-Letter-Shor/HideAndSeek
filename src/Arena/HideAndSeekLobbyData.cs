@@ -21,6 +21,10 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
     public TaggingMethods    EnabledTaggingMethods    { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledTaggingMethods);  } = Plugin.Options.EnabledTaggingMethods;
     public TagResult         EnabledTagResult         { get; set => ApplySetting(value, out field, Plugin.Options.CfgEnabledTagResult);       } = Plugin.Options.EnabledTagResult;
     
+    public int SeekerWinScore   { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerWinScore); } = Plugin.Options.SeekerWinScore;
+    public int SeekerTagScore   { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerTagScore); } = Plugin.Options.SeekerTagScore;
+    public int HiderWinScore    { get; set => ApplySetting(value, out field, Plugin.Options.CfgHiderWinScore);  } = Plugin.Options.HiderWinScore;
+    
     public Color SeekerBodyColor       { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerBodyColor);     } = Plugin.Options.SeekerBodyColor;
     public Color SeekerEyeColor        { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerEyeColor);      } = Plugin.Options.SeekerEyeColor;
     public Color SeekerTertiaryColor   { get; set => ApplySetting(value, out field, Plugin.Options.CfgSeekerTertiaryColor); } = Plugin.Options.SeekerTertiaryColor;
@@ -87,6 +91,7 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         [OnlineField(group = _debug)]
         public bool AreSeekerDebugToolsEnabled;
         
+        
         [OnlineField(group = _settings)]
         public int HideDurationSeconds;
         
@@ -106,6 +111,16 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         public int EnabledTagResult;
         
         
+        [OnlineField(group = _settings)]
+        public int SeekerWinScore;
+        
+        [OnlineField(group = _settings)]
+        public int SeekerTagScore;
+        
+        [OnlineField(group = _settings)]
+        public int HiderWinScore;
+        
+        
         [OnlineFieldColorRgb(group = _settings)]
         public Color SeekerBodyColor;
         
@@ -115,12 +130,14 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         [OnlineFieldColorRgb(group = _settings)]
         public Color SeekerTertiaryColor;
         
+        
         // TODO: Why do these lists need to have groups or be marked as nullable in order to be serializable? If only one exists it is fine, but as soon as there are two it fails.
         [OnlineField(group = nameof(Seekers))]
         public DynamicOrderedUshorts Seekers = new([]);
         
         [OnlineField(group = nameof(InitialSeekers))]
         public DynamicOrderedUshorts InitialSeekers = new([]);
+        
         
         // Rain Meadow requires a ctor with no params.
         [UsedImplicitly]
@@ -140,6 +157,10 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
             EnabledSeekerSelection = (int)data.EnabledSeekerSelection;
             EnabledTaggingMethods  = (int)data.EnabledTaggingMethods;
             EnabledTagResult       = (int)data.EnabledTagResult;
+            
+            SeekerWinScore = data.SeekerWinScore;
+            SeekerTagScore = data.SeekerTagScore;
+            HiderWinScore  = data.HiderWinScore;
             
             SeekerBodyColor     = data.SeekerBodyColor;
             SeekerEyeColor      = data.SeekerEyeColor;
@@ -165,37 +186,43 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
             data.EnabledTaggingMethods  = (TaggingMethods)EnabledTaggingMethods;
             data.EnabledTagResult       = (TagResult)EnabledTagResult;
             
+            data.SeekerWinScore = SeekerWinScore;
+            data.SeekerTagScore = SeekerTagScore;
+            data.HiderWinScore  = HiderWinScore;
+            
             data.SeekerBodyColor     = SeekerBodyColor;
             data.SeekerEyeColor      = SeekerEyeColor;
             data.SeekerTertiaryColor = SeekerTertiaryColor;
             
-            data.Seekers        = GetSeekersByInLobbyIds(Seekers.list, "seekers");
-            data.InitialSeekers = GetSeekersByInLobbyIds(InitialSeekers.list, "initial seekers");
+            data.Seekers        = GetOPlayersByInLobbyIds(Seekers.list, "seekers");
+            data.InitialSeekers = GetOPlayersByInLobbyIds(InitialSeekers.list, "initial seekers");
             
             return;
             
-            static List<OnlinePlayer> GetSeekersByInLobbyIds(List<ushort> seekerInLobbyIds, string seekerLoggingName)
+            static List<OnlinePlayer> GetOPlayersByInLobbyIds(
+                List<ushort> inLobbyIds,
+                string listLoggingName)
             {
-                List<(ushort id, OnlinePlayer oPlayer)> seekerResults = seekerInLobbyIds
-                                                                        .Select(id => (id, ArenaHelpers.FindOnlinePlayerByLobbyId(id)))
-                                                                        .ToList();
+                List<(ushort id, OnlinePlayer oPlayer)> results = inLobbyIds
+                    .Select(id => (id, ArenaHelpers.FindOnlinePlayerByLobbyId(id)))
+                    .ToList();
                 
-                List<OnlinePlayer> seekers = seekerResults
-                                             .Where(result => result.oPlayer is not null)
-                                             .Select(result => result.oPlayer)
-                                             .ToList();
+                List<OnlinePlayer> oPlayers = results
+                     .Where(result => result.oPlayer is not null)
+                     .Select(result => result.oPlayer)
+                     .ToList();
                 
-                if (seekers.Count != seekerResults.Count)
+                if (oPlayers.Count != results.Count)
                 {
                     Logger.Warning(
                         $"""
-                        Found {seekers.Count}/{seekerResults.Count} {seekerLoggingName}.
-                        - {seekerLoggingName} results: [ {string.Join(", ", seekerResults.Select(result => $"({result.id}, {result.oPlayer?.ToString() ?? "null"})"))} ]
+                        Found {oPlayers.Count}/{results.Count} {listLoggingName}.
+                        - {listLoggingName} results: [ {string.Join(", ", results.Select(result => $"({result.id}, {result.oPlayer?.ToString() ?? "null"})"))} ]
                         """
                     );
                 }
                 
-                return seekers;
+                return oPlayers;
             }
         }
         

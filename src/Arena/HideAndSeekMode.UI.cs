@@ -12,15 +12,17 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
         HiderAtlasElementName = "SaintA";
     
     public Color ErrorColor => Color.gray;
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     public Color InitialSeekerUIColor => LobbyData.SeekerBodyColor;
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     public Color InfectedSeekerUIColor => InitialSeekerUIColor.ToHSL().lightness < 0.7f
                                               ? Color.Lerp(InitialSeekerUIColor, Color.white, 0.32f)
                                               : Color.Lerp(InitialSeekerUIColor, Color.black, 0.42f);
     public Color HiderUIColor { get; } = new(0.10f, 0.60f, 0.10f);
     
     /// <summary>
-    /// Used to determine if the key bind for toggling seekers via the
-    /// <see cref="SlugcatColorableButton"/>s in the arena menu is pressed.
+    /// Used to determine if the key for toggling seekers via
+    /// <see cref="SlugcatColorableButton"/>s is pressed.
     /// </summary>
     private bool _isToggleSeekerPressed { get; set; }
     /// <summary>
@@ -38,6 +40,11 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
     /// This does not handle spectators. Ensure a separate check
     /// is used if spectators need to be handled differently.
     /// </remarks>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when:<br/>
+    /// - The online game mode is not <see cref="ArenaOnlineGameMode"/>.<br/>
+    /// - The external game mode is not <see cref="HideAndSeekMode"/>.
+    /// </exception>
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     public Color GetPlayerUIColor(OnlinePlayer oPlayer)
     {
@@ -56,6 +63,12 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
             return HiderUIColor;
     }
     
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when:<br/>
+    /// - The online game mode is not <see cref="ArenaOnlineGameMode"/>.<br/>
+    /// - The external game mode is not <see cref="HideAndSeekMode"/>.
+    /// </exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     public override string AddIcon(
         ArenaOnlineGameMode __,
         OnlinePlayerDisplay display,
@@ -71,6 +84,12 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
             : HiderAtlasElementName;
     }
     
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when:<br/>
+    /// - The online game mode is not <see cref="ArenaOnlineGameMode"/>.<br/>
+    /// - The external game mode is not <see cref="HideAndSeekMode"/>.
+    /// </exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     public override Color IconColor(
         ArenaOnlineGameMode __,
         OnlinePlayerDisplay display,

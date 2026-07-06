@@ -60,7 +60,6 @@ public sealed class ModOptions : OptionInterface
         set => CfgEnabledLogLevels.Value = value;
     }
     
-    
     /// <inheritdoc cref="CfgHideDurationSeconds"/>
     public int HideDurationSeconds
     {
@@ -98,6 +97,25 @@ public sealed class ModOptions : OptionInterface
         set => CfgEnabledTagResult.Value = value;
     }
     
+    /// <inheritdoc cref="CfgSeekerWinScore"/>
+    public int SeekerWinScore
+    {
+        get => CfgSeekerWinScore.Value;
+        set => CfgSeekerWinScore.Value = value;
+    }
+    /// <inheritdoc cref="CfgSeekerTagScore"/>
+    public int SeekerTagScore
+    {
+        get => CfgSeekerTagScore.Value;
+        set => CfgSeekerTagScore.Value = value;
+    }
+    /// <inheritdoc cref="CfgHiderWinScore"/>
+    public int HiderWinScore
+    {
+        get => CfgHiderWinScore.Value;
+        set => CfgHiderWinScore.Value = value;
+    }
+    
     /// <inheritdoc cref="CfgSeekerBodyColor"/>
     public Color SeekerBodyColor
     {
@@ -110,7 +128,6 @@ public sealed class ModOptions : OptionInterface
         get => CfgSeekerEyeColor.Value;
         set => CfgSeekerEyeColor.Value = value;
     }
-    
     /// <inheritdoc cref="CfgSeekerTertiaryColor"/>
     public Color SeekerTertiaryColor
     {
@@ -126,28 +143,27 @@ public sealed class ModOptions : OptionInterface
     }
     
     
+    
     // TODO: Add documentation for all configurables.
     // --- Configurables --- //
     /// <summary>For <see cref="Logging.Logger"/> to determine if a message should be logged.</summary>
     public Configurable<LogLevel> CfgEnabledLogLevels { get; }
     
-    
     public Configurable<int> CfgHideDurationSeconds { get; }
-    
     public Configurable<int> CfgSeekDurationSeconds { get; }
-    
     public Configurable<int> CfgSeekerCount { get; }
-    
     public Configurable<SeekerSelection> CfgEnabledSeekerSelection { get; }
+    public Configurable<TaggingMethods>  CfgEnabledTaggingMethods { get; }
+    public Configurable<TagResult>       CfgEnabledTagResult { get; }
     
-    public Configurable<TaggingMethods> CfgEnabledTaggingMethods { get; }
-    
-    public Configurable<TagResult> CfgEnabledTagResult { get; }
-    
+    public Configurable<int> CfgSeekerWinScore { get; }
+    public Configurable<int> CfgSeekerTagScore { get; }
+    public Configurable<int> CfgHiderWinScore { get; }
     
     public Configurable<Color> CfgSeekerBodyColor { get; }
     public Configurable<Color> CfgSeekerEyeColor { get; }
     public Configurable<Color> CfgSeekerTertiaryColor { get; }
+    
     public Configurable<bool> CfgAreSeekerDebugToolsEnabled { get; }
     
     
@@ -184,6 +200,10 @@ public sealed class ModOptions : OptionInterface
         CfgEnabledSeekerSelection = BindCfg(nameof(EnabledSeekerSelection), SeekerSelection.Random);
         CfgEnabledTaggingMethods  = BindCfg(nameof(EnabledTaggingMethods), TaggingMethods.All, new ConfigAcceptableRange<TaggingMethods>(TaggingMethods.None + 1, TaggingMethods.All));
         CfgEnabledTagResult       = BindCfg(nameof(EnabledTagResult), TagResult.Ghost);
+        
+        CfgSeekerWinScore = BindCfg(nameof(SeekerWinScore), 6, new ConfigAcceptableRange<int>(1, 99));
+        CfgSeekerTagScore = BindCfg(nameof(SeekerTagScore), 1, new ConfigAcceptableRange<int>(1, 99));
+        CfgHiderWinScore  = BindCfg(nameof(HiderWinScore),  10, new ConfigAcceptableRange<int>(1, 99));
         
         CfgSeekerBodyColor     = BindCfg(nameof(SeekerBodyColor),     new Color(1.00f, 0.00f, 0.00f));
         CfgSeekerEyeColor      = BindCfg(nameof(SeekerEyeColor),      new Color(0.00f, 1.00f, 0.00f));
