@@ -7,6 +7,7 @@ Fixes:
 - The Hide and Seek tab has UI elements which poorly overlap. It needs to be redesigned.
 
 Features:
+- Add support for story.
 - Change Rain Meadow's scoring to reflect seeker and hider scores.
 - Implement all tag results.
 - Seekers should not be able to see, move, or tag during the safety timer. (look in GameplayOverrides.cs something like HaltPlayerMovement)
@@ -16,7 +17,8 @@ Features:
 - Hiders and seekers should have different banned slugcats.
 - Protect against all weapon friendly fire.
 - Seekers and initial seekers need to be reselected every arena session end.
-- Add support for story.
+- The willing to seeker checkbox should be grayed when seeker selection is self.
+- The host should not be able to select players who are not willing to seek.
 
 Refactors:
 - Update Options class design after making story and arena game modes.

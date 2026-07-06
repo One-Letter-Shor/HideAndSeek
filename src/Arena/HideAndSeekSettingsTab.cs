@@ -79,8 +79,6 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         
         IsWillingToSeekCheckBox.OnValueChanged += (_, _, _) =>
         {
-            if (!OnlineManager.lobby!.isOwner) return;
-            
             HideAndSeek.MyClientData.IsWillingToSeek = IsWillingToSeekCheckBox.GetValueBool();
         };
         

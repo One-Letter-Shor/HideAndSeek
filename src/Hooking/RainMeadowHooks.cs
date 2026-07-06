@@ -117,6 +117,12 @@ public static class RainMeadowHooks
                 arenaOnline.lobbyCountDown > 0 &&
                 hideAndSeek.LobbyData.EnabledSeekerSelection == SeekerSelection.Random)
             {
+                if (!hideAndSeek.CanStartNewGame(out string? failureReason) &&
+                    !hideAndSeek.LobbyData.AreSeekerDebugToolsEnabled)
+                {
+                    Logger.Error($"It should not be possible to start the game. Reason: {failureReason}");
+                }
+                
                 hideAndSeek.SelectRandomSeekers();
             }
         }
@@ -169,7 +175,7 @@ public static class RainMeadowHooks
         orig(self);
         
         if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
-            (!hideAndSeek.CanStartNewGame && !hideAndSeek.LobbyData.AreSeekerDebugToolsEnabled))
+            (!hideAndSeek.CanStartNewGame() && !hideAndSeek.LobbyData.AreSeekerDebugToolsEnabled))
         {
             self.startButton?.buttonBehav.greyedOut = true;
         }

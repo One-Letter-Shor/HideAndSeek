@@ -22,60 +22,8 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     
     /// <exception cref="KeyNotFoundException">Thrown if the client data is not registered.</exception>
     public HideAndSeekClientData MyClientData => OnlineManager.lobby!
-                                                              .clientSettings[OnlineManager.mePlayer]
-                                                              .GetData<HideAndSeekClientData>();
-    
-    /// <summary>
-    /// Determines if the host is able to start a new game
-    /// </summary>
-    /// <remarks>
-    /// This property only considers gameplay-related Hide
-    /// and Seek data. Debug settings, such as
-    /// <see cref="HideAndSeekLobbyData.AreSeekerDebugToolsEnabled"/>,
-    /// are ignored.
-    /// </remarks>
-    public bool CanStartNewGame
-    {
-        get
-        {
-            // If this logic or the functions below change, ensure SelectRandomSeekers is updated too.
-            if (LobbyData.EnabledSeekerSelection == SeekerSelection.Random)
-            {
-                int selectablePlayerCount = OnlineManager.players
-                    .Count(player => IsReady(player) && IsWillingToSeek(player));
-                
-                return selectablePlayerCount >= LobbyData.SeekerCount + 1; // Enough players for all seekers + 1 hider
-            }
-            
-            return LobbyData.Seekers.Count > 0 && LobbyData.Seekers.Count < OnlineManager.players.Count;
-            
-            static bool IsReady(OnlinePlayer oPlayer)
-            {
-                ArenaClientSettings? clientData = ArenaHelpers.GetDataSettings<ArenaClientSettings>(oPlayer);
-                
-                if (clientData is null)
-                {
-                    Logger.Debug($"Could not find client data for {oPlayer}.");
-                    return false;
-                }
-                
-                return clientData.ready;
-            }
-            
-            static bool IsWillingToSeek(OnlinePlayer oPlayer)
-            {
-                HideAndSeekClientData? clientData = ArenaHelpers.GetDataSettings<HideAndSeekClientData>(oPlayer);
-                
-                if (clientData is null)
-                {
-                    Logger.Debug($"Could not find client data for {oPlayer}.");
-                    return false;
-                }
-                
-                return clientData.IsWillingToSeek;
-            }
-        }
-    }
+                                                     .clientSettings[OnlineManager.mePlayer]
+                                                     .GetData<HideAndSeekClientData>();
     
     /// <exception cref="InvalidOperationException">Thrown if not in a game.</exception>
     public bool IsSeekingTimeOver
@@ -147,6 +95,76 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     {
         MatchmakingManager.OnPlayerListReceived -= OnPlayerListReceived;
         MatchmakingManager.OnLobbyLeaving -= OnLobbyLeaving;
+    }
+    
+    /// <inheritdoc cref="CanStartNewGame(out string)"/>
+    public bool CanStartNewGame()
+    {
+        return CanStartNewGame(out _);
+    }
+    
+    /// <summary>
+    /// Determines if the host is able to start a new game
+    /// </summary>
+    public bool CanStartNewGame([NotNullWhen(false)] out string? failureReason)
+    {
+        failureReason = null;
+        
+        List<string> failureReasons = [];
+        
+        if (LobbyData.EnabledSeekerSelection == SeekerSelection.Random)
+        {
+            
+            // Logic is coupled to SelectRandomSeekers.
+            int readyPlayerCount = OnlineManager.players
+                .Count(IsReady);
+            int selectablePlayerCount = OnlineManager.players
+                .Count(player => IsReady(player) && IsWillingToSeek(player));
+            
+            if (selectablePlayerCount < LobbyData.SeekerCount)
+                failureReasons.Add($"There are not enough selectable players ({selectablePlayerCount}).");
+            if (readyPlayerCount <= LobbyData.SeekerCount)
+                failureReasons.Add($"There are not enough ready players ({readyPlayerCount}) to have at least 1 hider.");
+        }
+        else
+        {
+            if (LobbyData.Seekers.Count == 0)
+                failureReasons.Add("There are no seekers selected.");
+        }
+        
+        if (failureReasons.Count > 0)
+        {
+            failureReason = string.Join(" ", failureReasons);
+            return false;
+        }
+        
+        return true;
+        
+        static bool IsReady(OnlinePlayer oPlayer)
+        {
+            ArenaClientSettings? clientData = ArenaHelpers.GetDataSettings<ArenaClientSettings>(oPlayer);
+            
+            if (clientData is null)
+            {
+                Logger.Debug($"Could not find client data for {oPlayer}.");
+                return false;
+            }
+            
+            return clientData.ready;
+        }
+        
+        static bool IsWillingToSeek(OnlinePlayer oPlayer)
+        {
+            HideAndSeekClientData? clientData = ArenaHelpers.GetDataSettings<HideAndSeekClientData>(oPlayer);
+            
+            if (clientData is null)
+            {
+                Logger.Debug($"Could not find client data for {oPlayer}.");
+                return false;
+            }
+            
+            return clientData.IsWillingToSeek;
+        }
     }
     
     /// <inheritdoc cref="CanSelectSeeker(SeekerSelection, OnlinePlayer, OnlinePlayer, out string)"/>
@@ -370,12 +388,22 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         hideAndSeek.LobbyData.Seekers.Add(target);
     }
     
+    /// <summary>
+    /// Selects n valid players to be seekers. Where
+    /// n is <see cref="HideAndSeekLobbyData.SeekerCount"/>.
+    /// </summary>
     /// <exception cref="InvalidOperationException">
     /// Thrown when:<br/>
     /// - The me player is not the host.<br/>
     /// - <see cref="SeekerSelection"/> is not <see cref="SeekerSelection.Random"/>.
     /// </exception>
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    /// <remarks>
+    /// This method does not throw exceptions for some invalid
+    /// states.<br/> For instance: this is fine with not selecting
+    /// enough seekers if there are not enough selectable
+    /// players. This is also fine with selecting ALL players.
+    /// </remarks>
     public void SelectRandomSeekers()
     {
         if (!OnlineManager.lobby!.isOwner)
@@ -383,28 +411,16 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         if (LobbyData.EnabledSeekerSelection != SeekerSelection.Random)
             throw new InvalidOperationException($"Cannot select random seekers when selection mode is '{LobbyData.EnabledSeekerSelection}'.");
         
-        // If this logic or the functions below change, ensure CanStartNewGame and SelectSeekerRpc are updated too.
-        
+        // Logic is coupled to CanStartNewGame.
         List<OnlinePlayer> selectablePlayers = OnlineManager.players
-                                                            .Where(player => IsReady(player) &&
-                                                                             IsWillingToSeek(player)
-                                                            ).ToList();
+            .Where(oPlayer => IsReady(oPlayer) && IsWillingToSeek(oPlayer)) 
+            .ToList();
+        
         selectablePlayers.Shuffle();
         
-        int seekerCount = Mathf.Min(LobbyData.SeekerCount, selectablePlayers.Count);
         List<OnlinePlayer> selectedSeekers = selectablePlayers
-                                                .Take(seekerCount)
-                                                .ToList();
-        
-        if (selectedSeekers.Count != seekerCount)
-        {
-            Logger.Error(
-                $"Desired seeker count is '{seekerCount}' but there " +
-                $"are only {selectedSeekers.Count} selectable players." +
-                $"\n- All players:        [ {string.Join(", ", OnlineManager.players)} ]." + 
-                $"\n- Selectable players: [ {string.Join(", ", selectablePlayers)} ]." 
-            );
-        }
+            .Take(LobbyData.SeekerCount)
+            .ToList();
         
         LobbyData.Seekers        = selectedSeekers.ToList();
         LobbyData.InitialSeekers = selectedSeekers.ToList();
@@ -496,7 +512,6 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
             );
         }
         
-        // If this logic changes, ensure SelectRandomSeekers is updated too.
         if (!target.IsSeeker)
         {
             Logger.Debug($"Selecting {target} to be seeker. {fromText}");
