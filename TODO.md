@@ -6,11 +6,10 @@ Fixes:
 - Figure out when and why GetOnlineCreature() returns null. Currently some code relies on it not returning null.
 - The Hide and Seek tab has UI elements which poorly overlap. It needs to be redesigned.
 - seekers can see hider nametags (broke at some point)
-- restart doesn't remove infected seekers
+- restarting the round (session) doesn't remove infected seekers
 
 Features:
 - Add support for story.
-- Change Rain Meadow's scoring to reflect seeker and hider scores.
 - Implement all tag results.
 - Seekers should not be able to see, move, or tag during the safety timer. (look in GameplayOverrides.cs something like HaltPlayerMovement)
 - Hiders should be able to change their colors in game. For balancing purposes they should only be able to change colors during fixed times. Perhaps during the hiding timer works well.
@@ -20,9 +19,8 @@ Features:
 - Protect against all weapon friendly fire.
 - Seekers and initial seekers need to be reselected every arena session end.
 - Disable death for players.
-- The host should not be able to select players who are not willing to seek and the checkbox should not be grayed out when seeker selection is host.
 - Sort infected seekers by order of infection.
-- Add some score benefit for surviving long.
+- Add some addition scoring for hiders that live long.
 
 Refactors:
 - Update Options class design after making story and arena game modes.
