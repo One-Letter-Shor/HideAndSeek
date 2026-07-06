@@ -194,33 +194,35 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
             data.SeekerEyeColor      = SeekerEyeColor;
             data.SeekerTertiaryColor = SeekerTertiaryColor;
             
-            data.Seekers        = GetSeekersByInLobbyIds(Seekers.list, "seekers");
-            data.InitialSeekers = GetSeekersByInLobbyIds(InitialSeekers.list, "initial seekers");
+            data.Seekers        = GetOPlayersByInLobbyIds(Seekers.list, "seekers");
+            data.InitialSeekers = GetOPlayersByInLobbyIds(InitialSeekers.list, "initial seekers");
             
             return;
             
-            static List<OnlinePlayer> GetSeekersByInLobbyIds(List<ushort> seekerInLobbyIds, string seekerLoggingName)
+            static List<OnlinePlayer> GetOPlayersByInLobbyIds(
+                List<ushort> inLobbyIds,
+                string listLoggingName)
             {
-                List<(ushort id, OnlinePlayer oPlayer)> seekerResults = seekerInLobbyIds
-                                                                        .Select(id => (id, ArenaHelpers.FindOnlinePlayerByLobbyId(id)))
-                                                                        .ToList();
+                List<(ushort id, OnlinePlayer oPlayer)> results = inLobbyIds
+                    .Select(id => (id, ArenaHelpers.FindOnlinePlayerByLobbyId(id)))
+                    .ToList();
                 
-                List<OnlinePlayer> seekers = seekerResults
-                                             .Where(result => result.oPlayer is not null)
-                                             .Select(result => result.oPlayer)
-                                             .ToList();
+                List<OnlinePlayer> oPlayers = results
+                     .Where(result => result.oPlayer is not null)
+                     .Select(result => result.oPlayer)
+                     .ToList();
                 
-                if (seekers.Count != seekerResults.Count)
+                if (oPlayers.Count != results.Count)
                 {
                     Logger.Warning(
                         $"""
-                        Found {seekers.Count}/{seekerResults.Count} {seekerLoggingName}.
-                        - {seekerLoggingName} results: [ {string.Join(", ", seekerResults.Select(result => $"({result.id}, {result.oPlayer?.ToString() ?? "null"})"))} ]
+                        Found {oPlayers.Count}/{results.Count} {listLoggingName}.
+                        - {listLoggingName} results: [ {string.Join(", ", results.Select(result => $"({result.id}, {result.oPlayer?.ToString() ?? "null"})"))} ]
                         """
                     );
                 }
                 
-                return seekers;
+                return oPlayers;
             }
         }
         

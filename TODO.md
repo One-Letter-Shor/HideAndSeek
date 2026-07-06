@@ -21,6 +21,8 @@ Features:
 - Seekers and initial seekers need to be reselected every arena session end.
 - Disable death for players.
 - The host should not be able to select players who are not willing to seek and the checkbox should not be grayed out when seeker selection is host.
+- Sort infected seekers by order of infection.
+- Add some score benefit for surviving long.
 
 Refactors:
 - Update Options class design after making story and arena game modes.

@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Menu;
 using On.ArenaBehaviors;
 using OneLetterShor.HideAndSeek.Utils;
 using RainMeadow;
@@ -96,6 +97,178 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         MatchmakingManager.OnPlayerListReceived -= OnPlayerListReceived;
         MatchmakingManager.OnLobbyLeaving -= OnLobbyLeaving;
     }
+    
+    /// <summary>
+    /// If <paramref name="seekersWon"/> is <see langword="true"/>:<br/>
+    /// - (3) initial seekers<br/>
+    /// - (2) initial hiders<br/>
+    /// - (1) spectators<br/>
+    /// - (0) <see langword="null"/> players<br/><br/>
+    /// Otherwise, if <paramref name="seekersWon"/> is <see langword="false"/>:<br/>
+    /// - (4) current hiders<br/>
+    /// - (3) initial hiders<br/>
+    /// - (2) current seekers<br/>
+    /// - (1) spectators<br/>
+    /// - (0) <see langword="null"/> players<br/>
+    /// </summary>
+    public int GetSessionRanking(OnlinePlayer? oPlayer, bool seekersWon)
+    {
+        if (oPlayer is null)
+        {
+            Logger.Debug("Player is null (0)");
+            return 0;
+        }
+        
+        ArenaClientSettings? arenaClientData = ArenaHelpers.GetDataSettings<ArenaClientSettings>(oPlayer);
+        Assert(arenaClientData is not null);
+        
+        if (arenaClientData.playingAs == RainMeadow.RainMeadow.Ext_SlugcatStatsName.OnlineOverseerSpectator)
+        {
+            Logger.Debug($"{oPlayer} is a spectator (1)");
+            return 1;
+        }
+        
+        if (seekersWon)
+        {
+            if (!oPlayer.IsAnInitialSeeker)
+            {
+                Logger.Debug($"{oPlayer} is not an initial seeker (2)");
+                return 2;
+            }
+            Logger.Debug($"{oPlayer} is an initial seeker (3)");
+            return 3;
+        }
+        else
+        {
+            if (oPlayer.IsAnInitialSeeker)
+            {
+                Logger.Debug($"{oPlayer} is an initial seeker (2)");
+                return 2;
+            }
+            if (oPlayer.IsSeeker)
+            {
+                Logger.Debug($"{oPlayer} is a seeker (3)");
+                return 3;
+            }
+            
+            Logger.Debug($"{oPlayer} is a hider (4)");
+            return 4;
+        }
+    }
+    
+    public override bool PlayerSessionResultSort(
+        ArenaOnlineGameMode __,
+        On.ArenaSitting.orig_PlayerSessionResultSort? orig,
+        ArenaSitting self,
+        ArenaSitting.ArenaPlayer a,
+        ArenaSitting.ArenaPlayer b)
+    {
+        bool seekersWon = ArenaOnlineHelper.GetPlayingOPlayers(ArenaOnline)
+            .All(oPlayer => oPlayer.IsSeeker);
+        
+        Logger.Info($"seekers won: {seekersWon}");
+        
+        OnlinePlayer? oPlayerA = ArenaHelpers.FindOnlinePlayerByFakePlayerNumber(ArenaOnline, a.playerNumber);
+        OnlinePlayer? oPlayerB = ArenaHelpers.FindOnlinePlayerByFakePlayerNumber(ArenaOnline, b.playerNumber);
+        
+        Logger.Debug($"{oPlayerA} score: {a.score}");
+        Logger.Debug($"{oPlayerB} score: {b.score}");
+        
+        int rankingA = GetSessionRanking(oPlayerA, seekersWon);
+        int rankingB = GetSessionRanking(oPlayerB, seekersWon);
+        
+        if (rankingA != rankingB)
+        {
+            Logger.Info(
+                rankingA > rankingB
+                    ? $"{oPlayerA} is better than {oPlayerB}"
+                    : $"{oPlayerA} is not better than {oPlayerB}"
+            );
+            return rankingA > rankingB;
+        }
+        
+        Logger.Info(
+            a.score > b.score
+                ? $"{oPlayerA} is better than {oPlayerB}"
+                : $"{oPlayerA} is not better than {oPlayerB}"
+        );
+        
+        return a.score > b.score;
+    }
+
+    public override void ArenaSessionEnded(
+        ArenaOnlineGameMode __,
+        On.ArenaSitting.orig_SessionEnded orig,
+        ArenaSitting self,
+        ArenaGameSession arenaSession)
+    {
+        bool seekersWon = ArenaOnlineHelper.GetPlayingOPlayers(ArenaOnline)
+            .All(oPlayer => oPlayer.IsSeeker);
+        
+        foreach (ArenaSitting.ArenaPlayer arenaPlayer in self.players)
+        {
+            OnlinePlayer? oPlayer = ArenaHelpers.FindOnlinePlayerByFakePlayerNumber(ArenaOnline, arenaPlayer.playerNumber);
+            if (oPlayer is null) continue;
+            
+            if (arenaPlayer.playerClass == RainMeadow.RainMeadow.Ext_SlugcatStatsName.OnlineOverseerSpectator)
+            {
+                ArenaOnline.ResetPlayerStats(arenaPlayer);
+                
+                if (OnlineManager.lobby.isOwner)
+                    ArenaOnline.SetPlayerStatsFromLocalPlayer(arenaPlayer, oPlayer, false);
+                
+                continue;
+            }
+            
+            ArenaOnline.ReadFromStats(arenaPlayer, oPlayer); // local copy rm
+            
+            arenaPlayer.winner = false;
+            arenaPlayer.alive = arenaSession.EndOfSessionLogPlayerAsAlive(arenaPlayer.playerNumber);
+            
+            if (seekersWon && oPlayer.IsAnInitialSeeker)
+            {
+                arenaPlayer.score += LobbyData.SeekerWinScore;
+                arenaPlayer.winner = true;
+            }
+            else if (!seekersWon && !oPlayer.IsSeeker)
+            {
+                arenaPlayer.score += LobbyData.HiderWinScore;
+                arenaPlayer.winner = true;
+            }
+            
+            if (arenaPlayer.winner)
+                arenaPlayer.wins++;
+            
+            arenaPlayer.totScore += arenaPlayer.score; // Not technically needed
+            
+            if (OnlineManager.lobby.isOwner)
+            {
+                ArenaOnline.SetPlayerStatsFromLocalPlayer(arenaPlayer, oPlayer, false); // rm copy local
+                ArenaOnline.playerTotScore[oPlayer.inLobbyId] = arenaPlayer.totScore;   // rm copy local total score (the method doesn't set total score)
+            }
+        }
+        
+        List<ArenaSitting.ArenaPlayer> sortedPlayers = [];
+        foreach (ArenaSitting.ArenaPlayer player in self.players)
+        {
+            bool isInserted = false;
+            for (int i = 0; i < sortedPlayers.Count; ++i)
+            {
+                if (self.PlayerSessionResultSort(player, sortedPlayers[i]))
+                {
+                    sortedPlayers.Insert(i, player);
+                    isInserted = true;
+                    break;
+                }
+            }
+            if (!isInserted)
+                sortedPlayers.Add(player);
+        }
+        
+        arenaSession.game.arenaOverlay = new ArenaOverlay(arenaSession.game.manager, self, sortedPlayers);
+        arenaSession.game.manager.sideProcesses.Add(arenaSession.game.arenaOverlay);
+    }
+    
     
     /// <inheritdoc cref="CanStartNewGame(out string)"/>
     public bool CanStartNewGame()
@@ -386,6 +559,34 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         
         Logger.Debug($"Making {target} a seeker. {fromText}");
         hideAndSeek.LobbyData.Seekers.Add(target);
+        
+        // me when half the code is just to get the values to perform logic on
+        int taggerIndex = ArenaHelpers.FindOnlinePlayerNumber(hideAndSeek.ArenaOnline, tagger);
+        int targetIndex = ArenaHelpers.FindOnlinePlayerNumber(hideAndSeek.ArenaOnline, target);
+        ArenaOnlineGameMode arenaOnline  = hideAndSeek.ArenaOnline;
+        ArenaGameSession    arenaSession = hideAndSeek.ArenaOnline.session;
+        ArenaSitting        arenaSitting = hideAndSeek.ArenaOnline.session.arenaSitting;
+        
+        ArenaSitting.ArenaPlayer taggerArenaPlayer = arenaSitting.players[taggerIndex];
+        ArenaSitting.ArenaPlayer targetArenaPlayer = arenaSitting.players[targetIndex];
+        IconSymbol.IconSymbolData trophy = CreatureSymbol.SymbolDataFromCreature(arenaSession.Players[targetIndex]);
+        
+        
+        arenaOnline.ReadFromStats(taggerArenaPlayer, tagger); // local copy rm
+        arenaOnline.ReadFromStats(targetArenaPlayer, target); // local copy rm
+        
+        taggerArenaPlayer.score += hideAndSeek.LobbyData.SeekerTagScore;
+        
+        arenaOnline.CheckToAddPlayerStatsToDicts(tagger); // Populates with default values.
+        arenaOnline.playerNumberWithTrophies[tagger.inLobbyId]
+            .Add(trophy.ToString());
+        arenaOnline.playerNumberWithTrophiesPerRound[tagger.inLobbyId]
+            .Add(trophy.ToString());
+        
+        targetArenaPlayer.deaths++;
+        
+        arenaOnline.SetPlayerStatsFromLocalPlayer(taggerArenaPlayer, tagger, false); // rm copy local
+        arenaOnline.SetPlayerStatsFromLocalPlayer(targetArenaPlayer, target, false); // rm copy local
     }
     
     /// <summary>
