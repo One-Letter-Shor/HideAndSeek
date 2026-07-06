@@ -60,12 +60,6 @@ public sealed class ModOptions : OptionInterface
         set => CfgEnabledLogLevels.Value = value;
     }
     
-    /// <inheritdoc cref="CfgIsWillingToSeek"/>
-    public bool IsWillingToSeek
-    {
-        get => CfgIsWillingToSeek.Value;
-        set => CfgIsWillingToSeek.Value = value;
-    }
     
     /// <inheritdoc cref="CfgHideDurationSeconds"/>
     public int HideDurationSeconds
@@ -138,9 +132,6 @@ public sealed class ModOptions : OptionInterface
     public Configurable<LogLevel> CfgEnabledLogLevels { get; }
     
     
-    public Configurable<bool> CfgIsWillingToSeek { get; }
-    
-    
     public Configurable<int> CfgHideDurationSeconds { get; }
     
     public Configurable<int> CfgSeekDurationSeconds { get; }
@@ -186,8 +177,6 @@ public sealed class ModOptions : OptionInterface
             UpdateLogLevelCheckBoxes();
         };
         
-        
-        CfgIsWillingToSeek = BindCfg(nameof(IsWillingToSeek), true);
         
         CfgHideDurationSeconds    = BindCfg(nameof(HideDurationSeconds), 10);
         CfgSeekDurationSeconds    = BindCfg(nameof(SeekDurationSeconds), 60 * 8);

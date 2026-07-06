@@ -13,7 +13,7 @@ public sealed class HideAndSeekClientData : OnlineEntity.EntityData
     
     /// <remarks>Init-only setter.</remarks>
     public bool IsMine { get; internal set; } = false;
-    public bool IsWillingToSeek { get; set => ApplySetting(value, out field, Plugin.Options.CfgIsWillingToSeek); } = Plugin.Options.IsWillingToSeek;
+    public bool IsWillingToSeek { get; set; } = true;
     
     /// <summary>
     /// Clamps the value based on <paramref name="configurable"/>

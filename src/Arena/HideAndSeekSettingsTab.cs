@@ -75,7 +75,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         );
         
         IsWillingToSeekCheckBox = new OpCheckBox(
-            ConfigurableHelper.Clone(Plugin.Options.CfgIsWillingToSeek),
+            new Configurable<bool>(HideAndSeek.MyClientData.IsWillingToSeek),
             new Vector2(IsWillingToSeekLabel.pos.x + IsWillingToSeekLabel.size.x, IsWillingToSeekLabel.pos.y + labelAlignmentYFix)
         );
         
