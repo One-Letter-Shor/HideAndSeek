@@ -30,8 +30,8 @@ public static class RainWorldHooks
     {
         _previousIsToggleSeekerPressed        = _isToggleSeekerPressed;
         _previousIsToggleInitialSeekerPressed = _isToggleInitialSeekerPressed;
-        _isToggleSeekerPressed        = Input.GetKey(KeyCode.PageDown);
-        _isToggleInitialSeekerPressed = Input.GetKey(KeyCode.End);
+        _isToggleSeekerPressed        = Input.GetKey(Plugin.Options.DebugToggleSeekerKey);
+        _isToggleInitialSeekerPressed = Input.GetKey(Plugin.Options.DebugToggleInitialSeekerKey);
         
         if (HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek) &&
             hideAndSeek.LobbyData.AreSeekerDebugToolsEnabled)

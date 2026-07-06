@@ -49,6 +49,10 @@ public sealed class ModOptions : OptionInterface
     public OpLabel? DevTabTitleLabel { get; private set; }
     public OpLabelLong? DevTabInfoLabel { get; private set; }
     public List<(OpLabelLong, OpCheckBox)> DevToggleElements { get; private set; } = [];
+    public OpLabel?     DebugToggleSeekerLabel { get; private set; }
+    public OpKeyBinder? DebugToggleSeekerKeyBinder { get; private set; }
+    public OpLabel?     DebugToggleInitialSeekerLabel { get; private set; }
+    public OpKeyBinder? DebugToggleInitialSeekerKeyBinder { get; private set; }
     
     
     
@@ -141,6 +145,18 @@ public sealed class ModOptions : OptionInterface
         get => CfgAreSeekerDebugToolsEnabled.Value;
         set => CfgAreSeekerDebugToolsEnabled.Value = value;
     }
+    /// <inheritdoc cref="CfgDebugToggleSeekerKey"/>
+    public KeyCode DebugToggleSeekerKey
+    {
+        get => CfgDebugToggleSeekerKey.Value;
+        set => CfgDebugToggleSeekerKey.Value = value;
+    }
+    /// <inheritdoc cref="CfgDebugToggleInitialSeekerKey"/>
+    public KeyCode DebugToggleInitialSeekerKey
+    {
+        get => CfgDebugToggleInitialSeekerKey.Value;
+        set => CfgDebugToggleInitialSeekerKey.Value = value;
+    }
     
     
     
@@ -165,6 +181,8 @@ public sealed class ModOptions : OptionInterface
     public Configurable<Color> CfgSeekerTertiaryColor { get; }
     
     public Configurable<bool> CfgAreSeekerDebugToolsEnabled { get; }
+    public Configurable<KeyCode> CfgDebugToggleSeekerKey { get; }
+    public Configurable<KeyCode> CfgDebugToggleInitialSeekerKey { get; }
     
     
     
@@ -209,7 +227,10 @@ public sealed class ModOptions : OptionInterface
         CfgSeekerEyeColor      = BindCfg(nameof(SeekerEyeColor),      new Color(0.00f, 1.00f, 0.00f));
         CfgSeekerTertiaryColor = BindCfg(nameof(SeekerTertiaryColor), new Color(0.00f, 0.00f, 1.00f));
         
-        CfgAreSeekerDebugToolsEnabled = BindDevToggleCfg(nameof(AreSeekerDebugToolsEnabled), true, new Vector2Int(0, 12), "Enable Seeker Debug Tools");
+        CfgAreSeekerDebugToolsEnabled  = BindDevToggleCfg(nameof(AreSeekerDebugToolsEnabled), true, new Vector2Int(0, 12), "Enable Seeker Debug Tools");
+        CfgDebugToggleSeekerKey        = BindCfg(nameof(DebugToggleSeekerKey),        KeyCode.PageDown);
+        CfgDebugToggleInitialSeekerKey = BindCfg(nameof(DebugToggleInitialSeekerKey), KeyCode.End);
+        
         IsInitialized = true;
     }
     
@@ -222,6 +243,37 @@ public sealed class ModOptions : OptionInterface
         
         CreateLogLevelUI();
         CreateDevToggleUI();
+        
+        DebugToggleSeekerKeyBinder = new OpKeyBinder(
+            CfgDebugToggleSeekerKey,
+            new Vector2(50f, 30f),
+            new Vector2(150f, 30f),
+            false
+        );
+        DebugToggleSeekerLabel = new OpLabel(
+            DebugToggleSeekerKeyBinder.pos + new Vector2(0f, 30f),
+            DebugToggleSeekerKeyBinder.size,
+            "Toggle Seeker"
+        );
+        
+        DebugToggleInitialSeekerKeyBinder = new OpKeyBinder(
+            CfgDebugToggleInitialSeekerKey,
+            new Vector2(220f, 30f),
+            new Vector2(150f, 30f),
+            false
+        );
+        DebugToggleInitialSeekerLabel = new OpLabel(
+            DebugToggleInitialSeekerKeyBinder.pos + new Vector2(0f, 30f),
+            DebugToggleInitialSeekerKeyBinder.size,
+            "Toggle Initial Seeker"
+        );
+        
+        DevTab.AddItems(
+            DebugToggleSeekerKeyBinder,
+            DebugToggleSeekerLabel,
+            DebugToggleInitialSeekerKeyBinder,
+            DebugToggleInitialSeekerLabel
+        );
     }
     
     
