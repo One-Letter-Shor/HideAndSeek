@@ -89,6 +89,12 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
     
     public override Color GetPortraitColor(ArenaOnlineGameMode __, OnlinePlayer? oPlayer, Color originalColor)
     {
+        if (!IsHideAndSeekMode(out _))
+        {
+            Logger.Error("This method should not be called when it is not Hide and Seek.");
+            return ErrorColor; // Leave it to Rain Meadow to call the wrong game mode's method. TODO: PR Rain Meadow.
+        }
+        
         if (oPlayer is null)
             return base.GetPortraitColor(ArenaOnline, oPlayer, originalColor);
         
