@@ -17,8 +17,9 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
     public ArenaOnlineLobbyMenu ArenaOnlineMenu { get; }
     public HideAndSeekMode HideAndSeek { get; }
     
-    public ProperlyAlignedMenuLabel WillingToSeekLabel { get; }
+    public ProperlyAlignedMenuLabel IsWillingToSeekLabel { get; }
     public OpCheckBox               IsWillingToSeekCheckBox { get; }
+    
     public ProperlyAlignedMenuLabel SeekerCountLabel { get; }
     public OpUpdown                 SeekerCountUpdown { get; }
     public ProperlyAlignedMenuLabel SeekerSelectionLabel { get; }
@@ -27,12 +28,13 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
     public Dictionary<TaggingMethods, (ProperlyAlignedMenuLabel label, OpCheckBox checkBox)> UIByTaggingMethod { get; } = [];
     public ProperlyAlignedMenuLabel TagResultLabel { get; }
     public OpResourceSelector       TagResultSelector { get; }
-    public MenuLabel                SeekerBodyColorLabel { get; }
-    public OpColorPicker            SeekerBodyColorPicker { get; }
-    public MenuLabel                SeekerEyeColorLabel { get; }
-    public OpColorPicker            SeekerEyeColorPicker { get; }
-    public MenuLabel                SeekerTertiaryColorLabel { get; }
-    public OpColorPicker            SeekerTertiaryColorPicker { get; }
+    
+    public MenuLabel     SeekerBodyColorLabel { get; }
+    public OpColorPicker SeekerBodyColorPicker { get; }
+    public MenuLabel     SeekerEyeColorLabel { get; }
+    public OpColorPicker SeekerEyeColorPicker { get; }
+    public MenuLabel     SeekerTertiaryColorLabel { get; }
+    public OpColorPicker SeekerTertiaryColorPicker { get; }
     
     public UIfocusable[] AllUIFocusables { get; }
     public UIfocusable[] LobbyUIFocusables { get; }
@@ -63,7 +65,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         Vector2 labelSize = new(122f, 25f);       // Used by most settings labels.
         
         
-        WillingToSeekLabel = new ProperlyAlignedMenuLabel(
+        IsWillingToSeekLabel = new ProperlyAlignedMenuLabel(
             ArenaOnlineMenu,
             this,
             "Willing to Seek:",
@@ -74,7 +76,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         
         IsWillingToSeekCheckBox = new OpCheckBox(
             ConfigurableHelper.Clone(Plugin.Options.CfgIsWillingToSeek),
-            new Vector2(WillingToSeekLabel.pos.x + WillingToSeekLabel.size.x, WillingToSeekLabel.pos.y + labelAlignmentYFix)
+            new Vector2(IsWillingToSeekLabel.pos.x + IsWillingToSeekLabel.size.x, IsWillingToSeekLabel.pos.y + labelAlignmentYFix)
         );
         
         IsWillingToSeekCheckBox.OnValueChanged += (_, _, _) =>
@@ -317,7 +319,7 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         // Add new MenuObjects here
         AddObjects([
             myTabWrapper,
-            WillingToSeekLabel,
+            IsWillingToSeekLabel,
             SeekerCountLabel,
             SeekerSelectionLabel,
             ..taggingMethodMenuObjects,
@@ -358,7 +360,10 @@ public sealed class HideAndSeekSettingsTab : TabContainer.Tab
         
         
         if (HideAndSeek.LobbyData.EnabledSeekerSelection != SeekerSelection.Random)
+        {
+            IsWillingToSeekCheckBox.greyedOut = true;
             SeekerCountUpdown.greyedOut = true;
+        }
         
         TagResultSelector.greyedOut = true; // Not implemented yet.
         

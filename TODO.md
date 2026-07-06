@@ -5,6 +5,8 @@ Fixes:
 - Configurables in the lobby UI do not save.
 - Figure out when and why GetOnlineCreature() returns null. Currently some code relies on it not returning null.
 - The Hide and Seek tab has UI elements which poorly overlap. It needs to be redesigned.
+- seekers can see hider nametags (broke at some point)
+- restart doesn't remove infected seekers
 
 Features:
 - Add support for story.
@@ -17,8 +19,8 @@ Features:
 - Hiders and seekers should have different banned slugcats.
 - Protect against all weapon friendly fire.
 - Seekers and initial seekers need to be reselected every arena session end.
-- The willing to seeker checkbox should be grayed when seeker selection is self.
-- The host should not be able to select players who are not willing to seek.
+- Disable death for players.
+- The host should not be able to select players who are not willing to seek and the checkbox should not be grayed out when seeker selection is host.
 
 Refactors:
 - Update Options class design after making story and arena game modes.
