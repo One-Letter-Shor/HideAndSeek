@@ -183,7 +183,7 @@ public static class Logger
         [CallerLineNumber] int loggingLineNumber = 0,
         [CallerFilePath] string loggingFilePath = "")
     {
-        StringBuilder stringBuilder = new(loggingFilePath, 100);
+        StringBuilder stringBuilder = new(loggingFilePath.Remove(0, 5), 100); // Remove(0, 5) is for removing "/src/"
         
         stringBuilder
             .Append(':')
