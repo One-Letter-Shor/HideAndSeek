@@ -15,6 +15,8 @@ public static class RainWorldHooks
         On.Player.Collide += On_Player_Collide;
         On.Rock.HitSomething += On_Rock_HitSomething;
         On.PlayerGraphics.DrawSprites += On_PlayerGraphics_DrawSprites;
+        On.Player.Die += On_Player_Die;
+        On.AbstractCreature.Die += On_AbstractCreature_Die;
         
         IL.Player.ClassMechanicsSaint += IL_Player_ClassMechanicsSaint;
     }
@@ -230,6 +232,36 @@ public static class RainWorldHooks
         }
     }
     
+    // Prevent players from dying
+    private static void On_Player_Die(On.Player.orig_Die orig, Player self)
+    {
+        if (!HideAndSeekMode.IsHideAndSeekMode(out _))
+        {
+            orig(self);
+            return;
+        }
+        
+        OnlineCreature? oCreature = self.abstractCreature.GetOnlineCreature();
+        Assert(oCreature is not null);
+        
+        if (!oCreature.isAvatar)
+            orig(self);
+    }
+    
+    // Prevent players from dying
+    private static void On_AbstractCreature_Die(On.AbstractCreature.orig_Die orig, AbstractCreature self)
+    {
+        if (!HideAndSeekMode.IsHideAndSeekMode(out _))
+        {
+            orig(self);
+            return;
+        }
+        
+        OnlineCreature? oCreature = self.GetOnlineCreature();
+        
+        if (oCreature?.isAvatar != true)
+            orig(self);
+    }
     
     // Tag players when ascended.
     private static void IL_Player_ClassMechanicsSaint(ILContext il)

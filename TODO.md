@@ -17,9 +17,10 @@ Features:
 - Hiders and seekers should have different banned slugcats.
 - Protect against all weapon friendly fire.
 - Seekers and initial seekers need to be reselected every arena session end.
-- Disable death for players.
 - Sort infected seekers by order of infection.
 - Add some addition scoring for hiders that live long.
+- Add chat messages when tagged.
+- 1/10000 chance to explode when hit by rock (which results in tag). Make custom chat message too.
 
 Refactors:
 - Update Options class design after making story and arena game modes.
