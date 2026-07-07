@@ -51,7 +51,10 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     /// the external game mode is <see cref="HideAndSeekMode"/>,
     /// otherwise <see langword="false"/>.
     /// </returns>
-    /// <exception cref="InvalidOperationException">Thrown if <see cref="HideAndSeekMode"/> is not registered.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if the online game mode is <see cref="ArenaOnlineGameMode"/>
+    /// and <see cref="HideAndSeekMode"/> is not registered.
+    /// </exception>
     public static bool IsHideAndSeekMode([NotNullWhen(true)] out HideAndSeekMode? hideAndSeek)
     {
         hideAndSeek = null;
