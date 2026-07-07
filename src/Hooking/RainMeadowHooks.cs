@@ -165,8 +165,8 @@ public static class RainMeadowHooks
             Assert(throwerOCreature is not null);
             Assert(hitOCreature is not null);
             
-            if (throwerOCreature is { isAvatar: true, owner.IsSeeker: true } &&
-                hitOCreature     is { isAvatar: true, owner.IsSeeker: true })
+            if (throwerOCreature.isAvatar && hitOCreature.isAvatar &&
+                throwerOCreature.owner.IsSeeker == hitOCreature.owner.IsSeeker)
             {
                 return false;
             }
