@@ -64,6 +64,14 @@ public static class RainMeadowHooks
             On_RainMeadow_UI_Pages_ArenaMainLobbyPage_UpdateMatchButtons
         );
         
+        _ = new Hook(
+            typeof(ArenaOnlineGameMode).GetMethod(
+                nameof(ArenaOnlineGameMode.RestartGame),
+                BindingFlags.Public | BindingFlags.Instance
+            ),
+            On_RainMeadow_ArenaOnlineGameMode_RestartGame
+        );
+        
         _ = new ILHook(
             typeof(OnlinePlayerDisplay).GetMethod(
                 nameof(OnlinePlayerDisplay.Update),
@@ -187,6 +195,20 @@ public static class RainMeadowHooks
         {
             self.startButton?.buttonBehav.greyedOut = true;
         }
+    }
+    
+    // Remove infected seekers when the round is reset.
+    private static void On_RainMeadow_ArenaOnlineGameMode_RestartGame(
+        Action<ArenaOnlineGameMode> orig,
+        ArenaOnlineGameMode self)
+    {
+        if (OnlineManager.lobby!.isOwner &&
+            HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
+        {
+            hideAndSeek.LobbyData.Seekers = hideAndSeek.LobbyData.InitialSeekers.ToList();
+        }
+        
+        orig(self);
     }
     
     // Prevent seekers from seeing hider nametags.
