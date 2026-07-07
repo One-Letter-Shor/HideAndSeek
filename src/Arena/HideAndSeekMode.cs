@@ -551,6 +551,11 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
             Logger.Warning($"The game mode is not Hide and Seek. {fromText}");
             return;
         }
+        if (!GameHelper.IsInGame)
+        {
+            Logger.Debug($"Not currently in game. {fromText}");
+            return;
+        }
         if (!hideAndSeek.CanTagPlayer(tagger, target, out string? failureReason))
         {
             Logger.Debug($"{tagger} is trying to tag {target} when they cannot. Reason: {failureReason} {fromText}");
@@ -571,6 +576,10 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         ArenaSitting.ArenaPlayer targetArenaPlayer = arenaSitting.players[targetIndex];
         IconSymbol.IconSymbolData trophy = CreatureSymbol.SymbolDataFromCreature(arenaSession.Players[targetIndex]);
         
+        OnlineCreature taggerOCreature = arenaSession.Players
+            .Find(player => player.GetOnlineCreature()!.owner == tagger)
+            .GetOnlineCreature()!;
+        
         
         arenaOnline.ReadFromStats(taggerArenaPlayer, tagger); // local copy rm
         arenaOnline.ReadFromStats(targetArenaPlayer, target); // local copy rm
@@ -587,6 +596,9 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         
         arenaOnline.SetPlayerStatsFromLocalPlayer(taggerArenaPlayer, tagger, false); // rm copy local
         arenaOnline.SetPlayerStatsFromLocalPlayer(targetArenaPlayer, target, false); // rm copy local
+        
+        ChatLogRpcs.SystemLogPlayerTaggedRpc(null, tagger, target);
+        taggerOCreature.BroadcastRPCInRoom(ChatLogRpcs.SystemLogPlayerTaggedRpc, tagger, target);
     }
     
     /// <summary>

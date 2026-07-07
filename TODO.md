@@ -8,6 +8,7 @@ Fixes:
 
 Features:
 - Add support for story.
+- Add translation support.
 - Implement all tag results.
 - Seekers should not be able to see, move, or tag during the safety timer. (look in GameplayOverrides.cs something like HaltPlayerMovement)
 - Hiders should be able to change their colors in game. For balancing purposes they should only be able to change colors during fixed times. Perhaps during the hiding timer works well.
@@ -18,7 +19,7 @@ Features:
 - Seekers and initial seekers need to be reselected every arena session end.
 - Sort infected seekers by order of infection.
 - Add some addition scoring for hiders that live long.
-- Add chat messages when tagged.
+- Add system messages when seekers can start seeking, and when hiders are safe at the end of the round (session).
 - 1/10000 chance to explode when hit by rock (which results in tag). Make custom chat message too.
 
 Refactors:
