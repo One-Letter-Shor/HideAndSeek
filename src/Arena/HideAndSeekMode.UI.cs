@@ -48,10 +48,11 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     public Color GetPlayerUIColor(OnlinePlayer oPlayer)
     {
-        if (oPlayer.IsAnInitialSeeker && !oPlayer.IsSeeker &&
-            !LobbyData.AreSeekerDebugToolsEnabled)
+        if (oPlayer.IsAnInitialSeeker && !oPlayer.IsSeeker)
         {
-            Logger.Error($"Player ({oPlayer}) cannot logically be an initial seeker but not a seeker.");
+            if (!LobbyData.AreSeekerDebugToolsEnabled)
+                Logger.Error($"Player ({oPlayer}) cannot logically be an initial seeker but not a seeker.");
+            
             return ErrorColor;
         }
         
