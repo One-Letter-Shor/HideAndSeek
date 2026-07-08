@@ -227,7 +227,7 @@ public sealed class ModOptions : OptionInterface
         CfgSeekerEyeColor      = BindCfg(nameof(SeekerEyeColor),      new Color(0.00f, 1.00f, 0.00f));
         CfgSeekerTertiaryColor = BindCfg(nameof(SeekerTertiaryColor), new Color(0.00f, 0.00f, 1.00f));
         
-        CfgAreSeekerDebugToolsEnabled  = BindDevToggleCfg(nameof(AreSeekerDebugToolsEnabled), true, new Vector2Int(0, 12), "Enable Seeker Debug Tools");
+        CfgAreSeekerDebugToolsEnabled  = BindDevToggleCfg(nameof(AreSeekerDebugToolsEnabled), false, new Vector2Int(0, 12), "Enable Seeker Debug Tools");
         CfgDebugToggleSeekerKey        = BindCfg(nameof(DebugToggleSeekerKey),        KeyCode.PageDown);
         CfgDebugToggleInitialSeekerKey = BindCfg(nameof(DebugToggleInitialSeekerKey), KeyCode.End);
         
