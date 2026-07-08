@@ -52,7 +52,7 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         set
         {
             if (!value.SequenceEqual(field))
-                Logger.Debug($"Seekers: [ {string.Join(", ", value)} ]");
+                Logger.Debug($"Initial Seekers: [ {string.Join(", ", value)} ]");
             
             field = value;
         }

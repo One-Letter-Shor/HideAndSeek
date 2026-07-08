@@ -1,2 +1,2 @@
 - [ ] Check rain meadow hooks
-- [ ] Ensure `Arena.HideAndSeekMode.ArenaSessionUpdate` still runs intended logic from base class. Due to the base method doing many things, certain functionality had to be copied.
+- [ ] Ensure `Arena.HideAndSeekMode.ArenaSessionEnded` still runs intended logic from base class. Due to the base method doing many things, certain functionality had to be copied.

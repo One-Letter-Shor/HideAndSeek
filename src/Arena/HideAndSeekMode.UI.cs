@@ -26,8 +26,8 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
     /// </summary>
     private bool _isToggleSeekerPressed { get; set; }
     /// <summary>
-    /// Used to remember the value of
-    /// <see cref="_isToggleSeekerPressed"/> last UI Update.
+    /// Used to store the value of <see cref="_isToggleSeekerPressed"/>
+    /// from the last <see cref="ArenaOnlineLobbyMenu"/> Update.
     /// </summary>
     private bool _previousIsToggleSeekerPressed { get; set; }
     
