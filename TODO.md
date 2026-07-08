@@ -5,6 +5,9 @@ Fixes:
 - Configurables in the lobby UI do not save.
 - Figure out when and why GetOnlineCreature() returns null. Currently some code relies on it not returning null.
 - The Hide and Seek tab has UI elements which poorly overlap. It needs to be redesigned.
+- ArenaPlayer fields are not synced for clients. Make sure this is fixed.
+- Consider slightly reducing `HideAndSeekMode.RainCycleEndGraceTicks` (or the usages of it) for clients so they do not tag a player before safety but get rejected by the host.
+- Host-only members in `HideAndSeekMode` can have invalid data if the process switches tick perfectly or if a host transfer occurs at a bad time.
 
 Features:
 - Add support for story.

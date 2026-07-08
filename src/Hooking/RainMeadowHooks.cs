@@ -206,6 +206,7 @@ public static class RainMeadowHooks
             HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
         {
             hideAndSeek.LobbyData.Seekers = hideAndSeek.LobbyData.InitialSeekers.ToList();
+            hideAndSeek.ResetCustomHostSessionData();
         }
         
         orig(self);

@@ -26,6 +26,24 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
                                                      .clientSettings[OnlineManager.mePlayer]
                                                      .GetData<HideAndSeekClientData>();
     
+    /// <summary>
+    /// Indicates whether seekers' winning has been recognized.
+    /// </summary>
+    /// <remarks>
+    /// Meaningless if not the host. Also, there
+    /// is no custom handling for host transfers.
+    /// </remarks>
+    public bool HasRecognizedSeekerWin { get; set; }
+    
+    /// <summary>
+    /// Indicates whether hiders' winning has been recognized.
+    /// </summary>
+    /// <remarks>
+    /// Meaningless if not the host. Also, there
+    /// is no custom handling for host transfers.
+    /// </remarks>
+    public bool HasRecognizedHiderWin { get; set; }
+    
     /// <exception cref="InvalidOperationException">Thrown if not in a game.</exception>
     public bool IsSeekingTimeOver
     {
@@ -99,6 +117,13 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     {
         MatchmakingManager.OnPlayerListReceived -= OnPlayerListReceived;
         MatchmakingManager.OnLobbyLeaving -= OnLobbyLeaving;
+    }
+    
+    public void ResetCustomHostSessionData()
+    {
+        Logger.Mark();
+        HasRecognizedSeekerWin = false;
+        HasRecognizedHiderWin = false;
     }
     
     /// <summary>
@@ -198,7 +223,45 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         
         return a.score > b.score;
     }
-
+    
+    public override void ArenaSessionCtor(
+        ArenaOnlineGameMode __,
+        On.ArenaGameSession.orig_ctor orig,
+        ArenaGameSession self,
+        RainWorldGame game)
+    {
+        ResetCustomHostSessionData();
+        base.ArenaSessionCtor(ArenaOnline, orig, self, game);
+    }
+    
+    public override void ArenaSessionUpdate(
+        On.ArenaGameSession.orig_Update orig,
+        ArenaGameSession self,
+        ArenaOnlineGameMode __)
+    {
+        if (OnlineManager.lobby!.isOwner)
+        {
+            bool seekersWon = ArenaOnlineHelper.GetPlayingOPlayers(ArenaOnline)
+                .All(oPlayer => oPlayer.IsSeeker);
+            
+            if (seekersWon && !HasRecognizedSeekerWin)
+            {
+                ChatLogRpcs.SystemLogSeekerWinRpc(null);
+                foreach (OnlinePlayer oPlayer in OnlineManager.players.Where(p => !p.isMe))
+                    oPlayer.InvokeRPC(ChatLogRpcs.SystemLogSeekerWinRpc);
+            }
+            
+            if (IsSeekingTimeOver && !HasRecognizedHiderWin)
+            {
+                ChatLogRpcs.SystemLogHiderWinRpc(null);
+                foreach (OnlinePlayer oPlayer in OnlineManager.players.Where(p => !p.isMe))
+                    oPlayer.InvokeRPC(ChatLogRpcs.SystemLogHiderWinRpc);
+            }
+        }
+        
+        base.ArenaSessionUpdate(orig, self, ArenaOnline);
+    }
+    
     public override void ArenaSessionEnded(
         ArenaOnlineGameMode __,
         On.ArenaSitting.orig_SessionEnded orig,
@@ -271,7 +334,6 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         arenaSession.game.arenaOverlay = new ArenaOverlay(arenaSession.game.manager, self, sortedPlayers);
         arenaSession.game.manager.sideProcesses.Add(arenaSession.game.arenaOverlay);
     }
-    
     
     /// <inheritdoc cref="CanStartNewGame(out string)"/>
     public bool CanStartNewGame()
@@ -565,23 +627,35 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
             return;
         }
         
-        Logger.Debug($"Making {target} a seeker. {fromText}");
-        hideAndSeek.LobbyData.Seekers.Add(target);
-        
-        // me when half the code is just to get the values to perform logic on
-        int taggerIndex = ArenaHelpers.FindOnlinePlayerNumber(hideAndSeek.ArenaOnline, tagger);
-        int targetIndex = ArenaHelpers.FindOnlinePlayerNumber(hideAndSeek.ArenaOnline, target);
+        // Me when half the code is just to get the values to perform logic on
         ArenaOnlineGameMode arenaOnline  = hideAndSeek.ArenaOnline;
         ArenaGameSession    arenaSession = hideAndSeek.ArenaOnline.session;
         ArenaSitting        arenaSitting = hideAndSeek.ArenaOnline.session.arenaSitting;
+        
+        int taggerIndex = ArenaHelpers.FindOnlinePlayerNumber(arenaOnline, tagger);
+        int targetIndex = ArenaHelpers.FindOnlinePlayerNumber(arenaOnline, target);
+        
+        bool isTargetLastHider = !ArenaOnlineHelper.GetPlayingOPlayers(arenaOnline)
+            .Any(oPlayer => !oPlayer.IsSeeker && oPlayer != target);
         
         ArenaSitting.ArenaPlayer taggerArenaPlayer = arenaSitting.players[taggerIndex];
         ArenaSitting.ArenaPlayer targetArenaPlayer = arenaSitting.players[targetIndex];
         IconSymbol.IconSymbolData trophy = CreatureSymbol.SymbolDataFromCreature(arenaSession.Players[targetIndex]);
         
-        OnlineCreature taggerOCreature = arenaSession.Players
-            .Find(player => player.GetOnlineCreature()!.owner == tagger)
-            .GetOnlineCreature()!;
+        Logger.Mark(hideAndSeek.HasRecognizedSeekerWin);
+        
+        if (hideAndSeek.HasRecognizedSeekerWin &&
+            !hideAndSeek.LobbyData.AreSeekerDebugToolsEnabled)
+        {
+            Logger.Error(
+                $"Seeker win has already been recognized. " +
+                $"Continuing in the hopes that this is a minor bug. {fromText}"
+            );
+        }
+        
+        // Actual logic here
+        Logger.Debug($"Making {target} a seeker. {fromText}");
+        hideAndSeek.LobbyData.Seekers.Add(target);
         
         
         arenaOnline.ReadFromStats(taggerArenaPlayer, tagger); // local copy rm
@@ -600,8 +674,18 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         arenaOnline.SetPlayerStatsFromLocalPlayer(taggerArenaPlayer, tagger, false); // rm copy local
         arenaOnline.SetPlayerStatsFromLocalPlayer(targetArenaPlayer, target, false); // rm copy local
         
-        ChatLogRpcs.SystemLogPlayerTaggedRpc(null, tagger, target);
-        taggerOCreature.BroadcastRPCInRoom(ChatLogRpcs.SystemLogPlayerTaggedRpc, tagger, target);
+        if (isTargetLastHider)
+        {
+            ChatLogRpcs.SystemLogLastPlayerTaggedRpc(null, tagger, target);
+            foreach (OnlinePlayer oPlayer in OnlineManager.players.Where(p => !p.isMe))
+                oPlayer.InvokeRPC(ChatLogRpcs.SystemLogLastPlayerTaggedRpc, tagger, target);
+        }
+        else
+        {
+            ChatLogRpcs.SystemLogPlayerTaggedRpc(null, tagger, target);
+            foreach (OnlinePlayer oPlayer in OnlineManager.players.Where(p => !p.isMe))
+                oPlayer.InvokeRPC(ChatLogRpcs.SystemLogPlayerTaggedRpc, tagger, target);
+        }
     }
     
     /// <summary>
