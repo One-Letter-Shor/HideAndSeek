@@ -268,7 +268,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     /// <exception cref="InvalidOperationException">Thrown if not in a game.</exception>
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
     /// <remarks>Handles host and client logic automatically.</remarks>
-    public void CalculateFinalSessionScore(ArenaSitting arenaSitting, ArenaGameSession arenaSession)
+    public void CalculateSessionFinalStats(ArenaSitting arenaSitting, ArenaGameSession arenaSession)
     {
         bool seekersWon = ArenaOnlineHelper.GetPlayingOPlayers()
             .All(oPlayer => oPlayer.IsSeeker);
@@ -283,14 +283,15 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
                 ArenaOnline.ResetPlayerStats(arenaPlayer);
                 
                 if (OnlineManager.lobby.isOwner)
-                    ArenaOnline.SetPlayerStatsFromLocalPlayer(arenaPlayer, oPlayer, false);
+                    ArenaOnlineHelper.CopyStatsToLobbyData(arenaPlayer, oPlayer);
                 
                 continue;
             }
             
-            ArenaOnline.ReadFromStats(arenaPlayer, oPlayer); // local copy rm
+            ArenaOnlineHelper.CopyStatsFromLobbyData(arenaPlayer, oPlayer);
             
             arenaPlayer.winner = false;
+            arenaPlayer.allKills.AddRange(arenaPlayer.roundKills);
             arenaPlayer.alive = arenaSession.EndOfSessionLogPlayerAsAlive(arenaPlayer.playerNumber);
             
             if (seekersWon && oPlayer.IsAnInitialSeeker)
@@ -307,13 +308,10 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
             if (arenaPlayer.winner)
                 arenaPlayer.wins++;
             
-            arenaPlayer.totScore += arenaPlayer.score; // Not technically needed
+            arenaPlayer.totScore += arenaPlayer.score;
             
             if (OnlineManager.lobby.isOwner)
-            {
-                ArenaOnline.SetPlayerStatsFromLocalPlayer(arenaPlayer, oPlayer, false); // rm copy local
-                ArenaOnline.playerTotScore[oPlayer.inLobbyId] = arenaPlayer.totScore;   // rm copy local total score (the method doesn't set total score)
-            }
+                ArenaOnlineHelper.CopyStatsToLobbyData(arenaPlayer, oPlayer);
         }
         
         List<ArenaSitting.ArenaPlayer> sortedPlayers = [];
@@ -349,7 +347,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         ArenaSitting self,
         ArenaGameSession arenaSession)
     {
-        CalculateFinalSessionScore(self, arenaSession);
+        CalculateSessionFinalStats(self, arenaSession);
     }
     
     /// <inheritdoc cref="CanStartNewGame(out string)"/>
@@ -674,22 +672,15 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         Logger.Debug($"Making {target} a seeker. {fromText}");
         hideAndSeek.LobbyData.Seekers.Add(target);
         
-        
-        arenaOnline.ReadFromStats(taggerArenaPlayer, tagger); // local copy rm
-        arenaOnline.ReadFromStats(targetArenaPlayer, target); // local copy rm
+        ArenaOnlineHelper.CopyStatsFromLobbyData(taggerArenaPlayer, tagger);
+        ArenaOnlineHelper.CopyStatsFromLobbyData(targetArenaPlayer, target);
         
         taggerArenaPlayer.score += hideAndSeek.LobbyData.SeekerTagScore;
-        
-        arenaOnline.CheckToAddPlayerStatsToDicts(tagger); // Populates with default values.
-        arenaOnline.playerNumberWithTrophies[tagger.inLobbyId]
-            .Add(trophy.ToString());
-        arenaOnline.playerNumberWithTrophiesPerRound[tagger.inLobbyId]
-            .Add(trophy.ToString());
-        
+        taggerArenaPlayer.roundKills.Add(trophy);
         targetArenaPlayer.deaths++;
         
-        arenaOnline.SetPlayerStatsFromLocalPlayer(taggerArenaPlayer, tagger, false); // rm copy local
-        arenaOnline.SetPlayerStatsFromLocalPlayer(targetArenaPlayer, target, false); // rm copy local
+        ArenaOnlineHelper.CopyStatsToLobbyData(taggerArenaPlayer, tagger);
+        ArenaOnlineHelper.CopyStatsToLobbyData(targetArenaPlayer, target);
         
         if (isTargetLastHider)
         {

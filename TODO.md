@@ -35,6 +35,7 @@ Testing:
 - Play with high ping to ensure code is reliable.
 - Ensure there is not too much network usage. A lot of lobby data fields can easily be optimized to bytes and ushorts.
 - Ensure the scoring for seekers and hiders is balanced.
+- Ensure arena player stats are synced at all parts of the game. (They probably aren't)
 
 Misc:
 - Write external arena documentation for Rain Meadow after finishing.
