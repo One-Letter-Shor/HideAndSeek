@@ -711,7 +711,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     /// </summary>
     /// <exception cref="InvalidOperationException">
     /// Thrown when:<br/>
-    /// - The me player is not the host.<br/>
+    /// - Me player is not the host.<br/>
     /// - <see cref="SeekerSelection"/> is not <see cref="SeekerSelection.Random"/>.
     /// </exception>
     /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>

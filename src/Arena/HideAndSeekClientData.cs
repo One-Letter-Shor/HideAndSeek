@@ -17,7 +17,7 @@ public sealed class HideAndSeekClientData : OnlineEntity.EntityData
     
     /// <summary>
     /// Clamps the value based on <paramref name="configurable"/>
-    /// and writes to it if both the client data is for the me player and
+    /// and writes to it if both the client data is for me player and
     /// <see cref="CanApplySettings"/> is <see langword="true"/>.
     /// </summary>
     private void ApplySetting<T>(T value, out T field, Configurable<T> configurable)

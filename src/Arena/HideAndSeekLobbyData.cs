@@ -60,7 +60,7 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
     
     /// <summary>
     /// Clamps the value based on <paramref name="configurable"/>
-    /// and writes to it if both the me player is the host and
+    /// and writes to it if both me player is the host and
     /// <see cref="CanApplySettings"/> is <see langword="true"/>.
     /// </summary>
     private void ApplySetting<T>(T value, out T field, Configurable<T> configurable)
