@@ -191,7 +191,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         ArenaSitting.ArenaPlayer a,
         ArenaSitting.ArenaPlayer b)
     {
-        bool seekersWon = ArenaOnlineHelper.GetPlayingOPlayers(ArenaOnline)
+        bool seekersWon = ArenaOnlineHelper.GetPlayingOPlayers()
             .All(oPlayer => oPlayer.IsSeeker);
         
         Logger.Info($"seekers won: {seekersWon}");
@@ -241,7 +241,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     {
         if (OnlineManager.lobby!.isOwner)
         {
-            bool seekersWon = ArenaOnlineHelper.GetPlayingOPlayers(ArenaOnline)
+            bool seekersWon = ArenaOnlineHelper.GetPlayingOPlayers()
                 .All(oPlayer => oPlayer.IsSeeker);
             
             if (seekersWon && !HasRecognizedSeekerWin)
@@ -270,7 +270,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     /// <remarks>Handles host and client logic automatically.</remarks>
     public void CalculateFinalSessionScore(ArenaSitting arenaSitting, ArenaGameSession arenaSession)
     {
-        bool seekersWon = ArenaOnlineHelper.GetPlayingOPlayers(ArenaOnline)
+        bool seekersWon = ArenaOnlineHelper.GetPlayingOPlayers()
             .All(oPlayer => oPlayer.IsSeeker);
         
         foreach (ArenaSitting.ArenaPlayer arenaPlayer in arenaSitting.players)
@@ -342,6 +342,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
             arenaSession.game.arenaOverlay
         );
     }
+    
     public override void ArenaSessionEnded(
         ArenaOnlineGameMode __,
         On.ArenaSitting.orig_SessionEnded orig,
@@ -579,7 +580,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         ExitManager.orig_ExitsOpen orig,
         ArenaBehaviors.ExitManager exitManager)
     {
-        bool areAllPlayersSeekers = ArenaOnlineHelper.GetPlayingOPlayers(ArenaOnline)
+        bool areAllPlayersSeekers = ArenaOnlineHelper.GetPlayingOPlayers()
                                                      .All(oPlayer => oPlayer.IsSeeker);
         
         return IsSeekingTimeOver || areAllPlayersSeekers;
@@ -651,7 +652,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         int taggerIndex = ArenaHelpers.FindOnlinePlayerNumber(arenaOnline, tagger);
         int targetIndex = ArenaHelpers.FindOnlinePlayerNumber(arenaOnline, target);
         
-        bool isTargetLastHider = !ArenaOnlineHelper.GetPlayingOPlayers(arenaOnline)
+        bool isTargetLastHider = !ArenaOnlineHelper.GetPlayingOPlayers()
             .Any(oPlayer => !oPlayer.IsSeeker && oPlayer != target);
         
         ArenaSitting.ArenaPlayer taggerArenaPlayer = arenaSitting.players[taggerIndex];

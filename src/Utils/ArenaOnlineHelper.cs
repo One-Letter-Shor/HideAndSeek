@@ -1,3 +1,4 @@
+using OneLetterShor.HideAndSeek.Arena;
 using RainMeadow;
 
 namespace OneLetterShor.HideAndSeek.Utils;
@@ -8,9 +9,18 @@ internal static class ArenaOnlineHelper
     /// Finds all the <see cref="OnlinePlayer"/>s who
     /// are in the actual game and not a spectator.
     /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown if not in a game.</exception>
-    internal static List<OnlinePlayer> GetPlayingOPlayers(ArenaOnlineGameMode arenaOnline)
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when:<br/>
+    /// - The online game mode is not <see cref="ArenaOnlineGameMode"/>.<br/>
+    /// - The external game mode is not <see cref="HideAndSeekMode"/>.
+    /// - The me player is not in-game.
+    /// </exception>
+    internal static List<OnlinePlayer> GetPlayingOPlayers()
     {
+        if (!RainMeadow.RainMeadow.isArenaMode(out ArenaOnlineGameMode arenaOnline))
+            throw new InvalidOperationException($"The online game mode ({OnlineManager.lobby.gameMode}) is not arena.");
+        if (!HideAndSeekMode.IsHideAndSeekMode(out _))
+            throw new InvalidOperationException($"The external game mode ({arenaOnline.currentGameMode}) is not Hide and Seek.");
         if (!GameHelper.IsInGame)
             throw new InvalidOperationException("Not in a game.");
         
