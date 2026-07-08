@@ -217,7 +217,7 @@ public sealed class ModOptions : OptionInterface
         CfgSeekerCount            = BindCfg(nameof(SeekerCount), 1, new ConfigAcceptableRange<int>(1, 99));
         CfgEnabledSeekerSelection = BindCfg(nameof(EnabledSeekerSelection), SeekerSelection.Random);
         CfgEnabledTaggingMethods  = BindCfg(nameof(EnabledTaggingMethods), TaggingMethods.All, new ConfigAcceptableRange<TaggingMethods>(TaggingMethods.None + 1, TaggingMethods.All));
-        CfgEnabledTagResult       = BindCfg(nameof(EnabledTagResult), TagResult.Ghost);
+        CfgEnabledTagResult       = BindCfg(nameof(EnabledTagResult), TagResult.Infection);
         
         CfgSeekerWinScore = BindCfg(nameof(SeekerWinScore), 6, new ConfigAcceptableRange<int>(1, 99));
         CfgSeekerTagScore = BindCfg(nameof(SeekerTagScore), 1, new ConfigAcceptableRange<int>(1, 99));
