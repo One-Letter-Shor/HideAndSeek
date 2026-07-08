@@ -133,7 +133,7 @@ public sealed partial class HideAndSeekMode // HideAndSeekMode.UI
     {
         Logger.Mark();
         Assert(SettingsTab is null);
-        AssertIs(OnlineManager.lobby!.gameMode, out ArenaOnlineGameMode arenaOnline);
+        Assert(RainMeadow.RainMeadow.isArenaMode(out ArenaOnlineGameMode arenaOnline));
         
         if (OnlineManager.lobby!.isOwner)
         {

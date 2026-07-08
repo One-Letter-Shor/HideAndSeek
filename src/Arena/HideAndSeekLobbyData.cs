@@ -145,7 +145,7 @@ public sealed class HideAndSeekLobbyData : OnlineResource.ResourceData
         
         internal State(HideAndSeekLobbyData data, Lobby lobby)
         {
-            Assert(lobby.gameMode is ArenaOnlineGameMode);
+            Assert(RainMeadow.RainMeadow.isArenaMode(out _));
             
             if (!HideAndSeekMode.IsHideAndSeekMode(out _)) return;
             

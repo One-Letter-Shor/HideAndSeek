@@ -77,7 +77,7 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
     {
         hideAndSeek = null;
         
-        if (OnlineManager.lobby?.gameMode is not ArenaOnlineGameMode arenaOnline)
+        if (!RainMeadow.RainMeadow.isArenaMode(out ArenaOnlineGameMode arenaOnline))
             return false;
         
         string modeName = Id.value;

@@ -23,7 +23,7 @@ public static class OnlineCreatureExtensions
         /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
         public bool CanTag(OnlineCreature target)
         {
-            if (OnlineManager.lobby!.gameMode is not ArenaOnlineGameMode arenaOnline)
+            if (!RainMeadow.RainMeadow.isArenaMode(out ArenaOnlineGameMode arenaOnline))
                 throw new InvalidOperationException($"The online game mode ({OnlineManager.lobby.gameMode}) is not arena.");
             
             if (!HideAndSeekMode.IsHideAndSeekMode(out HideAndSeekMode? hideAndSeek))
