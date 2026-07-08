@@ -262,16 +262,18 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         base.ArenaSessionUpdate(orig, self, ArenaOnline);
     }
     
-    public override void ArenaSessionEnded(
-        ArenaOnlineGameMode __,
-        On.ArenaSitting.orig_SessionEnded orig,
-        ArenaSitting self,
-        ArenaGameSession arenaSession)
+    /// <summary>
+    /// Calculates the scores for all players in the <paramref name="arenaSitting"/>.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if not in a game.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown if the lobby data is not registered.</exception>
+    /// <remarks>Handles host and client logic automatically.</remarks>
+    public void CalculateFinalSessionScore(ArenaSitting arenaSitting, ArenaGameSession arenaSession)
     {
         bool seekersWon = ArenaOnlineHelper.GetPlayingOPlayers(ArenaOnline)
             .All(oPlayer => oPlayer.IsSeeker);
         
-        foreach (ArenaSitting.ArenaPlayer arenaPlayer in self.players)
+        foreach (ArenaSitting.ArenaPlayer arenaPlayer in arenaSitting.players)
         {
             OnlinePlayer? oPlayer = ArenaHelpers.FindOnlinePlayerByFakePlayerNumber(ArenaOnline, arenaPlayer.playerNumber);
             if (oPlayer is null) continue;
@@ -315,12 +317,12 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
         }
         
         List<ArenaSitting.ArenaPlayer> sortedPlayers = [];
-        foreach (ArenaSitting.ArenaPlayer player in self.players)
+        foreach (ArenaSitting.ArenaPlayer player in arenaSitting.players)
         {
             bool isInserted = false;
             for (int i = 0; i < sortedPlayers.Count; ++i)
             {
-                if (self.PlayerSessionResultSort(player, sortedPlayers[i]))
+                if (arenaSitting.PlayerSessionResultSort(player, sortedPlayers[i]))
                 {
                     sortedPlayers.Insert(i, player);
                     isInserted = true;
@@ -331,8 +333,22 @@ public sealed partial class HideAndSeekMode : ExternalArenaGameMode
                 sortedPlayers.Add(player);
         }
         
-        arenaSession.game.arenaOverlay = new ArenaOverlay(arenaSession.game.manager, self, sortedPlayers);
-        arenaSession.game.manager.sideProcesses.Add(arenaSession.game.arenaOverlay);
+        arenaSession.game.arenaOverlay = new ArenaOverlay(
+            arenaSession.game.manager,
+            arenaSitting,
+            sortedPlayers
+        );
+        arenaSession.game.manager.sideProcesses.Add(
+            arenaSession.game.arenaOverlay
+        );
+    }
+    public override void ArenaSessionEnded(
+        ArenaOnlineGameMode __,
+        On.ArenaSitting.orig_SessionEnded orig,
+        ArenaSitting self,
+        ArenaGameSession arenaSession)
+    {
+        CalculateFinalSessionScore(self, arenaSession);
     }
     
     /// <inheritdoc cref="CanStartNewGame(out string)"/>
